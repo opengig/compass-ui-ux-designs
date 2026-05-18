@@ -36,7 +36,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   }
 
   return (
-    <div className="flex-1 flex flex-col min-w-[320px] h-full bg-background">
+    <div className="flex-1 flex flex-col min-w-[320px] h-full bg-white">
       <div className="flex-1 overflow-auto">
         <div className="px-4 md:px-6 pt-0.5 pb-2 md:pt-3 md:pb-6 space-y-3">
           {/* Product Header */}

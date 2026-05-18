@@ -24,7 +24,7 @@ interface IconNavRailProps {
 
 export function IconNavRail({ activeScreen, onNavigate }: IconNavRailProps) {
   return (
-    <aside className="w-[60px] min-w-[70px] flex flex-col items-center py-4 border-r border-border bg-background h-full">
+    <aside className="w-[60px] min-w-[70px] flex flex-col items-center py-4 border-r border-border bg-white h-full">
       <div className="mb-6">
         <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
           <span className="text-white font-bold text-sm">⚡</span>

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { ChevronRight, X, Info } from 'lucide-react';
 import { queueTheme } from '../styles/queueTheme';
 const images = [
@@ -73,7 +73,7 @@ export function LabelPanel({ onClose }: LabelPanelProps) {
         <>
           {/* Product Image */}
           <div className="flex-1 flex items-start justify-center p-4">
-            <div className="rounded-lg overflow-hidden border border-border bg-muted/30 shadow-soft w-full">
+            <div className="rounded-lg overflow-hidden border border-border bg-white shadow-soft w-full">
               <img
                 src={activeImage.url}
                 alt={activeImage.label}
@@ -96,7 +96,7 @@ export function LabelPanel({ onClose }: LabelPanelProps) {
                       selected === img.id
                         ? 'border-2 border-primary shadow-sm'
                         : 'border border-border hover:border-muted-foreground/40'
-                    } ${img.id === 'barcode' ? 'bg-background' : 'bg-muted/30'}`}
+                    } ${img.id === 'barcode' ? 'bg-white' : 'bg-white'}`}
                   >
                     {img.id === 'barcode' ? (
                       <div className="flex gap-[1px]">

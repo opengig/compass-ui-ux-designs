@@ -1,7 +1,7 @@
 export const queueTheme = {
   appShell: 'bg-background',
   queueCanvas: 'bg-background',
-  header: 'bg-background border-b border-border',
+  header: 'bg-white border-b border-border',
   headerActiveTab:
     'bg-accent text-foreground',
   headerIdleTab:
@@ -13,7 +13,7 @@ export const queueTheme = {
     'border border-border bg-background text-foreground hover:bg-accent',
   selectedRow: 'bg-muted',
   rowHover: 'hover:bg-accent',
-  rightPanel: 'border-l border-border bg-muted',
+  rightPanel: 'border-l border-border bg-white',
   ctaButton:
     'border border-primary bg-primary text-primary-foreground hover:bg-primary-hover',
 } as const;
