@@ -1,0 +1,186 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --font-sans: var(--font-inter);
+  --font-serif: var(--font-fraunces);
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+
+  --color-brand: var(--brand);
+  --color-brand-soft: var(--brand-soft);
+
+  --color-green-queue: var(--green-queue);
+  --color-green-queue-soft: var(--green-queue-soft);
+  --color-amber-queue: var(--amber-queue);
+  --color-amber-queue-soft: var(--amber-queue-soft);
+  --color-red-queue: var(--red-queue);
+  --color-red-queue-soft: var(--red-queue-soft);
+  --color-blue-queue: var(--blue-queue);
+  --color-blue-queue-soft: var(--blue-queue-soft);
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+}
+
+:root {
+  --radius: 0.625rem;
+  --background: oklch(0.995 0.002 95);
+  /* Body text + headings: softened from near-black (L=0.18) to a darker slate grey
+     (L=0.26). Preserves AA contrast on the warm-white background while removing
+     the harsh-black feel client flagged. */
+  --foreground: oklch(0.26 0.008 255);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.26 0.008 255);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.26 0.008 255);
+  /* Primary buttons + sidebar bot icon bg — softened from L=0.25 to L=0.28.
+     Still reads as a strong dark button without being pure-black. */
+  --primary: oklch(0.28 0.018 255);
+  --primary-foreground: oklch(0.98 0.002 95);
+  --secondary: oklch(0.96 0.004 250);
+  --secondary-foreground: oklch(0.28 0.018 255);
+  --muted: oklch(0.96 0.004 250);
+  --muted-foreground: oklch(0.52 0.012 255);
+  --accent: oklch(0.95 0.008 250);
+  --accent-foreground: oklch(0.28 0.018 255);
+  --destructive: oklch(0.58 0.22 27);
+  --destructive-foreground: oklch(0.99 0.002 95);
+  --border: oklch(0.92 0.004 255);
+  --input: oklch(0.94 0.004 255);
+  --ring: oklch(0.65 0.02 255);
+
+  /* Compass Group brand gold — used sparingly for identity accents only. */
+  --brand: #C68A1E;
+  --brand-soft: oklch(0.965 0.04 80);
+
+  /* Queue identity colors — calm, not vivid. Blue is eye-blue, not warning. */
+  --green-queue: #14874E;
+  --green-queue-soft: oklch(0.95 0.05 155);
+  --amber-queue: oklch(0.68 0.14 75);
+  --amber-queue-soft: oklch(0.96 0.05 85);
+  --red-queue: oklch(0.58 0.19 27);
+  --red-queue-soft: oklch(0.96 0.04 27);
+  --blue-queue: #193CB8;
+  --blue-queue-soft: oklch(0.95 0.04 265);
+}
+
+.dark {
+  --background: oklch(0.16 0.008 255);
+  --foreground: oklch(0.95 0.004 95);
+  --card: oklch(0.2 0.008 255);
+  --card-foreground: oklch(0.95 0.004 95);
+  --popover: oklch(0.2 0.008 255);
+  --popover-foreground: oklch(0.95 0.004 95);
+  --primary: oklch(0.95 0.004 95);
+  --primary-foreground: oklch(0.2 0.008 255);
+  --secondary: oklch(0.26 0.008 255);
+  --secondary-foreground: oklch(0.95 0.004 95);
+  --muted: oklch(0.26 0.008 255);
+  --muted-foreground: oklch(0.7 0.012 255);
+  --accent: oklch(0.28 0.012 255);
+  --accent-foreground: oklch(0.95 0.004 95);
+  --destructive: oklch(0.6 0.22 27);
+  --destructive-foreground: oklch(0.95 0.004 95);
+  --border: oklch(0.28 0.012 255);
+  --input: oklch(0.28 0.012 255);
+  --ring: oklch(0.55 0.02 255);
+
+  --green-queue: oklch(0.68 0.14 155);
+  --green-queue-soft: oklch(0.28 0.06 155);
+  --amber-queue: oklch(0.78 0.14 75);
+  --amber-queue-soft: oklch(0.28 0.06 75);
+  --red-queue: oklch(0.7 0.19 27);
+  --red-queue-soft: oklch(0.28 0.08 27);
+  --blue-queue: oklch(0.68 0.09 240);
+  --blue-queue-soft: oklch(0.28 0.05 240);
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background: var(--background);
+    color: var(--foreground);
+    font-feature-settings: "cv11", "ss01";
+    -webkit-font-smoothing: antialiased;
+  }
+  html {
+    font-family: var(--font-inter), system-ui, sans-serif;
+    /* 93.75% = 15px base instead of 16px.
+     * All rem-based Tailwind utilities (h-*, py-*, gap-*, text-sm etc.)
+     * scale down proportionally — achieves the ~90%-zoom density
+     * without touching browser zoom. Explicit px values in components
+     * are reduced separately below. */
+    font-size: 93.75%;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family: var(--font-fraunces), ui-serif, Georgia, serif;
+    font-feature-settings: "ss01";
+  }
+
+  .numeric-tabular {
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* Minimal, subtle scrollbar — opt-in via the `scrollbar-thin` class on a
+     scroll container. Colors route through project tokens (--border,
+     --muted-foreground) so dark mode flips automatically; sizing matches the
+     spec (thin track + soft thumb that darkens on hover). Firefox uses
+     `scrollbar-*` shorthand; WebKit/Blink uses pseudo-elements. */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: color-mix(in oklab, var(--muted-foreground) 35%, transparent) transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: color-mix(in oklab, var(--muted-foreground) 30%, transparent);
+    border-radius: 10px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: color-mix(in oklab, var(--muted-foreground) 55%, transparent);
+  }
+
+  /* Fully hide the scrollbar while keeping the element scrollable.
+     Used by horizontal chip strips (filter rows, tab bars) that need
+     to overflow on narrow viewports without showing a visible track. */
+  .scrollbar-none {
+    scrollbar-width: none;
+  }
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+}

@@ -1,0 +1,65 @@
+import type { AuditEntry } from "@/lib/types";
+import { INCREMENTAL_BATCH } from "@/data/mogs";
+
+export const SEED_AUDIT: AuditEntry[] = [
+  {
+    id: "aud-001",
+    timestamp: "2026-04-16T04:12:00+05:30",
+    actor: "autobot",
+    action: "ods.refresh.completed",
+    entityType: "system",
+    entityId: "ods-feed",
+    explanation: "Nightly ODS refresh completed. 47 Article deltas processed. 4 retirements detected.",
+  },
+  {
+    id: "aud-002",
+    timestamp: "2026-04-16T04:14:00+05:30",
+    actor: "autobot",
+    action: "queue.assigned",
+    entityType: "decision",
+    entityId: "dec-008",
+    after: "blue",
+    explanation:
+      "'Cashew Broken' at Whitefield Park assigned to Blue Queue with Case 2 / Green replacement candidate.",
+  },
+  {
+    id: "aud-003",
+    timestamp: "2026-04-16T04:14:00+05:30",
+    actor: "autobot",
+    action: "queue.assigned",
+    entityType: "decision",
+    entityId: "dec-009",
+    after: "blue",
+    explanation: "'Mustard Oil' at Sector V assigned to Blue Queue. No replacement Article detected.",
+  },
+  {
+    id: "aud-004",
+    timestamp: "2026-04-16T04:13:00+05:30",
+    actor: "autobot",
+    action: "exception.raised",
+    entityType: "exception",
+    entityId: "exc-q01",
+    explanation: "Article flagged with missing fields: 'Ghee, Cow Pure, Amul' missing pack size and cost.",
+  },
+  {
+    id: "aud-005",
+    timestamp: "2026-04-15T09:42:00+05:30",
+    actor: "Kavya Reddy",
+    action: "decision.confirmed",
+    entityType: "decision",
+    entityId: "dec-hist-001",
+    before: "pending",
+    after: "confirmed",
+    explanation: "'Red Chilli Powder' → MDH 200 g confirmed and entered into CookBook.",
+  },
+  {
+    id: "aud-006",
+    timestamp: `${INCREMENTAL_BATCH.addedOn}T07:00:00+05:30`,
+    actor: "autobot",
+    action: "scope.incremental.detected",
+    entityType: "scope",
+    entityId: "scope-incremental-batch",
+    after: `${INCREMENTAL_BATCH.count}`,
+    explanation: `${INCREMENTAL_BATCH.count} new Ingredients entered scope (poha, vermicelli, sambar/rasam/pav-bhaji/chaat masalas, tea, coffee, yeast, baking soda).`,
+  },
+];
