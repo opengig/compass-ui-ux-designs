@@ -8,7 +8,28 @@ import { AuditLog } from './components/AuditLog';
 import { SITES } from './data/mockData';
 import { ReviewStoreProvider } from './stores/useReviewStore';
 import { ExpandProvider } from './stores/ExpandSections';
-import { ROUTES } from './router/routes';
+import { ROUTES, NUTRITIONIST_ROUTES, STORE_MANAGER_ROUTES } from './router/routes';
+import { NutritionistShell } from './components/nutritionist/NutritionistShell';
+import { LoginScreen as NutritionistLogin } from './components/nutritionist/screens/LoginScreen';
+import { DashboardScreen as NutritionistDashboard } from './components/nutritionist/screens/DashboardScreen';
+import { QueueScreen as NutritionistQueue } from './components/nutritionist/screens/QueueScreen';
+import { DetailScreen as NutritionistDetail } from './components/nutritionist/screens/DetailScreen';
+import { ApprovedScreen as NutritionistApproved } from './components/nutritionist/screens/ApprovedScreen';
+import { AuditScreen as NutritionistAudit } from './components/nutritionist/screens/AuditScreen';
+import { NotifScreen as NutritionistNotif } from './components/nutritionist/screens/NotifScreen';
+import { StoreManagerShell } from './components/store-manager/StoreManagerShell';
+import { StoreManagerLayout } from './components/store-manager/StoreManagerApp';
+import { LoginScreen as StoreManagerLogin } from './components/store-manager/screens/LoginScreen';
+import { SsoScreen as StoreManagerSso } from './components/store-manager/screens/SsoScreen';
+import { ArticlesScreen as StoreManagerArticles } from './components/store-manager/screens/ArticlesScreen';
+import { MarkIrrelevantScreen as StoreManagerMarkIrrelevant } from './components/store-manager/screens/MarkIrrelevantScreen';
+import { BarcodeScreen as StoreManagerBarcode } from './components/store-manager/screens/BarcodeScreen';
+import { CaptureScreen as StoreManagerCapture } from './components/store-manager/screens/CaptureScreen';
+import { ReviewScreen as StoreManagerReview } from './components/store-manager/screens/ReviewScreen';
+import { DoneScreen as StoreManagerDone } from './components/store-manager/screens/DoneScreen';
+import { ProgressScreen as StoreManagerProgress } from './components/store-manager/screens/ProgressScreen';
+import { RetryScreen as StoreManagerRetry } from './components/store-manager/screens/RetryScreen';
+import { AccountScreen as StoreManagerAccount } from './components/store-manager/screens/AccountScreen';
 
 function DashboardPage() {
   // Dashboard expects goApp + setQueueTab + selectedSites; pass URL-aware shims.
@@ -61,6 +82,42 @@ export function App() {
             <Route path={ROUTES.audit} element={<AuditLog />} />
             <Route path={ROUTES.settings} element={<PlaceholderPage title="Settings" />} />
           </Route>
+
+          {/* Nutritionist flow — one route per screen, all under the shell + context provider */}
+          <Route path={NUTRITIONIST_ROUTES.base} element={<Navigate to={NUTRITIONIST_ROUTES.login} replace />} />
+          <Route element={<NutritionistShell />}>
+            <Route path={NUTRITIONIST_ROUTES.login} element={<NutritionistLogin />} />
+            <Route path={NUTRITIONIST_ROUTES.dashboard} element={<NutritionistDashboard />} />
+            <Route path={NUTRITIONIST_ROUTES.queue} element={<NutritionistQueue />} />
+            <Route path={NUTRITIONIST_ROUTES.queueArticle} element={<NutritionistQueue />} />
+            <Route path={NUTRITIONIST_ROUTES.article} element={<NutritionistDetail />} />
+            <Route path={NUTRITIONIST_ROUTES.approved} element={<NutritionistApproved />} />
+            <Route path={NUTRITIONIST_ROUTES.audit} element={<NutritionistAudit />} />
+            <Route path={NUTRITIONIST_ROUTES.notifications} element={<NutritionistNotif />} />
+            {/* back-compat: old /nutritionist/home links redirect to /dashboard */}
+            <Route path={NUTRITIONIST_ROUTES.home} element={<Navigate to={NUTRITIONIST_ROUTES.dashboard} replace />} />
+          </Route>
+
+          {/* Store Manager flow — one route per screen, all under the shell + context provider */}
+          <Route path={STORE_MANAGER_ROUTES.base} element={<StoreManagerShell />}>
+            <Route element={<StoreManagerLayout />}>
+              <Route index element={<Navigate to={STORE_MANAGER_ROUTES.login} replace />} />
+              <Route path={STORE_MANAGER_ROUTES.login} element={<StoreManagerLogin />} />
+              <Route path={STORE_MANAGER_ROUTES.sso} element={<StoreManagerSso />} />
+              <Route path={STORE_MANAGER_ROUTES.articles} element={<StoreManagerArticles />} />
+              <Route path={STORE_MANAGER_ROUTES.markIrrelevant} element={<StoreManagerMarkIrrelevant />} />
+              <Route path={STORE_MANAGER_ROUTES.barcode} element={<StoreManagerBarcode />} />
+              <Route path={STORE_MANAGER_ROUTES.capture} element={<StoreManagerCapture />} />
+              <Route path={STORE_MANAGER_ROUTES.review} element={<StoreManagerReview />} />
+              <Route path={STORE_MANAGER_ROUTES.done} element={<StoreManagerDone />} />
+              <Route path={STORE_MANAGER_ROUTES.progress} element={<StoreManagerProgress />} />
+              <Route path={STORE_MANAGER_ROUTES.retry} element={<StoreManagerRetry />} />
+              <Route path={STORE_MANAGER_ROUTES.account} element={<StoreManagerAccount />} />
+            </Route>
+            {/* back-compat: old /store-manager/home links redirect to /articles */}
+            <Route path="home" element={<Navigate to={STORE_MANAGER_ROUTES.articles} replace />} />
+          </Route>
+
           <Route path="*" element={<Navigate to={ROUTES.review} replace />} />
         </Routes>
       </BrowserRouter>

@@ -1,0 +1,1258 @@
+
+<meta charset="utf-8">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Roboto',-apple-system,sans-serif}
+.outer{background:#ECEEF0;padding:20px 14px;display:flex;flex-direction:column;align-items:center;gap:14px}
+.step-row{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:760px}
+.pill{font-size:11px;padding:4px 11px;border-radius:4px;cursor:pointer;border:1px solid #C8CBD0;background:#fff;color:#6A6D72;transition:all .15s;white-space:nowrap}
+.pill.on{background:#17181B;color:#fff;border-color:#17181B;font-weight:500}
+.phone-wrap{background:#111;border-radius:48px;padding:10px;width:360px;box-shadow:0 0 0 1px #333}
+.phone{background:#F5F6F8;border-radius:38px;overflow:hidden;width:100%;height:700px;display:flex;flex-direction:column;position:relative}
+.sbar{background:#fff;padding:10px 20px 4px;display:flex;justify-content:space-between;align-items:center;flex-shrink:0}
+.stime{font-size:12px;font-weight:700;color:#17181B}
+.screen{display:none;flex-direction:column;flex:1;overflow:hidden}
+.screen.on{display:flex}
+.topbar{padding:10px 16px 8px;display:flex;align-items:center;gap:8px;background:#fff;flex-shrink:0}
+.ttitle{font-size:16px;font-weight:600;color:#17181B;flex:1}
+.tsub{font-size:11px;color:#9598A0;margin-top:1px;display:flex;align-items:center;gap:3px}
+.icon-btn{width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;position:relative}
+.icon-btn:hover{background:#EEF0F2}
+.tab-bar{display:flex;background:#fff;border-bottom:1px solid #E5E7EA;flex-shrink:0}
+.atab{flex:1;display:flex;align-items:center;justify-content:center;height:40px;cursor:pointer;border-bottom:2px solid transparent;font-size:12px;color:#9598A0;font-weight:400;gap:4px;transition:all .15s;white-space:nowrap;padding:0 4px}
+.atab.on{color:#17181B;border-bottom-color:#17181B;font-weight:600}
+.tab-count{font-size:10px;padding:1px 5px;border-radius:99px;background:#17181B;color:#fff;font-weight:600}
+.tab-count-g{background:#EAF3DE;color:#3B6D11}
+.tab-count-a{background:#EEF0F2;color:#4A4D52}
+.tab-content{display:none;flex:1;overflow:hidden;flex-direction:column}
+.tab-content.on{display:flex}
+.alist{flex:1;overflow-y:auto;padding:8px 14px;display:flex;flex-direction:column;gap:6px;background:#F5F6F8}
+.acard{background:#fff;border-radius:10px;padding:11px 13px;display:flex;align-items:center;gap:10px;cursor:pointer;border:1px solid #E8EAED;position:relative}
+.status-strip{width:4px;border-radius:2px;align-self:stretch;flex-shrink:0}
+.ainfo{flex:1;min-width:0}
+.aname{font-size:13px;font-weight:500;color:#17181B;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;word-break:break-word;line-height:1.3}
+.aweight{font-size:11px;color:#9598A0;margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.bnav{background:#fff;border-top:1px solid #E5E7EA;display:flex;padding:6px 0 14px;flex-shrink:0}
+.nitem{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 0}
+.nitem span{font-size:10px;color:#9598A0}
+.nitem.on span{color:#17181B;font-weight:500}
+.nitem-ind{width:32px;height:3px;border-radius:2px;background:transparent;margin-bottom:1px}
+.nitem.on .nitem-ind{background:#17181B}
+.cam-dark{background:#080808;flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;position:relative}
+.cam-dark::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 260px 170px at center,transparent 0%,transparent 40%,rgba(0,0,0,0.5) 100%);pointer-events:none}
+.cam-frame{position:relative;display:block}
+.corner{position:absolute;width:18px;height:18px}
+.scanline{position:absolute;left:6px;right:6px;height:1.5px;background:linear-gradient(90deg,transparent,#97C459 50%,transparent);box-shadow:0 0 6px rgba(151,196,89,0.7),0 0 12px rgba(151,196,89,0.35);animation:scanmove 2.2s cubic-bezier(.45,0,.55,1) infinite;border-radius:1px}
+@keyframes scanmove{0%{top:6px;opacity:.4}10%{opacity:1}50%{top:calc(100% - 8px);opacity:1}60%{opacity:.4}90%{opacity:.4}100%{top:6px;opacity:.4}}
+.thumbrow{display:flex;gap:6px;padding:8px 14px;background:#fff;flex-shrink:0;border-top:1px solid #E5E7EA}
+.thumb{width:48px;height:48px;border-radius:8px;border:1px solid #DDE0E3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:8px;color:#9598A0;background:#F5F6F8;flex-shrink:0}
+.thumb.done{background:#EAF3DE;border-color:#7DBD3B;color:#3B6D11}
+.thumb.active{border-color:#17181B;border-width:2px;background:#fff}
+.qwrap{padding:8px 16px 6px;background:#fff;flex-shrink:0}
+.qlbl{font-size:11px;color:#6A6D72;margin-bottom:3px;display:flex;justify-content:space-between}
+.qtrack{height:4px;background:#DDE0E3;border-radius:2px}
+.qfill{height:4px;border-radius:2px}
+.abar{padding:10px 16px 16px;background:#fff;border-top:1px solid #E5E7EA;display:flex;gap:8px;flex-shrink:0}
+.btn{padding:12px 16px;border-radius:8px;font-size:13px;font-weight:500;display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;border:1px solid #C8CBD0;color:#17181B;background:#fff}
+.btnp{background:#23262B;color:#fff;border-color:#23262B}
+.foverlay{position:absolute;inset:0;background:rgba(0,0,0,0.4);z-index:9;display:none;border-radius:38px}
+.foverlay.on{display:block}
+.fsheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:10;display:none;flex-direction:column;max-height:82%}
+.fsheet.on{display:flex}
+.fhandle{width:32px;height:3px;border-radius:2px;background:#DDE0E3;margin:10px auto 0}
+.fcheck-row{display:flex;align-items:center;gap:10px;padding:10px 16px;border-bottom:1px solid #EEF0F2;cursor:pointer}
+.fcheck{width:18px;height:18px;border-radius:3px;border:1.5px solid #C8CBD0;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fcheck.on{background:#17181B;border-color:#17181B}
+.ctr{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:24px 20px;background:#F5F6F8}
+.rcard{background:#fff;border:1px solid #E5E7EA;border-radius:10px;padding:12px 14px;width:100%}
+.rcard-lbl{font-size:10px;font-weight:600;color:#9598A0;letter-spacing:.05em;text-transform:uppercase;margin-bottom:5px}
+.site-item{display:flex;align-items:center;gap:10px;padding:12px 14px;background:#fff;border:1px solid #E5E7EA;border-radius:10px;cursor:pointer;margin-bottom:6px}
+.site-item.on{border-color:#17181B;background:#F2F4F6}
+.action-sheet{position:absolute;bottom:0;left:0;right:0;background:#fff;border-radius:16px 16px 0 0;z-index:10;display:none;flex-direction:column;padding-bottom:20px}
+.action-sheet.on{display:flex}
+.as-item{display:flex;align-items:center;gap:12px;padding:13px 20px;cursor:pointer;border-bottom:1px solid #EEF0F2}
+.as-item:last-child{border-bottom:none}
+.pulse{animation:pulse 1.5s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.5}}
+.spin{animation:spin 1.1s linear infinite;transform-origin:center}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fchip{font-size:11px;color:#34373C;background:#EEF0F2;border:1px solid #E5E7EA;padding:3px 10px;border-radius:99px;white-space:nowrap;font-weight:500;letter-spacing:.01em;line-height:1.4;transition:background .15s;flex-shrink:0}
+.fchip-more{background:#17181B!important;color:#fff!important;font-weight:600;padding:4px 9px;display:inline-flex;align-items:center;gap:2px}
+.fchip-more:hover{background:#2A2C2F!important}
+#filter-strip:hover .fchip:not(.fchip-more){background:#E1E4E7}
+.toast{position:absolute;left:50%;bottom:84px;transform:translateX(-50%) translateY(8px);background:#17181B;color:#fff;font-size:12px;padding:9px 14px;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.25);display:flex;align-items:center;gap:7px;opacity:0;pointer-events:none;transition:opacity .2s,transform .2s;z-index:20;white-space:nowrap}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+#filter-strip:hover .fchip{background:#E1E4E7}
+#filter-strip:active{opacity:.85}
+</style>
+
+<div class="outer">
+  <div class="step-row">
+    <div class="pill on" onclick="G(0)">1 Login</div>
+    <div class="pill" onclick="G(1)">2 SSO</div>
+    <div class="pill" onclick="G(2)">3 Articles</div>
+    <div class="pill" onclick="G(3)">4 Mark irrelevant</div>
+    <div class="pill" onclick="G(4)">5 Barcode</div>
+    <div class="pill" onclick="G(5)">6 Capture</div>
+    <div class="pill" onclick="G(6)">7 Submit</div>
+    <div class="pill" onclick="G(7)">8 Done + metadata</div>
+    <div class="pill" onclick="G(8)">9 Progress + games</div>
+    <div class="pill" onclick="G(9)">10 Retry</div>
+    <div class="pill" onclick="G(10)">11 Account</div>
+  </div>
+
+  <div class="phone-wrap">
+    <div class="phone">
+      <div class="sbar">
+        <span class="stime">9:41</span>
+        <div style="display:flex;gap:4px;align-items:center;color:#17181B;font-size:13px">
+          <i class="ti ti-signal-4g" style="font-size:12px" aria-hidden="true"></i>
+          <i class="ti ti-wifi" aria-hidden="true"></i>
+          <i class="ti ti-battery-2" aria-hidden="true"></i>
+        </div>
+      </div>
+
+      <div class="toast" id="toast"><i class="ti ti-check" style="font-size:14px;color:#97C459" aria-hidden="true"></i><span id="toast-msg">Done</span></div>
+
+      <!-- S0: LOGIN -->
+      <div class="screen on" id="s0">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:22px;padding:32px 24px;background:#fff">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:14px">
+            <svg width="58" height="58" viewBox="0 0 44 44"><rect width="44" height="44" rx="11" fill="#1F2125"/><line x1="10" y1="34" x2="34" y2="10" stroke="#E5E7EA" stroke-width="1.4" stroke-linecap="round"/><polygon points="34,10 29,14 32,17" fill="#E5E7EA"/><polygon points="10,34 15,30 12,27" fill="#9598A0"/><circle cx="22" cy="22" r="2.2" fill="#E5E7EA"/></svg>
+            <div style="text-align:center">
+              <div style="font-size:22px;font-weight:700;color:#1F2125;letter-spacing:-.2px">RETINA <span style="color:#E5E7EA">AI</span></div>
+              <div style="font-size:10px;color:#9598A0;letter-spacing:.15em;text-transform:uppercase;margin-top:4px">by Compass Group</div>
+            </div>
+          </div>
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+            <div class="btn btnp" onclick="G(1)" style="width:100%;font-size:14px;padding:14px;border-radius:8px">
+              <i class="ti ti-brand-windows" style="font-size:18px" aria-hidden="true"></i>Sign in with Compass SSO
+            </div>
+            <div style="font-size:11px;color:#9598A0;text-align:center">Use your Compass Group email</div>
+          </div>
+          <div style="font-size:11px;color:#C8CBD0">Secured by Microsoft Entra ID</div>
+        </div>
+      </div>
+
+      <!-- S1: SSO -->
+      <div class="screen" id="s1">
+        <div style="background:#F2F2F2;border-bottom:1px solid #DADADA;flex-shrink:0">
+          <div style="display:flex;align-items:center;padding:6px 10px 4px;gap:6px">
+            <i class="ti ti-chevron-left" style="font-size:17px;color:#444" aria-hidden="true"></i>
+            <div style="flex:1;background:#fff;border:1px solid #DADADA;border-radius:20px;padding:5px 12px;display:flex;align-items:center;gap:5px">
+              <i class="ti ti-lock" style="font-size:11px;color:#1A7F3C" aria-hidden="true"></i>
+              <span style="font-size:11px;color:#17181B">login.microsoftonline.com</span>
+            </div>
+          </div>
+          <div style="height:2px;background:#E0E0E0"><div style="height:2px;width:75%;background:#0067B8;border-radius:1px"></div></div>
+        </div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;padding:16px;background:#E8F0F9">
+          <div style="width:100%;background:#fff;border-radius:4px;padding:22px 22px 18px;box-shadow:0 2px 6px rgba(0,0,0,0.12)">
+            <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px">
+              <svg width="18" height="18" viewBox="0 0 21 21"><rect x="0" y="0" width="10" height="10" fill="#F25022"/><rect x="11" y="0" width="10" height="10" fill="#7FBA00"/><rect x="0" y="11" width="10" height="10" fill="#00A4EF"/><rect x="11" y="11" width="10" height="10" fill="#FFB900"/></svg>
+              <span style="font-size:13px;color:#17181B">Microsoft</span>
+            </div>
+            <div style="font-size:19px;font-weight:600;color:#17181B;margin-bottom:14px">Sign in</div>
+            <div style="border-bottom:1.5px solid #0067B8;padding-bottom:4px;margin-bottom:5px">
+              <div style="font-size:10px;color:#0067B8;margin-bottom:2px">Email</div>
+              <div style="font-size:12px;color:#17181B">ravi.kumar@compass-group.com</div>
+            </div>
+            <div style="font-size:11px;color:#0067B8;margin:8px 0 18px">Can't access your account?</div>
+            <div style="display:flex;justify-content:flex-end">
+              <div onclick="G(2)" style="background:#0067B8;color:#fff;font-size:13px;padding:8px 20px;border-radius:2px;cursor:pointer">Next</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S2: ARTICLES with all 5 statuses -->
+      <div class="screen" id="s2">
+        <div style="background:#fff;padding:10px 16px 0;flex-shrink:0">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
+            <div style="flex:1">
+              <div style="display:flex;align-items:center;gap:7px">
+                <svg width="20" height="20" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0">
+                  <path d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z" fill="#34373C" opacity=".55"/>
+                  <ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#34373C"/>
+                  <path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#34373C"/>
+                  <path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#34373C"/>
+                </svg>
+                <span style="font-size:16px;font-weight:600;color:#17181B;letter-spacing:-.1px">My Articles</span>
+              </div>
+              <div style="font-size:11px;color:#9598A0;display:flex;align-items:center;gap:3px;margin-top:2px;padding-left:23px">
+                <i class="ti ti-map-pin" style="font-size:11px" aria-hidden="true"></i>
+                Bengaluru Central Kitchen
+                <i class="ti ti-chevron-down" style="font-size:10px;cursor:pointer" onclick="G(10)" aria-hidden="true"></i>
+              </div>
+            </div>
+            <div class="icon-btn" onclick="toggleFilter()">
+              <i class="ti ti-adjustments-horizontal" style="font-size:19px;color:#17181B" aria-hidden="true"></i>
+              <div id="filter-dot" style="position:absolute;top:6px;right:6px;width:7px;height:7px;border-radius:50%;background:#E5E7EA;border:1.5px solid #fff"></div>
+            </div>
+            <div class="icon-btn" onclick="openSearch()">
+              <i class="ti ti-search" style="font-size:19px;color:#17181B" aria-hidden="true"></i>
+            </div>
+          </div>
+          <!-- Inline search row -->
+          <div id="search-row" style="display:none;align-items:center;gap:8px;padding:4px 0 8px">
+            <div style="flex:1;display:flex;align-items:center;gap:7px;background:#EEF0F2;border-radius:8px;padding:7px 10px">
+              <i class="ti ti-search" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+              <input id="search-input" oninput="applyFilters(false)" placeholder="Search name, category, ART code" style="flex:1;border:none;outline:none;background:transparent;font-size:13px;color:#17181B;font-family:inherit;min-width:0"/>
+              <i id="search-clear" onclick="clearSearch()" class="ti ti-x" style="font-size:14px;color:#9598A0;cursor:pointer;display:none" aria-hidden="true"></i>
+            </div>
+            <span onclick="closeSearch()" style="font-size:12px;color:#6A6D72;cursor:pointer;font-weight:500;flex-shrink:0">Cancel</span>
+          </div>
+          <div class="tab-bar">
+            <div class="atab on" id="tab-scan" onclick="ST('scan')">To scan <span class="tab-count">12</span></div>
+            <div class="atab" id="tab-mapped" onclick="ST('mapped')">Mapped <span class="tab-count tab-count-g">4</span></div>
+            <div class="atab" id="tab-loose" onclick="ST('loose')">Loose Items <span class="tab-count">8</span></div>
+          </div>
+          <!-- Active filter chips -->
+          <div id="filter-strip" onclick="toggleFilter()" style="display:flex;align-items:center;gap:8px;padding:9px 0 10px;border-top:1px solid #EEF0F2;cursor:pointer;min-width:0">
+            <i class="ti ti-filter" style="font-size:14px;color:#9598A0;flex-shrink:0" aria-hidden="true"></i>
+            <div class="fchip-box" style="display:flex;gap:5px;flex:1;min-width:0;flex-wrap:nowrap;overflow:hidden;align-items:center">
+              <span class="fchip">Dairy</span>
+              <span class="fchip">Frozen</span>
+              <span class="fchip">Spices</span>
+            </div>
+            <span onclick="event.stopPropagation();clearFilters()" style="font-size:11px;color:#6A6D72;font-weight:400;cursor:pointer;flex-shrink:0;padding:2px 2px">Clear all</span>
+          </div>
+        </div>
+
+        <!-- TAB 1: TO SCAN — all 5 status types -->
+        <div class="tab-content on" id="tc-scan">
+          <div class="alist">
+            <div id="empty-state" style="display:none;padding:36px 12px;text-align:center;color:#9598A0">
+              <i class="ti ti-search-off" style="font-size:30px;color:#C8CBD0;display:block;margin-bottom:8px" aria-hidden="true"></i>
+              <div style="font-size:13px;color:#6A6D72;font-weight:500">No matching articles found</div>
+              <div style="font-size:11px;color:#9598A0;margin-top:3px">Try a different keyword or clear filters</div>
+            </div>
+            <!-- STATUS LEGEND -->
+            <div style="display:flex;gap:8px;flex-wrap:wrap;padding:2px 0 4px">
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#9598A0"><div style="width:7px;height:7px;border-radius:50%;background:#E24B4A"></div>Failed</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#9598A0"><div style="width:7px;height:7px;border-radius:50%;background:#5A8C1A"></div>Done</div>
+              <div style="display:flex;align-items:center;gap:4px;font-size:10px;color:#9598A0"><div style="width:7px;height:7px;border-radius:50%;background:#C8CBD0"></div>To scan</div>
+            </div>
+
+            <!-- RED: Failed upload -->
+            <div class="acard" data-cat="spices" style="border-color:#F09595;background:#FFFBFB" onclick="G(9)">
+              <div class="status-strip" style="background:#E24B4A"></div>
+              <div class="ainfo">
+                <div class="aname">Spice, MDH, Chana Masala</div>
+                <div class="aweight" style="color:#A32D2D">100 g · Upload failed · retry</div>
+              </div>
+              <i class="ti ti-refresh" style="font-size:16px;color:#A32D2D;flex-shrink:0" aria-hidden="true"></i>
+            </div>
+
+            <div class="acard" data-cat="dairy" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Butter, Amul, Salted Pasteurised</div>
+                <div class="aweight">500 g · Dairy · ART-10112</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="dry" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Chicken, Fresh, Curry Cut Bone-in Skinless Marinated</div>
+                <div class="aweight">1 kg · Meat · ART-10455</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="frozen" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Frozen, McCain, French Fries Classic Cut</div>
+                <div class="aweight">1.25 kg · Frozen · ART-10781</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- GREY: Unscanned -->
+            <div class="acard" id="card-active-paneer" data-cat="dairy" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Paneer, Amul, Fresh Block</div>
+                <div class="aweight">1 kg · Dairy · ART-10234</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="spices" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Spice, MTR, Sambar Masala Blend</div>
+                <div class="aweight">100 g · Spices · ART-10519</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="frozen" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Ice Cream, Mother Dairy, Vanilla Magic</div>
+                <div class="aweight">750 ml · Frozen · ART-10844</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- GREY: Unscanned — long name -->
+            <div class="acard" data-cat="dry" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Flour, Aashirvaad, Whole Wheat Atta Multigrain</div>
+                <div class="aweight">5 kg · Dry goods · ART-10921</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <!-- GREEN: Done -->
+            <div class="acard" data-cat="condiments">
+              <div class="status-strip" style="background:#5A8C1A"></div>
+              <div class="ainfo">
+                <div class="aname" style="color:#3B6D11">Jam, Kissan, Mixed Fruit Spread</div>
+                <div class="aweight">500 g · Condiments · ART-10445</div>
+              </div>
+              <i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i>
+            </div>
+
+            <div class="acard" data-cat="oils" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Oil, Fortune, Refined Sunflower</div>
+                <div class="aweight">1 L · Oils · ART-10633</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="bakery" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Bread, Modern, Whole Wheat Sliced Sandwich</div>
+                <div class="aweight">400 g · Bakery · ART-10314</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="beverages" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Beverage, Coca-Cola, Original Taste</div>
+                <div class="aweight">1 L · Beverages · ART-10052</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="dairy" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Curd, Mother Dairy, Fresh Set Pouch</div>
+                <div class="aweight">400 g · Dairy · ART-10678</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+            <div class="acard" data-cat="condiments" onclick="startScan(this)">
+              <div class="status-strip" style="background:#C8CBD0"></div>
+              <div class="ainfo">
+                <div class="aname">Sauce, Maggi, Rich Tomato Ketchup</div>
+                <div class="aweight">500 g · Condiments · ART-10288</div>
+              </div>
+              <div style="display:flex;align-items:center;gap:6px">
+                <i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i>
+                <div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)">
+                  <i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- TAB 2: MAPPED -->
+        <div class="tab-content" id="tc-mapped">
+          <div class="alist">
+            <div style="font-size:11px;color:#9598A0;padding:2px 0 4px">Scanned by your site or another store</div>
+            <div class="acard"><div class="status-strip" style="background:#5A8C1A"></div><div class="ainfo"><div class="aname" style="color:#3B6D11">Jam, Kissan, Mixed Fruit Spread</div><div class="aweight">500 g · Condiments · ART-10445</div></div><i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i></div>
+            <div class="acard"><div class="status-strip" style="background:#5A8C1A"></div><div class="ainfo"><div class="aname" style="color:#3B6D11">Butter, Amul, Salted Pasteurised</div><div class="aweight">500 g · Dairy · ART-10112</div></div><i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i></div>
+            <div class="acard"><div class="status-strip" style="background:#5A8C1A"></div><div class="ainfo"><div class="aname" style="color:#3B6D11">Salt, Tata, Iodised Crystal</div><div class="aweight">1 kg · Dry goods · ART-10089</div></div><i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i></div>
+            <div class="acard"><div class="status-strip" style="background:#5A8C1A"></div><div class="ainfo"><div class="aname" style="color:#3B6D11">Biscuit, Parle-G, Original Glucose</div><div class="aweight">800 g · Bakery · ART-10203</div></div><i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: LOOSE ITEMS — no barcode flow -->
+        <div class="tab-content" id="tc-loose">
+          <div class="alist">
+            <div style="font-size:11px;color:#9598A0;padding:2px 0 4px">Items without barcodes — capture images directly</div>
+            <div class="acard" data-cat="vegetables" onclick="startLooseScan('Tomatoes, Loose, Fresh')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Tomatoes, Loose, Fresh</div><div class="aweight">per kg · Vegetables · ART-20011</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="vegetables" onclick="startLooseScan('Onions, Loose, Red')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Onions, Loose, Red</div><div class="aweight">per kg · Vegetables · ART-20015</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="herbs" onclick="startLooseScan('Coriander, Fresh, Bunch')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Coriander, Fresh, Bunch</div><div class="aweight">100 g · Herbs · ART-20023</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="meat" onclick="startLooseScan('Chicken, Fresh, Drumsticks')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Chicken, Fresh, Drumsticks Skin-on</div><div class="aweight">per kg · Meat · ART-20041</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="vegetables" onclick="startLooseScan('Potatoes, Loose')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Potatoes, Loose, Premium</div><div class="aweight">per kg · Vegetables · ART-20009</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="meat" onclick="startLooseScan('Chicken, Fresh, Curry Cut')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Chicken, Fresh, Curry Cut Bone-in</div><div class="aweight">per kg · Meat · ART-20055</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="herbs" onclick="startLooseScan('Green Chillies, Loose')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Green Chillies, Loose, Fresh</div><div class="aweight">100 g · Herbs · ART-20028</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+            <div class="acard" data-cat="fruits" onclick="startLooseScan('Bananas, Loose')"><div class="status-strip" style="background:#C8CBD0"></div><div class="ainfo"><div class="aname">Bananas, Loose, Robusta</div><div class="aweight">per dozen · Fruits · ART-20071</div></div><div style="display:flex;align-items:center;gap:6px;flex-shrink:0"><i class="ti ti-chevron-right" style="font-size:16px;color:#C8CBD0" aria-hidden="true"></i><div style="background:#EEF0F2;border-radius:4px;padding:3px;cursor:pointer" onclick="showActions(event)"><i class="ti ti-dots-vertical" style="font-size:14px;color:#9598A0" aria-hidden="true"></i></div></div></div>
+          </div>
+        </div>
+
+        <!-- TAB 3: PROGRESS with gamification -->
+        <div class="tab-content" id="tc-progress">
+          <div style="flex:1;padding:12px 14px;display:flex;flex-direction:column;gap:10px;background:#F5F6F8;overflow-y:auto">
+
+            <!-- Gamification banner -->
+            <div style="background:linear-gradient(135deg,#1F2125,#34373C);border-radius:12px;padding:14px 16px;position:relative;overflow:hidden">
+              <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em">Today's streak</div>
+              <div style="display:flex;align-items:center;gap:10px">
+                <div style="font-size:28px;font-weight:700;color:#E5E7EA">7</div>
+                <div>
+                  <div style="font-size:13px;font-weight:500;color:#fff">articles scanned!</div>
+                  <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px">Keep going — 13 more to hit today's target</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:4px;margin-top:10px">
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+                <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+              </div>
+              <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">7 of 20 today</div>
+            </div>
+
+            <!-- Weekly streak badges -->
+            <div class="rcard">
+              <div class="rcard-lbl">Weekly streak</div>
+              <div style="display:flex;gap:6px;margin-top:6px">
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:16px;color:#3B6D11" aria-hidden="true"></i></div>
+                  <span style="font-size:9px;color:#9598A0">Mon</span>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:16px;color:#3B6D11" aria-hidden="true"></i></div>
+                  <span style="font-size:9px;color:#9598A0">Tue</span>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:16px;color:#3B6D11" aria-hidden="true"></i></div>
+                  <span style="font-size:9px;color:#9598A0">Wed</span>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#17181B;border:2px solid #E5E7EA;display:flex;align-items:center;justify-content:center"><span style="font-size:10px;color:#E5E7EA;font-weight:700">7</span></div>
+                  <span style="font-size:9px;color:#E5E7EA;font-weight:500">Thu</span>
+                </div>
+                <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px">
+                  <div style="width:32px;height:32px;border-radius:50%;background:#EEF0F2;border:1.5px dashed #C8CBD0;display:flex;align-items:center;justify-content:center"><i class="ti ti-lock" style="font-size:13px;color:#C8CBD0" aria-hidden="true"></i></div>
+                  <span style="font-size:9px;color:#C8CBD0">Fri</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Stats grid -->
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px">
+              <div style="background:#EAF3DE;border-radius:10px;padding:10px 10px;border:1px solid #97C459;text-align:center">
+                <div style="font-size:10px;color:#3B6D11;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Done</div>
+                <div style="font-size:20px;font-weight:700;color:#3B6D11">6</div>
+              </div>
+              <div style="background:#EEF0F2;border-radius:10px;padding:10px;border:1px solid #C8CBD0;text-align:center">
+                <div style="font-size:10px;color:#4A4D52;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Processing</div>
+                <div style="font-size:20px;font-weight:700;color:#4A4D52">1</div>
+              </div>
+              <div style="background:#FCEBEB;border-radius:10px;padding:10px;border:1px solid #F09595;text-align:center">
+                <div style="font-size:10px;color:#A32D2D;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:3px">Failed</div>
+                <div style="font-size:20px;font-weight:700;color:#A32D2D">1</div>
+              </div>
+            </div>
+
+            <!-- Today's scan list -->
+            <div class="rcard">
+              <div class="rcard-lbl">Scanned today</div>
+              <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#5A8C1A;flex-shrink:0"></div><span style="font-size:12px;color:#17181B;flex:1">Amul Paneer 1kg</span><span style="font-size:10px;color:#9598A0">9:12 AM</span><span style="font-size:11px;color:#5A8C1A">Done</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#6A6D72;flex-shrink:0" class="pulse"></div><span style="font-size:12px;color:#17181B;flex:1">Amul Butter 500g</span><span style="font-size:10px;color:#9598A0">9:28 AM</span><span style="font-size:11px;color:#4A4D52">Processing</span></div>
+                <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#E24B4A;flex-shrink:0"></div><span style="font-size:12px;color:#17181B;flex:1">MDH Chana Masala</span><span style="font-size:10px;color:#9598A0">9:41 AM</span><span style="font-size:11px;color:#A32D2D;cursor:pointer" onclick="G(9)">Retry</span></div>
+              </div>
+            </div>
+            <div class="btn btnp" onclick="ST('scan')" style="width:100%;font-size:13px;border-radius:8px">
+              <i class="ti ti-scan" style="font-size:15px" aria-hidden="true"></i>Continue scanning
+            </div>
+          </div>
+        </div>
+
+        <div class="bnav">
+          <div class="nitem on">
+            <div class="nitem-ind"></div>
+            <i class="ti ti-list" style="font-size:22px;color:#17181B" aria-hidden="true"></i>
+            <span style="color:#17181B">Articles</span>
+          </div>
+          <div class="nitem" onclick="G(8)">
+            <div class="nitem-ind"></div>
+            <i class="ti ti-chart-bar" style="font-size:22px;color:#9598A0" aria-hidden="true"></i>
+            <span>Progress</span>
+          </div>
+          <div class="nitem" onclick="G(10)">
+            <div class="nitem-ind"></div>
+            <i class="ti ti-user-circle" style="font-size:22px;color:#9598A0" aria-hidden="true"></i>
+            <span>Account</span>
+          </div>
+        </div>
+
+        <!-- Filter sheet -->
+        <div class="foverlay" id="foverlay" onclick="toggleFilter()"></div>
+        <div class="fsheet" id="fsheet">
+          <div class="fhandle"></div>
+          <div style="display:flex;align-items:center;gap:12px;padding:12px 16px 8px">
+            <span style="font-size:15px;font-weight:600;color:#17181B;flex:1">Filter by category</span>
+            <span onclick="clearFilters()" style="font-size:12px;color:#A32D2D;font-weight:500;cursor:pointer">Clear all</span>
+            <i class="ti ti-x" style="font-size:18px;color:#6A6D72;cursor:pointer" onclick="toggleFilter()" aria-hidden="true"></i>
+          </div>
+          <div id="fcheck-list" style="overflow-y:auto;padding-bottom:8px"></div>
+          <div style="padding:10px 16px 18px;background:#fff;border-top:1px solid #E5E7EA">
+            <div class="btn btnp" id="fapply-btn" onclick="applyFilters(true)" style="width:100%;font-size:13px;border-radius:8px">Apply · 3 selected</div>
+          </div>
+        </div>
+
+        <!-- Mark irrelevant action sheet -->
+        <div class="foverlay" id="aoverlay" onclick="hideActions()"></div>
+        <div class="action-sheet" id="asheet">
+          <div class="fhandle"></div>
+          <div id="asheet-title" style="padding:12px 20px 6px;font-size:13px;font-weight:500;color:#17181B">Article</div>
+          <div class="as-item" onclick="openExcludeAction()">
+            <i class="ti ti-eye-off" style="font-size:18px;color:#4A4D52" aria-hidden="true"></i>
+            <div>
+              <div id="asheet-action-label" style="font-size:13px;color:#4A4D52">Mark as not in my store</div>
+              <div id="asheet-action-desc" style="font-size:11px;color:#9598A0;margin-top:1px">This article doesn't exist at this site</div>
+            </div>
+          </div>
+          <div class="as-item" onclick="hideActions()">
+            <i class="ti ti-x" style="font-size:18px;color:#9598A0" aria-hidden="true"></i>
+            <div style="font-size:13px;color:#9598A0">Cancel</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S3: MARK IRRELEVANT CONFIRM -->
+      <div class="screen" id="s3">
+        <div class="topbar">
+          <i class="ti ti-arrow-left" style="font-size:20px;color:#6A6D72;cursor:pointer" onclick="G(2)" aria-label="back"></i>
+          <div style="flex:1">
+            <div class="ttitle" id="s3-title">Mark as not in store</div>
+            <div class="tsub">Amul Paneer 1kg · ART-10234</div>
+          </div>
+        </div>
+        <div style="flex:1;padding:16px;display:flex;flex-direction:column;gap:12px;background:#F5F6F8">
+          <div style="background:#EEF0F2;border-radius:10px;padding:13px 14px;border:1px solid #C8CBD0;display:flex;gap:9px">
+            <i class="ti ti-info-circle" style="font-size:16px;color:#4A4D52;flex-shrink:0;margin-top:1px" aria-hidden="true"></i>
+            <div id="s3-info" style="font-size:12px;color:#34373C;line-height:1.6">Marking this article as "not in my store" means it will be removed from your scan list and flagged as irrelevant for Bengaluru Central Kitchen.</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:10px;overflow:hidden">
+            <div id="s3-reason-label" style="font-size:10px;font-weight:600;color:#9598A0;text-transform:uppercase;letter-spacing:.06em;padding:10px 14px 6px">Why is it not in your store?</div>
+            <div id="s3-radios" style="padding:4px 14px 12px;display:flex;flex-direction:column;gap:8px">
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel" checked>We don't stock this product</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Product was discontinued</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Wrong article assigned to my site</label>
+              <label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Other</label>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:10px;padding:12px 14px">
+            <div style="font-size:11px;color:#9598A0;margin-bottom:6px">Additional note (optional)</div>
+            <textarea style="width:100%;border:1px solid #E5E7EA;border-radius:7px;padding:8px 10px;font-size:12px;resize:none;font-family:inherit;background:#F6F7F9;height:56px" placeholder="e.g. This product was replaced by a newer SKU..."></textarea>
+          </div>
+        </div>
+        <div class="abar" style="padding-bottom:14px">
+          <div class="btn" style="flex:0.6;font-size:12px" onclick="G(2)">Cancel</div>
+          <div class="btn" style="flex:1;background:#4A4D52;color:#fff;border-color:#4A4D52" onclick="confirmExclude()">
+            <i class="ti ti-eye-off" style="font-size:14px" aria-hidden="true"></i>Confirm
+          </div>
+        </div>
+      </div>
+
+      <!-- S4: BARCODE -->
+      <div class="screen" id="s4">
+        <div class="topbar">
+          <i class="ti ti-arrow-left" style="font-size:20px;color:#6A6D72;cursor:pointer" onclick="G(5)" aria-label="back"></i>
+          <div style="flex:1"><div class="ttitle">Scan Article</div><div class="tsub">Amul Paneer · ART-10234</div></div>
+        </div>
+        <div class="cam-dark" onclick="markBarcodeDone();renderCapture();G(5)" style="cursor:pointer">
+          <div class="cam-frame" id="bc-frame" style="width:240px;height:120px;z-index:1">
+            <div class="corner" style="top:0;left:0;border-top:2.5px solid #97C459;border-left:2.5px solid #97C459;border-radius:3px 0 0 0"></div>
+            <div class="corner" style="top:0;right:0;border-top:2.5px solid #97C459;border-right:2.5px solid #97C459;border-radius:0 3px 0 0"></div>
+            <div class="corner" style="bottom:0;left:0;border-bottom:2.5px solid #97C459;border-left:2.5px solid #97C459;border-radius:0 0 0 3px"></div>
+            <div class="corner" style="bottom:0;right:0;border-bottom:2.5px solid #97C459;border-right:2.5px solid #97C459;border-radius:0 0 3px 0"></div>
+            <div class="scanline"></div>
+          </div>
+          <div style="font-size:12px;color:rgba(255,255,255,0.6);margin-top:22px;letter-spacing:.01em;z-index:1">Align barcode inside frame</div>
+        </div>
+        <div style="background:#fff;padding:10px 16px;border-top:1px solid #E5E7EA;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+          <div><div style="font-size:12px;color:#6A6D72;font-weight:500">Barcode not detected?</div><div style="font-size:10px;color:#ABAEB3;margin-top:1px">Take a photo instead</div></div>
+          <div style="font-size:12px;font-weight:500;color:#17181B;background:#EEF0F2;padding:7px 14px;border-radius:8px;cursor:pointer;display:flex;align-items:center;gap:5px"><i class="ti ti-camera" style="font-size:13px" aria-hidden="true"></i>Photo</div>
+        </div>
+        <div class="abar" style="padding-bottom:12px">
+          <div class="btn" style="flex:1;color:#9598A0;border-color:#E5E7EA;font-size:12px" onclick="G(2)"><i class="ti ti-x" style="font-size:13px" aria-hidden="true"></i>Cancel</div>
+        </div>
+      </div>
+
+      <!-- S5: CAPTURE -->
+      <div class="screen" id="s5">
+        <div class="topbar">
+          <i class="ti ti-arrow-left" style="font-size:20px;color:#6A6D72;cursor:pointer" onclick="G(2)" aria-label="back"></i>
+          <div style="flex:1"><div class="ttitle" id="cap-title">Paneer, Amul, Fresh Block</div><div class="tsub" id="cap-sub">Tap a step to capture</div></div>
+          <span id="cap-count" style="font-size:10px;color:#9598A0;background:#EEF0F2;padding:3px 8px;border-radius:5px">0/3</span>
+        </div>
+        <div class="cam-dark">
+          <div id="cap-frame-photo" class="cam-frame" style="width:180px;height:220px;border:2px dashed rgba(255,255,255,0.35);border-radius:12px;display:flex;align-items:center;justify-content:center"><div id="cam-hint" style="font-size:11px;color:rgba(255,255,255,0.45);text-align:center;padding:0 16px">Tap a step below to start</div></div>
+          <div id="cap-frame-barcode" class="cam-frame" style="width:230px;height:118px;display:none">
+            <div class="corner" style="top:0;left:0;border-top:2.5px solid #97C459;border-left:2.5px solid #97C459;border-radius:3px 0 0 0"></div>
+            <div class="corner" style="top:0;right:0;border-top:2.5px solid #97C459;border-right:2.5px solid #97C459;border-radius:0 3px 0 0"></div>
+            <div class="corner" style="bottom:0;left:0;border-bottom:2.5px solid #97C459;border-left:2.5px solid #97C459;border-radius:0 0 0 3px"></div>
+            <div class="corner" style="bottom:0;right:0;border-bottom:2.5px solid #97C459;border-right:2.5px solid #97C459;border-radius:0 0 3px 0"></div>
+            <div class="scanline"></div>
+          </div>
+        </div>
+        <div class="qwrap">
+          <div class="qlbl"><span>Quality</span><span style="color:#5A8C1A;font-weight:500">Good</span></div>
+          <div class="qtrack"><div class="qfill" style="width:78%;background:#5A8C1A"></div></div>
+        </div>
+        <div class="thumbrow">
+          <div id="thumb-barcode" class="thumb" onclick="selectCapStep('barcode')" style="cursor:pointer"><i class="ti ti-barcode" style="font-size:14px" aria-hidden="true"></i><span>Barcode</span></div>
+          <div id="thumb-front" class="thumb" onclick="selectCapStep('front')" style="cursor:pointer"><i class="ti ti-camera" style="font-size:14px" aria-hidden="true"></i><span>Front</span></div>
+          <div id="thumb-back" class="thumb" onclick="selectCapStep('back')" style="cursor:pointer"><i class="ti ti-camera" style="font-size:14px" aria-hidden="true"></i><span>Back</span></div>
+          <div id="thumb-more" class="thumb" onclick="selectCapStep('more')" style="border-style:dashed;cursor:pointer;position:relative"><i class="ti ti-plus" style="font-size:12px;color:#C8CBD0" aria-hidden="true"></i><span>More</span><span id="more-count" style="position:absolute;top:-3px;right:-3px;font-size:8px;background:#17181B;color:#fff;padding:1px 4px;border-radius:99px;font-weight:600;display:none"></span></div>
+        </div>
+        <div class="abar" style="padding-bottom:14px">
+          <div class="btn" style="flex:0.55;font-size:12px" onclick="G(2)">Cancel</div>
+          <div id="cap-btn" class="btn btnp" style="flex:1;opacity:.55;pointer-events:none" onclick="doCapture()"><i class="ti ti-camera" style="font-size:15px" aria-hidden="true"></i>Capture</div>
+        </div>
+      </div>
+
+      <!-- S6: REVIEW & SUBMIT -->
+      <div class="screen" id="s6">
+        <div class="topbar">
+          <i class="ti ti-arrow-left" style="font-size:20px;color:#6A6D72;cursor:pointer" onclick="G(5)" aria-label="back"></i>
+          <div class="ttitle">Review & submit</div>
+        </div>
+        <div style="padding:10px 16px 8px;background:#fff;border-bottom:1px solid #E5E7EA;flex-shrink:0">
+          <div id="s6-name" style="font-size:13px;font-weight:500;color:#17181B">Amul Paneer 1kg</div>
+          <div id="s6-detail" style="font-size:11px;color:#9598A0;margin-top:2px">ART-10234 · Dairy · Barcode: 8901030546167</div>
+        </div>
+        <div style="flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:#F5F6F8;overflow-y:auto">
+          <div id="s6-thumbs" style="display:flex;gap:7px">
+            <div class="thumb done" style="width:64px;height:64px"><i class="ti ti-barcode" style="font-size:18px" aria-hidden="true"></i><span style="font-size:8px">Barcode</span></div>
+            <div class="thumb done" style="width:64px;height:64px"><i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i><span style="font-size:8px">Front</span></div>
+            <div class="thumb done" style="width:64px;height:64px"><i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i><span style="font-size:8px">Back</span></div>
+          </div>
+          <div style="background:#EAF3DE;border-radius:8px;padding:10px 13px;border:1px solid #97C459;display:flex;gap:7px;align-items:center">
+            <i class="ti ti-circle-check" style="font-size:16px;color:#3B6D11;flex-shrink:0" aria-hidden="true"></i>
+            <div id="s6-verify" style="font-size:12px;color:#3B6D11">Barcode detected · GTIN 8901030546167 · Amul verified</div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:10px;padding:12px 13px">
+            <div style="font-size:11px;color:#9598A0;margin-bottom:3px">What happens next</div>
+            <div style="font-size:12px;color:#6A6D72;line-height:1.6">AI extracts allergens, ingredients and nutrition in the background. You can keep scanning.</div>
+          </div>
+        </div>
+        <div class="abar" style="padding-bottom:14px">
+          <div class="btn" style="flex:0.55;font-size:12px" onclick="G(5)">Retake</div>
+          <div class="btn btnp" style="flex:1" onclick="markScanned();populateSubmitted();G(7)">Submit</div>
+        </div>
+      </div>
+
+      <!-- S7: DONE + METADATA -->
+      <div class="screen" id="s7">
+        <div class="ctr">
+          <div style="width:60px;height:60px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center">
+            <i class="ti ti-check" style="font-size:26px;color:#3B6D11" aria-hidden="true"></i>
+          </div>
+          <div style="font-size:19px;font-weight:600;color:#17181B;text-align:center">Submitted!</div>
+          <div style="font-size:13px;color:#6A6D72;text-align:center;line-height:1.6">Submitted — keep scanning your next article.</div>
+
+          <!-- Metadata confirmation card -->
+          <div class="rcard">
+            <div class="rcard-lbl">Submission details</div>
+            <div style="display:flex;flex-direction:column;gap:7px;margin-top:4px">
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Article</span>
+                <span id="s7-name" style="font-size:12px;font-weight:500;color:#17181B">Amul Paneer 1kg</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Article code</span>
+                <span id="s7-code" style="font-size:12px;font-weight:500;color:#17181B">ART-10234</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Barcode (GTIN)</span>
+                <span id="s7-gtin" style="font-size:12px;font-weight:500;color:#17181B">8901030546167</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Images sent</span>
+                <span id="s7-imgs" style="font-size:12px;font-weight:500;color:#17181B">3 images</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Scanned at</span>
+                <span id="s7-time" style="font-size:12px;font-weight:500;color:#17181B">9:41 AM · Thu 8 May</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Scanned by</span>
+                <span style="font-size:12px;font-weight:500;color:#17181B">Ravi Kumar · BCK-001</span>
+              </div>
+              <div style="display:flex;justify-content:space-between">
+                <span style="font-size:11px;color:#9598A0">Status</span>
+                <span style="font-size:11px;font-weight:500;color:#3B6D11;display:flex;align-items:center;gap:4px"><i class="ti ti-check" style="font-size:11px" aria-hidden="true"></i>Submitted</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Progress nudge -->
+          <div style="background:#17181B;border-radius:10px;padding:12px 14px;width:100%;display:flex;align-items:center;gap:10px">
+            <div style="flex:1">
+              <div style="font-size:11px;color:rgba(255,255,255,0.6);margin-bottom:2px">Today's progress</div>
+              <div style="font-size:16px;font-weight:700;color:#E5E7EA">8 <span style="font-size:11px;font-weight:400;color:rgba(255,255,255,0.5)">of 20 done</span></div>
+            </div>
+            <div style="height:36px;width:36px;border-radius:50%;background:rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center">
+              <i class="ti ti-flame" style="font-size:18px;color:#E5E7EA" aria-hidden="true"></i>
+            </div>
+          </div>
+
+          <div style="width:100%;display:flex;flex-direction:column;gap:8px">
+            <div class="btn btnp" onclick="G(2)" style="width:100%;font-size:13px;border-radius:8px">
+              <i class="ti ti-scan" style="font-size:15px" aria-hidden="true"></i>Scan Next Article
+            </div>
+            <div class="btn" onclick="G(8)" style="width:100%;font-size:12px;color:#9598A0;border-color:#E5E7EA;border-radius:8px">View progress</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- S8: PROGRESS SCREEN standalone -->
+      <div class="screen" id="s8">
+        <div class="topbar"><div class="ttitle" style="display:flex;align-items:center;gap:7px"><svg width="20" height="20" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0"><path d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z" fill="#34373C" opacity=".55"/><ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#34373C"/><path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#34373C"/><path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#34373C"/></svg>Progress</div></div>
+        <div style="flex:1;overflow-y:auto;padding:10px 14px 12px;display:flex;flex-direction:column;gap:10px;background:#F5F6F8">
+
+          <!-- Gamification banner -->
+          <div style="background:linear-gradient(135deg,#1F2125,#34373C);border-radius:12px;padding:13px 15px;position:relative;overflow:hidden">
+            <div style="font-size:10px;color:rgba(255,255,255,0.65);margin-bottom:3px;text-transform:uppercase;letter-spacing:.08em;font-weight:600">Today's streak</div>
+            <div style="display:flex;align-items:center;gap:10px">
+              <div style="font-size:28px;font-weight:700;color:#E5E7EA;line-height:1">7</div>
+              <div>
+                <div style="font-size:13px;font-weight:500;color:#fff">articles scanned!</div>
+                <div style="font-size:11px;color:rgba(255,255,255,0.55);margin-top:1px">Keep going — 13 more to hit today's target</div>
+              </div>
+            </div>
+            <div style="display:flex;gap:4px;margin-top:10px">
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:#E5E7EA"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+              <div style="flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.15)"></div>
+            </div>
+            <div style="font-size:10px;color:rgba(255,255,255,0.4);margin-top:4px">7 of 20 today</div>
+          </div>
+
+          <!-- Stats grid -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:7px">
+            <div style="background:#EAF3DE;border-radius:10px;padding:9px 8px;border:1px solid #97C459;text-align:center">
+              <div style="font-size:10px;color:#3B6D11;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Done</div>
+              <div style="font-size:20px;font-weight:700;color:#3B6D11;line-height:1">6</div>
+            </div>
+            <div style="background:#FCEBEB;border-radius:10px;padding:9px 8px;border:1px solid #F09595;text-align:center">
+              <div style="font-size:10px;color:#A32D2D;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-bottom:2px">Failed</div>
+              <div style="font-size:20px;font-weight:700;color:#A32D2D;line-height:1">1</div>
+            </div>
+          </div>
+
+          <!-- Weekly streak -->
+          <div class="rcard" style="padding:10px 12px">
+            <div class="rcard-lbl" style="margin-bottom:6px">Weekly streak</div>
+            <div style="display:flex;gap:6px">
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:30px;height:30px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:15px;color:#3B6D11" aria-hidden="true"></i></div><span style="font-size:9px;color:#9598A0">Mon</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:30px;height:30px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:15px;color:#3B6D11" aria-hidden="true"></i></div><span style="font-size:9px;color:#9598A0">Tue</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:30px;height:30px;border-radius:50%;background:#EAF3DE;display:flex;align-items:center;justify-content:center"><i class="ti ti-check" style="font-size:15px;color:#3B6D11" aria-hidden="true"></i></div><span style="font-size:9px;color:#9598A0">Wed</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:30px;height:30px;border-radius:50%;background:#17181B;border:2px solid #E5E7EA;display:flex;align-items:center;justify-content:center"><span style="font-size:10px;color:#E5E7EA;font-weight:700">7</span></div><span style="font-size:9px;color:#E5E7EA;font-weight:500">Thu</span></div>
+              <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:3px"><div style="width:30px;height:30px;border-radius:50%;background:#EEF0F2;border:1.5px dashed #C8CBD0;display:flex;align-items:center;justify-content:center"><i class="ti ti-lock" style="font-size:12px;color:#C8CBD0" aria-hidden="true"></i></div><span style="font-size:9px;color:#C8CBD0">Fri</span></div>
+            </div>
+          </div>
+
+          <!-- Scanned today activity -->
+          <div class="rcard" style="padding:10px 12px">
+            <div class="rcard-lbl" style="margin-bottom:6px">Scanned today</div>
+            <div style="display:flex;flex-direction:column;gap:7px">
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#5A8C1A;flex-shrink:0"></div><span style="font-size:12px;color:#17181B;flex:1">Amul Paneer 1kg</span><span style="font-size:10px;color:#9598A0">9:12 AM</span><span style="font-size:11px;color:#5A8C1A;font-weight:500">Done</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#5A8C1A;flex-shrink:0"></div><span style="font-size:12px;color:#17181B;flex:1">Tata Salt 1kg</span><span style="font-size:10px;color:#9598A0">9:28 AM</span><span style="font-size:11px;color:#5A8C1A;font-weight:500">Done</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><div style="width:6px;height:6px;border-radius:50%;background:#E24B4A;flex-shrink:0"></div><span style="font-size:12px;color:#17181B;flex:1">MDH Chana Masala</span><span style="font-size:10px;color:#9598A0">9:41 AM</span><span style="font-size:11px;color:#A32D2D;font-weight:500;cursor:pointer" onclick="G(9)">Retry</span></div>
+            </div>
+          </div>
+
+          <div class="btn btnp" onclick="G(2)" style="width:100%;font-size:13px;border-radius:8px"><i class="ti ti-scan" style="font-size:15px" aria-hidden="true"></i>Continue scanning</div>
+        </div>
+        <div class="bnav">
+          <div class="nitem" onclick="G(2)"><div class="nitem-ind"></div><i class="ti ti-list" style="font-size:22px;color:#9598A0" aria-hidden="true"></i><span>Articles</span></div>
+          <div class="nitem on"><div class="nitem-ind"></div><i class="ti ti-chart-bar" style="font-size:22px;color:#17181B" aria-hidden="true"></i><span style="color:#17181B">Progress</span></div>
+          <div class="nitem" onclick="G(10)"><div class="nitem-ind"></div><i class="ti ti-user-circle" style="font-size:22px;color:#9598A0" aria-hidden="true"></i><span>Account</span></div>
+        </div>
+      </div>
+
+      <!-- S9: RETRY -->
+      <div class="screen" id="s9">
+        <div class="topbar">
+          <i class="ti ti-arrow-left" style="font-size:20px;color:#6A6D72;cursor:pointer" onclick="G(2)" aria-label="back"></i>
+          <div class="ttitle">Upload failed</div>
+        </div>
+        <div style="flex:1;padding:12px 16px;display:flex;flex-direction:column;gap:10px;background:#F5F6F8;overflow-y:auto">
+          <div style="background:#FCEBEB;border-radius:10px;padding:12px 14px;border:1px solid #F09595">
+            <div style="font-size:12px;font-weight:600;color:#A32D2D;margin-bottom:4px;display:flex;align-items:center;gap:6px"><i class="ti ti-wifi-off" style="font-size:15px" aria-hidden="true"></i>Connection lost during upload</div>
+            <div style="font-size:12px;color:#A32D2D;line-height:1.5">Your images were saved. Tap retry — no need to rescan.</div>
+          </div>
+          <div class="rcard">
+            <div class="rcard-lbl">Failed article</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-top:6px">
+              <div style="width:34px;height:34px;background:#FCEBEB;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0"><i class="ti ti-package" style="font-size:17px;color:#A32D2D" aria-hidden="true"></i></div>
+              <div><div style="font-size:13px;font-weight:500;color:#17181B">MDH Chana Masala 100g</div><div style="font-size:11px;color:#9598A0">ART-10102 · 3 images saved</div></div>
+            </div>
+          </div>
+          <div class="rcard">
+            <div class="rcard-lbl">Saved images — ready to upload</div>
+            <div style="display:flex;gap:7px;margin-top:6px">
+              <div class="thumb done" style="width:56px;height:56px"><i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i></div>
+              <div class="thumb done" style="width:56px;height:56px"><i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i></div>
+              <div class="thumb done" style="width:56px;height:56px"><i class="ti ti-check" style="font-size:18px" aria-hidden="true"></i></div>
+            </div>
+          </div>
+        </div>
+        <div class="abar" style="padding-bottom:14px">
+          <div class="btn" style="flex:0.55;font-size:12px" onclick="G(2)"><i class="ti ti-x" style="font-size:13px" aria-hidden="true"></i>Cancel</div>
+          <div class="btn btnp" style="flex:1" onclick="G(7)"><i class="ti ti-refresh" style="font-size:14px" aria-hidden="true"></i>Retry upload</div>
+        </div>
+      </div>
+
+      <!-- S10: ACCOUNT -->
+      <div class="screen" id="s10">
+        <div class="topbar"><div class="ttitle" style="display:flex;align-items:center;gap:7px"><svg width="20" height="20" viewBox="0 0 40 40" aria-hidden="true" style="flex-shrink:0"><path d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z" fill="#34373C" opacity=".55"/><ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#34373C"/><path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#34373C"/><path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#34373C"/></svg>Account</div></div>
+        <div style="flex:1;overflow-y:auto;background:#F5F6F8;padding:12px 16px;display:flex;flex-direction:column;gap:10px">
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:12px;padding:16px;display:flex;align-items:center;gap:12px">
+            <div style="width:48px;height:48px;border-radius:50%;background:#EEF0F2;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:600;color:#34373C;flex-shrink:0">RK</div>
+            <div><div style="font-size:14px;font-weight:500;color:#17181B">Ravi Kumar</div><div style="font-size:11px;color:#9598A0;margin-top:2px">ravi.kumar@compass-group.com</div><div style="font-size:11px;color:#9598A0;margin-top:1px">Store Manager · Bengaluru</div></div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:12px;overflow:hidden">
+            <div style="font-size:10px;font-weight:600;color:#9598A0;letter-spacing:.06em;text-transform:uppercase;padding:10px 14px 6px">Site</div>
+            <div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-top:1px solid #EEF0F2;cursor:pointer">
+              <i class="ti ti-map-pin" style="font-size:16px;color:#6A6D72;flex-shrink:0" aria-hidden="true"></i>
+              <div style="flex:1"><div style="font-size:13px;color:#17181B">Bengaluru Central Kitchen</div><div style="font-size:11px;color:#9598A0;margin-top:1px">BCK-001 · Primary</div></div>
+              <i class="ti ti-chevron-right" style="font-size:15px;color:#C8CBD0" aria-hidden="true"></i>
+            </div>
+          </div>
+          <div style="background:#fff;border:1px solid #E5E7EA;border-radius:12px;overflow:hidden">
+            <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer" onclick="G(0)">
+              <i class="ti ti-logout" style="font-size:16px;color:#A32D2D;flex-shrink:0" aria-hidden="true"></i>
+              <div style="flex:1;font-size:13px;color:#A32D2D;font-weight:500">Sign out</div>
+            </div>
+          </div>
+        </div>
+        <div class="bnav">
+          <div class="nitem" onclick="G(2)"><div class="nitem-ind"></div><i class="ti ti-list" style="font-size:22px;color:#9598A0" aria-hidden="true"></i><span>Articles</span></div>
+          <div class="nitem" onclick="G(8)"><div class="nitem-ind"></div><i class="ti ti-chart-bar" style="font-size:22px;color:#9598A0" aria-hidden="true"></i><span>Progress</span></div>
+          <div class="nitem on"><div class="nitem-ind"></div><i class="ti ti-user-circle" style="font-size:22px;color:#17181B" aria-hidden="true"></i><span style="color:#17181B">Account</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+  <div style="font-size:11px;color:#9598A0;text-align:center">Tap steps · Tap ⋮ on article cards to mark as irrelevant</div>
+</div>
+
+<script>
+function G(n){
+  document.querySelectorAll('.screen').forEach((s,i)=>s.classList.toggle('on',i===n));
+  document.querySelectorAll('.pill').forEach((p,i)=>p.classList.toggle('on',i===n));
+}
+function ST(t){
+  ['scan','mapped','loose'].forEach(id=>{
+    const tab=document.getElementById('tab-'+id);
+    const tc=document.getElementById('tc-'+id);
+    const on=id===t;
+    if(tab)tab.classList.toggle('on',on);
+    if(tc)tc.classList.toggle('on',on);
+  });
+  currentTab=t;
+  if(typeof renderFilterSheet==='function'){renderFilterSheet();applyFilters(false);}
+}
+const filterDefs={
+  scan:[{cat:'dairy',label:'Dairy',count:12},{cat:'dry',label:'Dry goods',count:34},{cat:'frozen',label:'Frozen',count:8},{cat:'beverages',label:'Beverages',count:21},{cat:'bakery',label:'Bakery',count:11},{cat:'spices',label:'Spices & Masala',count:18},{cat:'oils',label:'Oils',count:9},{cat:'condiments',label:'Condiments',count:15}],
+  mapped:[{cat:'dairy',label:'Dairy',count:2},{cat:'dry',label:'Dry goods',count:1},{cat:'bakery',label:'Bakery',count:1},{cat:'condiments',label:'Condiments',count:1}],
+  loose:[{cat:'vegetables',label:'Vegetables',count:3},{cat:'fruits',label:'Fruits',count:1},{cat:'herbs',label:'Herbs',count:2},{cat:'meat',label:'Meat',count:2}]
+};
+const filterState={scan:new Set(['dairy','frozen','spices']),mapped:new Set(),loose:new Set()};
+let currentTab='scan';
+function renderFilterSheet(){
+  const list=document.getElementById('fcheck-list');if(!list)return;
+  const defs=filterDefs[currentTab]||[];
+  const state=filterState[currentTab];
+  list.innerHTML=defs.map(d=>{
+    const on=state.has(d.cat);
+    return `<div class="fcheck-row" data-cat="${d.cat}" data-label="${d.label}" onclick="toggleFilterRow(this)"><div class="fcheck${on?' on':''}">${on?'<i class="ti ti-check" style="font-size:11px;color:#fff" aria-hidden="true"></i>':''}</div><span style="font-size:13px;color:#17181B;flex:1">${d.label}</span><span style="font-size:11px;color:#9598A0">${d.count}</span></div>`;
+  }).join('');
+}
+function selectedCats(){
+  const defs=filterDefs[currentTab]||[];
+  const state=filterState[currentTab];
+  return defs.filter(d=>state.has(d.cat)).map(d=>({cat:d.cat,label:d.label}));
+}
+function applyFilters(close){
+  const sel=selectedCats();
+  const cats=new Set(sel.map(s=>s.cat));
+  const q=(document.getElementById('search-input')?.value||'').trim().toLowerCase();
+  let visible=0;
+  document.querySelectorAll('#tc-'+currentTab+' .acard').forEach(c=>{
+    const cat=c.dataset.cat||'';
+    const name=(c.querySelector('.aname')?.textContent||'').toLowerCase();
+    const meta=(c.querySelector('.aweight')?.textContent||'').toLowerCase();
+    const catOk=cats.size===0||cats.has(cat);
+    const qOk=!q||name.includes(q)||meta.includes(q)||cat.includes(q);
+    const show=catOk&&qOk;
+    c.style.display=show?'':'none';
+    if(show)visible++;
+  });
+  const strip=document.getElementById('filter-strip');
+  const chipBox=strip.querySelector('div.fchip-box');
+  if(sel.length===0){strip.style.display='none';}
+  else{
+    strip.style.display='flex';
+    const max=3;const shown=sel.slice(0,max);const rest=sel.length-shown.length;
+    let html=shown.map(s=>`<span class="fchip">${s.label}</span>`).join('');
+    if(rest>0)html+=`<span class="fchip fchip-more">+${rest}</span>`;
+    chipBox.innerHTML=html;
+  }
+  const btn=document.getElementById('fapply-btn');if(btn)btn.textContent='Apply · '+sel.length+' selected';
+  const dot=document.getElementById('filter-dot');if(dot)dot.style.display=sel.length?'':'none';
+  const empty=document.getElementById('empty-state');
+  if(empty)empty.style.display=(currentTab==='scan'&&visible===0)?'block':'none';
+  const sc=document.getElementById('search-clear');if(sc)sc.style.display=q?'':'none';
+  if(close){toggleFilter();}
+}
+function openSearch(){
+  const r=document.getElementById('search-row');if(!r)return;
+  r.style.display='flex';
+  const i=document.getElementById('search-input');setTimeout(()=>i&&i.focus(),50);
+}
+function closeSearch(){
+  const r=document.getElementById('search-row');if(!r)return;
+  const i=document.getElementById('search-input');if(i)i.value='';
+  r.style.display='none';
+  applyFilters(false);
+}
+function clearSearch(){
+  const i=document.getElementById('search-input');if(i){i.value='';i.focus();}
+  applyFilters(false);
+}
+function toggleFilterRow(row){
+  const cat=row.dataset.cat;
+  const state=filterState[currentTab];
+  if(state.has(cat))state.delete(cat);else state.add(cat);
+  renderFilterSheet();
+  applyFilters(false);
+}
+function clearFilters(){
+  filterState[currentTab].clear();
+  renderFilterSheet();
+  applyFilters(false);
+}
+window.addEventListener('DOMContentLoaded',()=>{renderFilterSheet();applyFilters(false);});
+const gtinMap={
+  'ART-10112':'8901030542091','ART-10455':'8907001230045','ART-10781':'8904109019871',
+  'ART-10234':'8901030546167','ART-10519':'8901042128834','ART-10844':'8906015671123',
+  'ART-10921':'8901725019901','ART-10633':'8904056782210','ART-10314':'8901226001234',
+  'ART-10052':'5449000000996','ART-10678':'8906009873312','ART-10288':'8901526112345'
+};
+const looseCardData={
+  'Tomatoes, Loose, Fresh':{code:'ART-20011',category:'Vegetables'},
+  'Onions, Loose, Red':{code:'ART-20015',category:'Vegetables'},
+  'Coriander, Fresh, Bunch':{code:'ART-20023',category:'Herbs'},
+  'Chicken, Fresh, Drumsticks Skin-on':{code:'ART-20041',category:'Meat'},
+  'Potatoes, Loose, Premium':{code:'ART-20009',category:'Vegetables'},
+  'Chicken, Fresh, Curry Cut Bone-in':{code:'ART-20055',category:'Meat'},
+  'Green Chillies, Loose, Fresh':{code:'ART-20028',category:'Herbs'},
+  'Bananas, Loose, Robusta':{code:'ART-20071',category:'Fruits'}
+};
+let capture={mode:'barcode',barcode:false,front:false,back:false,more:0,active:null,title:'',code:'',gtin:'',category:''};
+function captureReqs(){return capture.mode==='loose'?['front']:['barcode','front','back'];}
+function startScan(el){
+  const card=el?.closest?.('.acard')||el;
+  const name=card?.querySelector('.aname')?.textContent.trim()||'Article';
+  const wt=card?.querySelector('.aweight')?.textContent.trim()||'';
+  const parts=wt.split('·').map(s=>s.trim());
+  const code=parts.find(p=>p.startsWith('ART-'))||'';
+  const category=parts.find(p=>!p.startsWith('ART-')&&!/^[\d.]/.test(p))||'';
+  capture={mode:'barcode',barcode:false,front:false,back:false,more:0,active:'barcode',
+           title:name,code,gtin:gtinMap[code]||'—',category};
+  G(5);renderCapture();
+}
+function startLooseScan(name){
+  const data=looseCardData[name]||{};
+  capture={mode:'loose',barcode:false,front:false,back:false,more:0,active:'front',
+           title:name||'Loose item',code:data.code||'',gtin:'—',category:data.category||''};
+  G(5);renderCapture();
+}
+function populateReview(){
+  const loose=capture.mode==='loose';
+  const n=document.getElementById('s6-name');if(n)n.textContent=capture.title;
+  const d=document.getElementById('s6-detail');
+  if(d){
+    const pts=[capture.code,capture.category];
+    if(!loose&&capture.gtin!=='—')pts.push('Barcode: '+capture.gtin);
+    d.textContent=pts.filter(Boolean).join(' · ');
+  }
+  const tb=document.getElementById('s6-thumbs');
+  if(tb){
+    const th=(icon,label)=>`<div class="thumb done" style="width:64px;height:64px"><i class="ti ${icon}" style="font-size:18px" aria-hidden="true"></i><span style="font-size:8px">${label}</span></div>`;
+    let h='';
+    if(!loose)h+=th('ti-barcode','Barcode');
+    if(capture.front)h+=th('ti-check','Front');
+    if(!loose&&capture.back)h+=th('ti-check','Back');
+    for(let i=0;i<capture.more;i++)h+=th('ti-check','Extra '+(i+1));
+    tb.innerHTML=h||th('ti-camera','Image');
+  }
+  const v=document.getElementById('s6-verify');
+  if(v){
+    if(loose){
+      v.textContent=(capture.title.split(',')[0]||capture.title)+' — ready to submit';
+    } else {
+      const brand=capture.title.split(',').length>1?capture.title.split(',')[1].trim():capture.title.split(' ')[0];
+      v.textContent='Barcode detected · GTIN '+capture.gtin+' · '+brand+' verified';
+    }
+  }
+}
+function populateSubmitted(){
+  const loose=capture.mode==='loose';
+  const imgCount=(capture.barcode?1:0)+(capture.front?1:0)+(capture.back?1:0)+capture.more;
+  const now=new Date();
+  const t=now.toLocaleTimeString('en-IN',{hour:'numeric',minute:'2-digit',hour12:true}).replace('am','AM').replace('pm','PM');
+  const dOpts={weekday:'short',day:'numeric',month:'short'};
+  const ds=now.toLocaleDateString('en-GB',dOpts).replace(/,/g,'');
+  const el=id=>document.getElementById(id);
+  if(el('s7-name'))el('s7-name').textContent=capture.title;
+  if(el('s7-code'))el('s7-code').textContent=capture.code||'—';
+  if(el('s7-gtin'))el('s7-gtin').textContent=loose?'—':capture.gtin;
+  if(el('s7-imgs'))el('s7-imgs').textContent=imgCount+(imgCount===1?' image':' images');
+  if(el('s7-time'))el('s7-time').textContent=t+' · '+ds;
+}
+function selectCapStep(step){
+  if(capture.mode==='loose'&&(step==='barcode'||step==='back'))return;
+  capture.active=step;renderCapture();
+}
+function doCapture(){
+  const a=capture.active;if(!a)return;
+  if(a==='more'){capture.more++;}
+  else{capture[a]=true;}
+  const reqs=captureReqs();
+  const pending=reqs.find(s=>!capture[s]);
+  capture.active=pending||'more';
+  renderCapture();
+}
+function markBarcodeDone(){
+  capture.barcode=true;
+  const reqs=captureReqs();
+  const pending=reqs.find(s=>!capture[s]);
+  capture.active=pending||'more';
+}
+function renderCapture(){
+  const labels={barcode:'Barcode',front:'Front label',back:'Back label',more:'Additional image'};
+  const loose=capture.mode==='loose';
+  const title=document.getElementById('cap-title');if(title)title.textContent=capture.title||'';
+  ['barcode','front','back'].forEach(k=>{
+    const t=document.getElementById('thumb-'+k);if(!t)return;
+    const hide=loose&&(k==='barcode'||k==='back');
+    t.style.display=hide?'none':'';
+    if(hide)return;
+    t.classList.toggle('done',capture[k]);
+    t.classList.toggle('active',capture.active===k && !capture[k]);
+    const icon=t.querySelector('i');
+    if(capture[k]){icon.className='ti ti-check';icon.style.color='#3B6D11';}
+    else if(k==='barcode'){icon.className='ti ti-barcode';icon.style.color='';}
+    else{icon.className='ti ti-camera';icon.style.color='';}
+  });
+  const m=document.getElementById('thumb-more');if(m)m.classList.toggle('active',capture.active==='more');
+  const mc=document.getElementById('more-count');if(mc){if(capture.more>0){mc.style.display='block';mc.textContent='+'+capture.more;}else{mc.style.display='none';}}
+  const sub=document.getElementById('cap-sub');if(sub)sub.textContent=capture.active?labels[capture.active]:'Tap a step to capture';
+  const reqs=captureReqs();
+  const done=reqs.filter(k=>capture[k]).length;
+  const cnt=document.getElementById('cap-count');if(cnt)cnt.textContent=done+'/'+reqs.length;
+  const hint=document.getElementById('cam-hint');if(hint)hint.textContent=capture.active?'Point at '+labels[capture.active].toLowerCase():'Tap a step below to start';
+  const photoFrame=document.getElementById('cap-frame-photo');const bcFrame=document.getElementById('cap-frame-barcode');
+  if(photoFrame&&bcFrame){
+    if(capture.active==='barcode'){bcFrame.style.display='block';photoFrame.style.display='none';}
+    else{bcFrame.style.display='none';photoFrame.style.display='flex';}
+  }
+  const cap=document.getElementById('cap-btn');
+  if(!cap)return;
+  if(done>=reqs.length){cap.innerHTML='<i class="ti ti-check" style="font-size:15px" aria-hidden="true"></i>Review & Submit';cap.setAttribute('onclick','populateReview();G(6)');cap.style.opacity='';cap.style.pointerEvents='';}
+  else if(capture.active){
+    const icon=capture.active==='barcode'?'ti-scan':'ti-camera';
+    const btnLabel=capture.active==='more'?'Capture More':'Capture '+labels[capture.active];
+    cap.innerHTML=`<i class="ti ${icon}" style="font-size:15px" aria-hidden="true"></i>${btnLabel}`;
+    cap.setAttribute('onclick','doCapture()');cap.style.opacity='';cap.style.pointerEvents='';
+  }
+  else{cap.innerHTML='<i class="ti ti-camera" style="font-size:15px" aria-hidden="true"></i>Capture';cap.style.opacity='.55';cap.style.pointerEvents='none';}
+}
+let paneerScanned=false;
+function markScanned(){
+  if(paneerScanned)return;
+  paneerScanned=true;
+  const a=document.getElementById('card-active-paneer');
+  if(a){
+    a.removeAttribute('onclick');
+    a.setAttribute('style','');
+    a.innerHTML=`
+      <div class="status-strip" style="background:#5A8C1A"></div>
+      <div class="ainfo">
+        <div class="aname" style="color:#3B6D11">Paneer, Amul, Fresh Block</div>
+        <div class="aweight">1 kg · Dairy · ART-10234</div>
+      </div>
+      <i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i>`;
+    const list=a.parentElement;if(list)list.appendChild(a);
+  }
+  const ts=document.querySelector('#tab-scan .tab-count');if(ts){const n=parseInt(ts.textContent)||0;ts.textContent=Math.max(0,n-1);}
+  const tm=document.querySelector('#tab-mapped .tab-count');if(tm){const n=parseInt(tm.textContent)||0;tm.textContent=n+1;}
+  const mlist=document.querySelector('#tc-mapped .alist');
+  if(mlist){
+    const card=document.createElement('div');card.className='acard';
+    card.innerHTML='<div class="status-strip" style="background:#5A8C1A"></div><div class="ainfo"><div class="aname" style="color:#3B6D11">Paneer, Amul, Fresh Block</div><div class="aweight">1 kg · Dairy · ART-10234</div></div><i class="ti ti-check" style="font-size:16px;color:#5A8C1A;flex-shrink:0" aria-hidden="true"></i>';
+    mlist.appendChild(card);
+  }
+}
+let paneerOriginal=null;
+function excludePaneer(){
+  const a=document.getElementById('card-active-paneer');if(!a)return;
+  if(paneerOriginal===null){paneerOriginal={html:a.innerHTML,onclick:a.getAttribute('onclick'),style:a.getAttribute('style')||''};}
+  a.removeAttribute('onclick');
+  a.setAttribute('style','background:#F2F4F6;border-color:#E8E6DE;opacity:.78;cursor:default');
+  a.innerHTML=`
+    <div class="status-strip" style="background:#C8CBD0"></div>
+    <div class="ainfo">
+      <div class="aname" style="color:#9598A0;font-weight:400">Amul Paneer</div>
+      <div class="aweight" style="display:flex;align-items:center;gap:6px;margin-top:3px">
+        <span style="font-size:10px;color:#6A6D72;background:#ECEEF0;padding:2px 7px;border-radius:99px;font-weight:500">Not in store</span>
+        <span style="color:#ABAEB3">ART-10234</span>
+      </div>
+    </div>
+    <span onclick="event.stopPropagation();restorePaneer()" style="font-size:11px;color:#17181B;font-weight:500;cursor:pointer;padding:5px 9px;border:1px solid #D9D7CE;border-radius:6px;background:#fff;display:flex;align-items:center;gap:4px;flex-shrink:0">
+      <i class="ti ti-rotate" style="font-size:12px" aria-hidden="true"></i>Restore
+    </span>`;
+}
+function restorePaneer(){
+  const a=document.getElementById('card-active-paneer');if(!a||!paneerOriginal)return;
+  a.innerHTML=paneerOriginal.html;
+  a.setAttribute('onclick',paneerOriginal.onclick||'');
+  a.setAttribute('style',paneerOriginal.style);
+  showToast('Restored to scan list');
+}
+let toastT;
+function showToast(msg){
+  const t=document.getElementById('toast');const m=document.getElementById('toast-msg');
+  if(!t)return;m.textContent=msg;t.classList.add('on');
+  clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('on'),2200);
+}
+function toggleFilter(){
+  document.getElementById('fsheet').classList.toggle('on');
+  document.getElementById('foverlay').classList.toggle('on');
+}
+function showActions(e){
+  e.stopPropagation();
+  const card=e.target.closest('.acard');
+  const name=card?.querySelector('.aname')?.textContent.trim();
+  const meta=card?.querySelector('.aweight')?.textContent.trim();
+  const qty=meta?meta.split('·')[0].trim():'';
+  const t=document.getElementById('asheet-title');
+  if(t&&name)t.textContent=qty?`${name} · ${qty}`:name;
+  const loose=currentTab==='loose';
+  document.getElementById('asheet-action-label').textContent=loose?'Not available today':'Mark as not in my store';
+  document.getElementById('asheet-action-desc').textContent=loose?'This item was not received or is unavailable today.':'This article doesn\'t exist at this site';
+  document.getElementById('asheet').classList.add('on');
+  document.getElementById('aoverlay').classList.add('on');
+}
+function openExcludeAction(){
+  hideActions();
+  const loose=currentTab==='loose';
+  document.getElementById('s3-title').textContent=loose?'Not available today':'Mark as not in store';
+  document.getElementById('s3-info').textContent=loose
+    ?'Marking this item as not available today will remove it from the loose items list for today\'s session.'
+    :'Marking this article as "not in my store" means it will be removed from your scan list and flagged as irrelevant for Bengaluru Central Kitchen.';
+  document.getElementById('s3-reason-label').textContent=loose?'Why is it not available?':'Why is it not in your store?';
+  document.getElementById('s3-radios').innerHTML=loose
+    ?'<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel" checked>Not received today</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Out of season</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Supplier issue</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Other</label>'
+    :'<label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel" checked>We don\'t stock this product</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Product was discontinued</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Wrong article assigned to my site</label><label style="display:flex;align-items:center;gap:10px;font-size:13px;color:#17181B;cursor:pointer"><input type="radio" name="irrel">Other</label>';
+  G(3);
+}
+function confirmExclude(){
+  const loose=currentTab==='loose';
+  excludePaneer();
+  G(2);
+  showToast(loose?'Item marked as not available today':'Article marked as not in store');
+}
+function hideActions(){
+  document.getElementById('asheet').classList.remove('on');
+  document.getElementById('aoverlay').classList.remove('on');
+}
+</script>
