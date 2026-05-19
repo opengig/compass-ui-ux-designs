@@ -1,13 +1,5 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow } from
-'./Table';
-import { Pencil, Trash2 } from 'lucide-react';
+import { Pencil, Plus, Trash2, X, Check } from 'lucide-react';
 import type { Ingredient } from '../data/mockData';
 import { useReviewStore } from '../stores/useReviewStore';
 
@@ -18,50 +10,38 @@ type IngredientsTableProps = {
 
 type IngredientDraft = {
   extractedText: string;
-  mappedIngredient: string;
-  allergen: 'Yes' | 'No';
   allergenType: string;
-  source: string;
 };
 
+const COLS = 'grid-cols-[2rem_1.7fr_1fr_4.5rem]';
+
+function AllergenChip({ allergen }: { allergen: string }) {
+  if (!allergen || allergen === '-') {
+    return <span className="text-[11px] text-muted-foreground/40">—</span>;
+  }
+  return (
+    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border border-rose-300 text-rose-700">
+      {allergen}
+    </span>
+  );
+}
+
 export function IngredientsTable({ articleId, ingredients }: IngredientsTableProps) {
-  const { editIngredientField, addIngredient, removeIngredient, state } = useReviewStore();
+  const { editIngredientField, addIngredient, removeIngredient } = useReviewStore();
   const [editingRowId, setEditingRowId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<IngredientDraft | null>(null);
   const [isAdding, setIsAdding] = React.useState(false);
 
-  const latestPendingByField = React.useMemo(() => {
-    const map = new Map<string, string>();
-    state.editLog.forEach((entry) => {
-      if (entry.articleId === articleId && entry.section === 'ingredients' && entry.status === 'pending') {
-        map.set(entry.field, entry.oldValue);
-      }
-    });
-    return map;
-  }, [articleId, state.editLog]);
-
   const startEditing = (row: Ingredient) => {
     setEditingRowId(row.id);
     setIsAdding(false);
-    setDraft({
-      extractedText: row.extractedText,
-      mappedIngredient: row.mappedIngredient,
-      allergen: row.allergen,
-      allergenType: row.allergenType,
-      source: row.source,
-    });
+    setDraft({ extractedText: row.extractedText, allergenType: row.allergenType });
   };
 
   const startAdding = () => {
     setEditingRowId('new');
     setIsAdding(true);
-    setDraft({
-      extractedText: '',
-      mappedIngredient: '',
-      allergen: 'No',
-      allergenType: '-',
-      source: 'SME update',
-    });
+    setDraft({ extractedText: '', allergenType: '-' });
   };
 
   const cancelEditing = () => {
@@ -78,211 +58,137 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
       const newIngredient: Ingredient = {
         id: `new-ing-${Date.now()}`,
         extractedText: draft.extractedText || 'New ingredient',
-        mappedIngredient: draft.mappedIngredient || 'Unmapped',
-        allergen: draft.allergen,
+        mappedIngredient: draft.extractedText || 'Unmapped',
+        allergen: draft.allergenType && draft.allergenType !== '-' ? 'Yes' : 'No',
         allergenType: draft.allergenType || '-',
         confidence: 'Medium',
-        source: draft.source,
+        source: 'SME update',
       };
       addIngredient(articleId, newIngredient);
       cancelEditing();
       return;
     }
-
-    (Object.keys(draft) as Array<keyof IngredientDraft>).forEach((field) => {
-      const previous = row[field];
-      const nextValue = draft[field];
-      if (String(previous) !== String(nextValue)) {
-        editIngredientField(articleId, row.id, field as keyof Ingredient, nextValue);
-      }
-    });
+    if (row.extractedText !== draft.extractedText) {
+      editIngredientField(articleId, row.id, 'extractedText', draft.extractedText);
+    }
     cancelEditing();
   };
 
   return (
     <div>
-      <div className="border border-border rounded-lg overflow-hidden shadow-soft bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead colSpan={5} className="py-2">
-                <div className="flex justify-end">
-                  <button
-                    type="button"
-                    className="text-xs px-2.5 h-7 inline-flex items-center rounded-md border border-border hover:bg-muted/40 transition-colors"
-                    onClick={startAdding}
-                  >
-                    Add ingredient
-                  </button>
-                </div>
-              </TableHead>
-            </TableRow>
-            <TableRow className="bg-muted/40">
-              <TableHead className="w-10 text-xs font-medium text-muted-foreground">
-                #
-              </TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">
-                Extracted text
-              </TableHead>
-
-              <TableHead className="text-xs font-medium text-muted-foreground">
-                Allergen type
-              </TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">
-                Source
-              </TableHead>
-              <TableHead className="text-xs font-medium text-muted-foreground">
-                Action
-              </TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ingredients.map((row, index) => {
-              const isEditing = editingRowId === row.id;
-              const textFieldKey = `${row.mappedIngredient}.extractedText`;
-              const allergenFieldKey = `${row.mappedIngredient}.allergenType`;
-              return (
-                <TableRow key={row.id} className={`hover:bg-muted/30 ${isEditing ? 'bg-muted/20' : ''}`}>
-                <TableCell className="text-xs text-muted-foreground">
-                  {index + 1}
-                </TableCell>
-                <TableCell className="text-sm text-foreground">
-                  {isEditing && draft ? (
-                    <input
-                      className="w-full rounded border border-border px-2 py-1 text-sm bg-background"
-                      value={draft.extractedText}
-                      onChange={(event) => setDraft({ ...draft, extractedText: event.target.value })}
-                    />
-                  ) : (
-                    <>
-                      {row.extractedText}
-                      {latestPendingByField.get(textFieldKey) ? (
-                        <p className="text-[10px] text-muted-foreground">was: {latestPendingByField.get(textFieldKey)}</p>
-                      ) : null}
-                    </>
-                  )}
-                </TableCell>
-
-                <TableCell className="text-sm text-foreground/90">
-                  {isEditing && draft ? (
-                    <input
-                      className="w-full rounded border border-border px-2 py-1 text-sm bg-background"
-                      value={draft.allergenType}
-                      onChange={(event) => setDraft({ ...draft, allergenType: event.target.value })}
-                    />
-                  ) : (
-                    <>
-                      {row.allergenType}
-                      {latestPendingByField.get(allergenFieldKey) ? (
-                        <p className="text-[10px] text-muted-foreground">was: {latestPendingByField.get(allergenFieldKey)}</p>
-                      ) : null}
-                    </>
-                  )}
-                </TableCell>
-                <TableCell className="text-xs text-muted-foreground">
-                  {isEditing && draft ? (
-                    <div className="flex gap-1">
-                      <select
-                        className="rounded border border-border px-2 py-1 text-xs bg-background"
-                        value={draft.allergen}
-                        onChange={(event) =>
-                          setDraft({
-                            ...draft,
-                            allergen: event.target.value as IngredientDraft['allergen'],
-                          })
-                        }
-                      >
-                        <option value="Yes">Allergen: Yes</option>
-                        <option value="No">Allergen: No</option>
-                      </select>
-                      <input
-                        className="w-24 rounded border border-border px-2 py-1 text-xs bg-background"
-                        value={draft.source}
-                        onChange={(event) => setDraft({ ...draft, source: event.target.value })}
-                      />
-                    </div>
-                  ) : (
-                    row.source
-                  )}
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    {isEditing ? (
-                      <>
-                        <button
-                          className="px-2 py-1 text-xs rounded-md bg-primary text-primary-foreground"
-                          onClick={() => saveRow(row)}
-                        >
-                          Save
-                        </button>
-                        <button
-                          className="px-2 py-1 text-xs rounded-md border border-border"
-                          onClick={cancelEditing}
-                        >
-                          Cancel
-                        </button>
-                      </>
-                    ) : (
-                      <>
-                        <button className="p-1 hover:bg-muted rounded-md transition-colors" onClick={() => startEditing(row)}>
-                          <Pencil className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
-                        <button
-                          className="p-1 hover:bg-muted rounded-md transition-colors"
-                          onClick={() => removeIngredient(articleId, row.id)}
-                        >
-                          <Trash2 className="w-3.5 h-3.5 text-muted-foreground" />
-                        </button>
-                      </>
-                    )}
-                  </div>
-                </TableCell>
-              </TableRow>
-              );
-            })}
-            {isAdding && draft ? (
-              <TableRow className="bg-muted/20">
-                <TableCell className="text-xs text-muted-foreground">{ingredients.length + 1}</TableCell>
-                <TableCell>
+      <div className="rounded-md overflow-hidden">
+        <div
+          className={`grid ${COLS} gap-3 px-3 py-2 text-[10px] uppercase tracking-wider text-muted-foreground/80 border-b border-border/70`}
+        >
+          <div>#</div>
+          <div>Ingredient</div>
+          <div>Allergen</div>
+          <div className="text-right">Actions</div>
+        </div>
+        <ul className="divide-y divide-border/50">
+          {ingredients.map((row, index) => {
+            const isEditing = editingRowId === row.id;
+            return (
+              <li
+                key={row.id}
+                className={`grid ${COLS} gap-3 px-3 py-2 items-center transition-colors ${
+                  isEditing ? 'bg-muted/30' : ''
+                }`}
+              >
+                <span className="text-[12px] text-muted-foreground tabular-nums">{index + 1}</span>
+                {isEditing && draft ? (
                   <input
-                    className="w-full rounded border border-border px-2 py-1 text-sm bg-background"
+                    autoFocus
+                    className="rounded bg-card border border-border px-2 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
                     value={draft.extractedText}
                     onChange={(event) => setDraft({ ...draft, extractedText: event.target.value })}
-                    placeholder="Extracted text"
                   />
-                </TableCell>
-                <TableCell>
-                  <input
-                    className="w-full rounded border border-border px-2 py-1 text-sm bg-background"
-                    value={draft.allergenType}
-                    onChange={(event) => setDraft({ ...draft, allergenType: event.target.value })}
-                    placeholder="Allergen type"
-                  />
-                </TableCell>
-                <TableCell>
-                  <input
-                    className="w-full rounded border border-border px-2 py-1 text-xs bg-background"
-                    value={draft.source}
-                    onChange={(event) => setDraft({ ...draft, source: event.target.value })}
-                    placeholder="Source"
-                  />
-                </TableCell>
-                <TableCell>
-                  <div className="flex items-center gap-1">
-                    <button className="px-2 py-1 text-xs rounded-md bg-primary text-primary-foreground" onClick={() => saveRow(null)}>
-                      Save
-                    </button>
-                    <button className="px-2 py-1 text-xs rounded-md border border-border" onClick={cancelEditing}>
-                      Cancel
-                    </button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ) : null}
-          </TableBody>
-        </Table>
+                ) : (
+                  <span className="text-[13px] text-foreground leading-tight">{row.extractedText}</span>
+                )}
+                <AllergenChip allergen={row.allergenType} />
+                <div className="flex items-center justify-end gap-0.5">
+                  {isEditing ? (
+                    <>
+                      <button
+                        title="Save"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary text-primary-foreground hover:bg-primary-hover"
+                        onClick={() => saveRow(row)}
+                      >
+                        <Check className="w-3 h-3" />
+                      </button>
+                      <button
+                        title="Cancel"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        onClick={cancelEditing}
+                      >
+                        <X className="w-3 h-3" />
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button
+                        title="Edit"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        onClick={() => startEditing(row)}
+                      >
+                        <Pencil className="w-3 h-3" />
+                      </button>
+                      <button
+                        title="Remove"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
+                        onClick={() => removeIngredient(articleId, row.id)}
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                    </>
+                  )}
+                </div>
+              </li>
+            );
+          })}
+          {isAdding && draft ? (
+            <li className={`grid ${COLS} gap-3 px-3 py-2 items-center bg-muted/30`}>
+              <span className="text-[12px] text-muted-foreground tabular-nums">{ingredients.length + 1}</span>
+              <input
+                autoFocus
+                placeholder="Ingredient name"
+                className="rounded bg-card border border-border px-2 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
+                value={draft.extractedText}
+                onChange={(event) => setDraft({ ...draft, extractedText: event.target.value })}
+              />
+              <span className="text-[11px] text-muted-foreground italic">auto-derived</span>
+              <div className="flex items-center justify-end gap-0.5">
+                <button
+                  title="Add"
+                  className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary text-primary-foreground hover:bg-primary-hover"
+                  onClick={() => saveRow(null)}
+                >
+                  <Check className="w-3 h-3" />
+                </button>
+                <button
+                  title="Cancel"
+                  className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                  onClick={cancelEditing}
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </div>
+            </li>
+          ) : null}
+        </ul>
       </div>
+
+      {!isAdding ? (
+        <button
+          type="button"
+          onClick={startAdding}
+          className="mt-2 inline-flex items-center gap-1.5 h-7 px-2 rounded-md text-[12px] text-foreground/85 border border-border hover:border-foreground/30 transition-colors"
+        >
+          <Plus className="w-3 h-3" />
+          Add ingredient
+        </button>
+      ) : null}
     </div>
   );
-
 }

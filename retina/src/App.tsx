@@ -1,86 +1,42 @@
-import React, { useState } from 'react';
-import { IconNavRail } from './components/IconNavRail';
+import { BrowserRouter, Navigate, Route, Routes, useNavigate } from 'react-router-dom';
+import { Shell } from './components/Shell';
+import { QueueScreen } from './components/QueueScreen';
+import { CatalogScreen } from './components/CatalogScreen';
 import { Dashboard } from './components/Dashboard';
-import { SITES } from './data/mockData';
-import { ReviewStoreProvider, useReviewStore } from './stores/useReviewStore';
 import { ApprovedList } from './components/ApprovedList';
 import { AuditLog } from './components/AuditLog';
-import { useQueueFilter, type QueueTab } from './hooks/useQueueFilter';
-import { QueueHeader } from './components/QueueHeader';
-import { QueueScreen } from './components/QueueScreen';
-import type { Screen } from './types';
-import { queueTheme } from './styles/queueTheme';
+import { SITES } from './data/mockData';
+import { ReviewStoreProvider } from './stores/useReviewStore';
+import { ExpandProvider } from './stores/ExpandSections';
+import { ROUTES } from './router/routes';
 
-function AppContent() {
-  const { articles } = useReviewStore();
-
-  const [activeScreen, setActiveScreen] = useState<Screen>('dashboard');
-  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
-  const [isLabelPanelVisible, setIsLabelPanelVisible] = useState(false);
-  const { queueTab, setQueueTab, searchQuery, setSearchQuery, filteredArticles, filterTabs } =
-    useQueueFilter(articles);
-
-  const handleProductSelect = (productId: string) => {
-    setSelectedProductId(productId);
-    setIsLabelPanelVisible(true);
-  };
-
-  const goApp = (screen: string) => {
-    setActiveScreen(screen as Screen);
-  };
-
-  const isQueueScreen = activeScreen === 'queue';
-
+function DashboardPage() {
+  // Dashboard expects goApp + setQueueTab + selectedSites; pass URL-aware shims.
   return (
-    <div className="flex w-full h-screen bg-background font-heading text-foreground">
-      <IconNavRail activeScreen={activeScreen} onNavigate={setActiveScreen} />
+    <Dashboard
+      goApp={() => {}}
+      setQueueTab={() => {}}
+      selectedSites={SITES}
+      setHighlightArtIds={() => {}}
+    />
+  );
+}
 
-      <div className={`flex-1 flex flex-col min-w-0 h-full ${queueTheme.appShell}`}>
+function ApprovedPage() {
+  const navigate = useNavigate();
+  return (
+    <ApprovedList
+      onOpenArticle={(articleId) => {
+        navigate(`${ROUTES.review}?article=${encodeURIComponent(articleId)}`);
+      }}
+    />
+  );
+}
 
-        {/* Header — only visible on queue / task screens */}
-        {isQueueScreen ? (
-          <QueueHeader
-            filterTabs={filterTabs}
-            queueTab={queueTab}
-            onQueueTabChange={setQueueTab}
-            searchQuery={searchQuery}
-            onSearchChange={setSearchQuery}
-          />
-        ) : null}
-
-        {/* Main content */}
-        {activeScreen === 'dashboard' ? (
-          <Dashboard
-            goApp={goApp}
-            setQueueTab={(tab) => setQueueTab(tab as QueueTab)}
-            selectedSites={SITES}
-            setHighlightArtIds={() => {}}
-          />
-        ) : isQueueScreen ? (
-          <QueueScreen
-            selectedProductId={selectedProductId}
-            onSelectProduct={handleProductSelect}
-            filteredArticles={filteredArticles}
-            isLabelPanelVisible={isLabelPanelVisible}
-            setIsLabelPanelVisible={setIsLabelPanelVisible}
-            queueTab={queueTab}
-          />
-        ) : activeScreen === 'approved' ? (
-          <ApprovedList
-            onOpenArticle={(articleId) => {
-              setSelectedProductId(articleId);
-              setActiveScreen('queue');
-            }}
-          />
-        ) : activeScreen === 'audit' ? (
-          <AuditLog />
-        ) : (
-          /* Placeholder for other screens */
-          <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
-            {activeScreen.charAt(0).toUpperCase() + activeScreen.slice(1)} — coming soon
-          </div>
-        )}
-      </div>
+function PlaceholderPage({ title }: { title: string }) {
+  return (
+    <div className="flex-1 flex items-center justify-center text-muted-foreground text-sm">
+      {title} — coming soon
     </div>
   );
 }
@@ -88,7 +44,27 @@ function AppContent() {
 export function App() {
   return (
     <ReviewStoreProvider>
-      <AppContent />
+      <ExpandProvider>
+      <BrowserRouter>
+        <Routes>
+          <Route path="/" element={<Navigate to={ROUTES.review} replace />} />
+          <Route path={ROUTES.base} element={<Navigate to={ROUTES.review} replace />} />
+          <Route element={<Shell />}>
+            <Route path={ROUTES.review} element={<QueueScreen />} />
+            <Route
+              path={ROUTES.submitted}
+              element={<Navigate to={`${ROUTES.review}?tab=submitted`} replace />}
+            />
+            <Route path={ROUTES.catalog} element={<CatalogScreen />} />
+            <Route path={ROUTES.dashboard} element={<DashboardPage />} />
+            <Route path={ROUTES.approved} element={<ApprovedPage />} />
+            <Route path={ROUTES.audit} element={<AuditLog />} />
+            <Route path={ROUTES.settings} element={<PlaceholderPage title="Settings" />} />
+          </Route>
+          <Route path="*" element={<Navigate to={ROUTES.review} replace />} />
+        </Routes>
+      </BrowserRouter>
+      </ExpandProvider>
     </ReviewStoreProvider>
   );
 }

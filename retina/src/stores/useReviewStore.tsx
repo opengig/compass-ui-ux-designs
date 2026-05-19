@@ -10,10 +10,18 @@ import {
   type ReviewSection,
 } from '../data/mockData';
 
+interface SubmissionRecord {
+  comment: string;
+  submittedAt: string;
+  submittedBy: string;
+}
+
 interface ReviewState {
   articles: Record<string, ArticleData>;
   editLog: EditLogEntry[];
-  unsavedEdits: Record<string, number>;
+  undoStacks: Record<string, ArticleData[]>;
+  redoStacks: Record<string, ArticleData[]>;
+  submissions: Record<string, SubmissionRecord>;
 }
 
 type ReviewAction =
@@ -28,12 +36,14 @@ type ReviewAction =
         editedBy?: string;
       };
     }
-  | { type: 'UPDATE_ARTICLE'; payload: { article: ArticleData } }
+  | { type: 'UPDATE_ARTICLE'; payload: { article: ArticleData; recordSnapshot?: boolean } }
   | { type: 'SAVE_CHANGES'; payload: { articleId: string } }
-  | { type: 'APPROVE_ARTICLE'; payload: { articleId: string; comment?: string; editedBy?: string } }
-  | { type: 'REJECT_ARTICLE'; payload: { articleId: string; reason: string; editedBy?: string } }
+  | { type: 'UNDO'; payload: { articleId: string } }
+  | { type: 'REDO'; payload: { articleId: string } }
+  | { type: 'SUBMIT_ARTICLE'; payload: { articleId: string; comment: string; submittedBy?: string } }
   | { type: 'MOVE_TO_LOW'; payload: { articleId: string; editedBy?: string } }
-  | { type: 'MARK_NEEDS_REVIEW'; payload: { articleId: string; editedBy?: string } };
+  | { type: 'MARK_NEEDS_REVIEW'; payload: { articleId: string; editedBy?: string } }
+  | { type: 'BULK_SET_CONFIDENCE'; payload: { articleIds: string[]; confidence: number; editedBy?: string } };
 
 interface ReviewStoreContextValue {
   state: ReviewState;
@@ -45,12 +55,19 @@ interface ReviewStoreContextValue {
   updateAllergens: (articleId: string, allergens: AllergenSummary[]) => void;
   updateArticleStatus: (articleId: string, status: ArticleStatus) => void;
   saveChanges: (articleId: string) => void;
-  approveArticle: (articleId: string, comment?: string) => void;
-  rejectArticle: (articleId: string, reason: string) => void;
+  submitArticle: (articleId: string, comment: string) => void;
+  undo: (articleId: string) => void;
+  redo: (articleId: string) => void;
   moveToLow: (articleId: string) => void;
   markNeedsReview: (articleId: string) => void;
+  bulkSetConfidence: (articleIds: string[], confidence: number) => void;
   getArticleById: (articleId: string | null) => ArticleData | null;
   getUnsavedEditCount: (articleId: string) => number;
+  getCanUndo: (articleId: string) => boolean;
+  getCanRedo: (articleId: string) => boolean;
+  getSubmission: (articleId: string) => SubmissionRecord | null;
+  isSubmitted: (articleId: string) => boolean;
+  getArticleEditLog: (articleId: string) => EditLogEntry[];
 }
 
 function buildInitialState(): ReviewState {
@@ -58,10 +75,18 @@ function buildInitialState(): ReviewState {
   ARTICLE_DATA.forEach((article) => {
     articles[article.id] = article;
   });
-  return { articles, editLog: [], unsavedEdits: {} };
+  return {
+    articles,
+    editLog: [],
+    undoStacks: {},
+    redoStacks: {},
+    submissions: {},
+  };
 }
 
 const initialState: ReviewState = buildInitialState();
+const MAX_UNDO = 50;
+const DEFAULT_USER = 'Priya Sharma';
 
 function makeLogId(): string {
   return `log-${Date.now()}-${Math.random().toString(16).slice(2, 7)}`;
@@ -84,7 +109,6 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
       if (oldValue === newValue) {
         return state;
       }
-
       const logEntry: EditLogEntry = {
         id: makeLogId(),
         articleId,
@@ -92,37 +116,41 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
         field,
         oldValue,
         newValue,
-        editedBy: editedBy ?? 'Priya Sharma',
+        editedBy: editedBy ?? DEFAULT_USER,
         editedAt: nowLabel(),
         status: 'pending',
       };
-
       return {
         ...state,
         editLog: [logEntry, ...state.editLog],
-        unsavedEdits: {
-          ...state.unsavedEdits,
-          [articleId]: (state.unsavedEdits[articleId] ?? 0) + 1,
-        },
       };
     }
     case 'UPDATE_ARTICLE': {
+      const { article, recordSnapshot } = action.payload;
+      const previous = state.articles[article.id];
+      let undoStacks = state.undoStacks;
+      let redoStacks = state.redoStacks;
+      if (recordSnapshot && previous) {
+        const prevStack = state.undoStacks[article.id] ?? [];
+        undoStacks = {
+          ...state.undoStacks,
+          [article.id]: [...prevStack, previous].slice(-MAX_UNDO),
+        };
+        redoStacks = { ...state.redoStacks, [article.id]: [] };
+      }
       return {
         ...state,
-        articles: {
-          ...state.articles,
-          [action.payload.article.id]: action.payload.article,
-        },
+        articles: { ...state.articles, [article.id]: article },
+        undoStacks,
+        redoStacks,
       };
     }
     case 'SAVE_CHANGES': {
       const articleId = action.payload.articleId;
       return {
         ...state,
-        unsavedEdits: {
-          ...state.unsavedEdits,
-          [articleId]: 0,
-        },
+        undoStacks: { ...state.undoStacks, [articleId]: [] },
+        redoStacks: { ...state.redoStacks, [articleId]: [] },
         editLog: state.editLog.map((entry) =>
           entry.articleId === articleId && entry.status === 'pending'
             ? { ...entry, status: 'applied' }
@@ -130,76 +158,81 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
         ),
       };
     }
-    case 'APPROVE_ARTICLE': {
-      const { articleId, comment, editedBy } = action.payload;
-      const article = state.articles[articleId];
-      if (!article) {
+    case 'UNDO': {
+      const { articleId } = action.payload;
+      const undoStack = state.undoStacks[articleId] ?? [];
+      const current = state.articles[articleId];
+      if (undoStack.length === 0 || !current) {
         return state;
       }
-
-      const updatedArticle: ArticleData = {
-        ...article,
-        status: 'approved',
-        reviewer: editedBy ?? 'Priya Sharma',
-        approvedAt: nowLabel(),
-      };
-
-      const approvalEntry: EditLogEntry = {
-        id: makeLogId(),
-        articleId,
-        section: 'claims',
-        field: 'approval',
-        oldValue: article.status,
-        newValue: comment ? `approved - ${comment}` : 'approved',
-        editedBy: editedBy ?? 'Priya Sharma',
-        editedAt: nowLabel(),
-        status: 'applied',
-      };
-
+      const previous = undoStack[undoStack.length - 1];
+      const newUndo = undoStack.slice(0, -1);
+      const redoStack = state.redoStacks[articleId] ?? [];
       return {
         ...state,
-        articles: {
-          ...state.articles,
-          [articleId]: updatedArticle,
-        },
-        unsavedEdits: {
-          ...state.unsavedEdits,
-          [articleId]: 0,
-        },
-        editLog: [approvalEntry, ...state.editLog],
+        articles: { ...state.articles, [articleId]: previous },
+        undoStacks: { ...state.undoStacks, [articleId]: newUndo },
+        redoStacks: { ...state.redoStacks, [articleId]: [...redoStack, current] },
       };
     }
-    case 'REJECT_ARTICLE': {
-      const { articleId, reason, editedBy } = action.payload;
+    case 'REDO': {
+      const { articleId } = action.payload;
+      const redoStack = state.redoStacks[articleId] ?? [];
+      const current = state.articles[articleId];
+      if (redoStack.length === 0 || !current) {
+        return state;
+      }
+      const next = redoStack[redoStack.length - 1];
+      const newRedo = redoStack.slice(0, -1);
+      const undoStack = state.undoStacks[articleId] ?? [];
+      return {
+        ...state,
+        articles: { ...state.articles, [articleId]: next },
+        redoStacks: { ...state.redoStacks, [articleId]: newRedo },
+        undoStacks: { ...state.undoStacks, [articleId]: [...undoStack, current] },
+      };
+    }
+    case 'SUBMIT_ARTICLE': {
+      const { articleId, comment, submittedBy } = action.payload;
       const article = state.articles[articleId];
       if (!article) {
         return state;
       }
-
-      const updatedArticle: ArticleData = {
-        ...article,
-        status: 'needs_changes',
+      const submission: SubmissionRecord = {
+        comment,
+        submittedAt: nowLabel(),
+        submittedBy: submittedBy ?? DEFAULT_USER,
       };
-
-      const rejectEntry: EditLogEntry = {
+      const entry: EditLogEntry = {
         id: makeLogId(),
         articleId,
         section: 'claims',
-        field: 'decision',
+        field: 'submission',
         oldValue: article.status,
-        newValue: `needs_changes - ${reason}`,
-        editedBy: editedBy ?? 'Priya Sharma',
+        newValue: comment ? `submitted — ${comment}` : 'submitted',
+        editedBy: submittedBy ?? DEFAULT_USER,
         editedAt: nowLabel(),
         status: 'applied',
       };
-
+      const updatedArticle: ArticleData = {
+        ...article,
+        reviewer: submittedBy ?? DEFAULT_USER,
+        approvedAt: submission.submittedAt,
+      };
       return {
         ...state,
-        articles: {
-          ...state.articles,
-          [articleId]: updatedArticle,
-        },
-        editLog: [rejectEntry, ...state.editLog],
+        articles: { ...state.articles, [articleId]: updatedArticle },
+        submissions: { ...state.submissions, [articleId]: submission },
+        undoStacks: { ...state.undoStacks, [articleId]: [] },
+        redoStacks: { ...state.redoStacks, [articleId]: [] },
+        editLog: [
+          entry,
+          ...state.editLog.map<EditLogEntry>((logEntry) =>
+            logEntry.articleId === articleId && logEntry.status === 'pending'
+              ? { ...logEntry, status: 'applied' }
+              : logEntry,
+          ),
+        ],
       };
     }
     case 'MOVE_TO_LOW': {
@@ -208,13 +241,11 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
       if (!article) {
         return state;
       }
-
       const updatedArticle: ArticleData = {
         ...article,
         confidence: 50,
         status: 'rejected',
       };
-
       const entry: EditLogEntry = {
         id: makeLogId(),
         articleId,
@@ -222,16 +253,42 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
         field: 'decision',
         oldValue: `${article.status} (confidence ${article.confidence}%)`,
         newValue: 'rejected — moved to Low',
-        editedBy: editedBy ?? 'Priya Sharma',
+        editedBy: editedBy ?? DEFAULT_USER,
         editedAt: nowLabel(),
         status: 'applied',
       };
-
       return {
         ...state,
         articles: { ...state.articles, [articleId]: updatedArticle },
-        unsavedEdits: { ...state.unsavedEdits, [articleId]: 0 },
         editLog: [entry, ...state.editLog],
+      };
+    }
+    case 'BULK_SET_CONFIDENCE': {
+      const { articleIds, confidence, editedBy } = action.payload;
+      const newArticles = { ...state.articles };
+      const newLogEntries: EditLogEntry[] = [];
+      for (const articleId of articleIds) {
+        const article = newArticles[articleId];
+        if (!article || article.confidence === confidence) {
+          continue;
+        }
+        newArticles[articleId] = { ...article, confidence };
+        newLogEntries.push({
+          id: makeLogId(),
+          articleId,
+          section: 'claims',
+          field: 'confidence',
+          oldValue: String(article.confidence),
+          newValue: String(confidence),
+          editedBy: editedBy ?? DEFAULT_USER,
+          editedAt: nowLabel(),
+          status: 'applied',
+        });
+      }
+      return {
+        ...state,
+        articles: newArticles,
+        editLog: [...newLogEntries, ...state.editLog],
       };
     }
     case 'MARK_NEEDS_REVIEW': {
@@ -240,12 +297,10 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
       if (!article) {
         return state;
       }
-
       const updatedArticle: ArticleData = {
         ...article,
         status: 'in_review',
       };
-
       const entry: EditLogEntry = {
         id: makeLogId(),
         articleId,
@@ -253,11 +308,10 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
         field: 'status',
         oldValue: article.status,
         newValue: 'in_review — flagged for review',
-        editedBy: editedBy ?? 'Priya Sharma',
+        editedBy: editedBy ?? DEFAULT_USER,
         editedAt: nowLabel(),
         status: 'applied',
       };
-
       return {
         ...state,
         articles: { ...state.articles, [articleId]: updatedArticle },
@@ -277,8 +331,8 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
   const value: ReviewStoreContextValue = useMemo(() => {
     const articles = Object.values(state.articles);
 
-    const updateArticle = (article: ArticleData) => {
-      dispatch({ type: 'UPDATE_ARTICLE', payload: { article } });
+    const updateArticle = (article: ArticleData, recordSnapshot = true) => {
+      dispatch({ type: 'UPDATE_ARTICLE', payload: { article, recordSnapshot } });
     };
 
     return {
@@ -289,7 +343,6 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
         if (!article) {
           return;
         }
-
         const ingredients = article.ingredients.map((item) => {
           if (item.id !== ingredientId) {
             return item;
@@ -305,10 +358,8 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
               newValue: value,
             },
           });
-
           return { ...item, [field]: value };
         });
-
         updateArticle({ ...article, ingredients });
       },
       editNutritionField: (articleId, nutrientId, field, value) => {
@@ -316,7 +367,6 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
         if (!article) {
           return;
         }
-
         const nutrition = article.nutrition.map((item) => {
           if (item.id !== nutrientId) {
             return item;
@@ -334,7 +384,6 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
           });
           return { ...item, [field]: value };
         });
-
         updateArticle({ ...article, nutrition });
       },
       addIngredient: (articleId, ingredient) => {
@@ -349,7 +398,7 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
             section: 'ingredients',
             field: 'ingredient.add',
             oldValue: '-',
-            newValue: ingredient.mappedIngredient,
+            newValue: ingredient.mappedIngredient || ingredient.extractedText,
           },
         });
         updateArticle({ ...article, ingredients: [...article.ingredients, ingredient] });
@@ -410,19 +459,24 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
             newValue: status,
           },
         });
-        updateArticle({ ...article, status });
+        dispatch({ type: 'UPDATE_ARTICLE', payload: { article: { ...article, status }, recordSnapshot: false } });
       },
       saveChanges: (articleId) => dispatch({ type: 'SAVE_CHANGES', payload: { articleId } }),
-      approveArticle: (articleId, comment) =>
-        dispatch({ type: 'APPROVE_ARTICLE', payload: { articleId, comment } }),
-      rejectArticle: (articleId, reason) =>
-        dispatch({ type: 'REJECT_ARTICLE', payload: { articleId, reason } }),
-      moveToLow: (articleId) =>
-        dispatch({ type: 'MOVE_TO_LOW', payload: { articleId } }),
-      markNeedsReview: (articleId) =>
-        dispatch({ type: 'MARK_NEEDS_REVIEW', payload: { articleId } }),
+      submitArticle: (articleId, comment) =>
+        dispatch({ type: 'SUBMIT_ARTICLE', payload: { articleId, comment } }),
+      undo: (articleId) => dispatch({ type: 'UNDO', payload: { articleId } }),
+      redo: (articleId) => dispatch({ type: 'REDO', payload: { articleId } }),
+      moveToLow: (articleId) => dispatch({ type: 'MOVE_TO_LOW', payload: { articleId } }),
+      markNeedsReview: (articleId) => dispatch({ type: 'MARK_NEEDS_REVIEW', payload: { articleId } }),
+      bulkSetConfidence: (articleIds, confidence) =>
+        dispatch({ type: 'BULK_SET_CONFIDENCE', payload: { articleIds, confidence } }),
       getArticleById: (articleId) => (articleId ? state.articles[articleId] ?? null : null),
-      getUnsavedEditCount: (articleId) => state.unsavedEdits[articleId] ?? 0,
+      getUnsavedEditCount: (articleId) => state.undoStacks[articleId]?.length ?? 0,
+      getCanUndo: (articleId) => (state.undoStacks[articleId]?.length ?? 0) > 0,
+      getCanRedo: (articleId) => (state.redoStacks[articleId]?.length ?? 0) > 0,
+      getSubmission: (articleId) => state.submissions[articleId] ?? null,
+      isSubmitted: (articleId) => Boolean(state.submissions[articleId]),
+      getArticleEditLog: (articleId) => state.editLog.filter((entry) => entry.articleId === articleId),
     };
   }, [state]);
 

@@ -1,8 +1,6 @@
 /* --- MANAGED FONT IMPORTS START (do not edit manually) --- */
-/* INTERNAL USE NAME: Heading */
-@import url('https://fonts.googleapis.com/css2?family=Geist:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
-/* INTERNAL USE NAME: Mono */
-@import url('https://fonts.googleapis.com/css2?family=Geist+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap');
 @import './_designSystem/ds-6551b66a-cfd3-4df9-a9b1-9ead8d7fe7e9/index.css';
 @import 'tailwindcss/base';
 @import 'tailwindcss/components';
@@ -13,56 +11,55 @@
 @tailwind utilities;
 /* --- MANAGED FONT IMPORTS END --- */
 
-/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE, ABOVE THE TAILWIND IMPORTS — DO NOT DELETE THIS COMMENT */
-
-/* CRITICAL: THE FOLLOWING TAILWIND IMPORTS MUST NEVER BE DELETED OR REORDERED — DO NOT DELETE THIS COMMENT */
-/* END TAILWIND IMPORTS — ALL OTHER CSS MUST GO BELOW THIS LINE */
+/* @import url() FONT IMPORTS MUST ALWAYS BE AT THE VERY TOP OF THIS FILE */
 
 @custom-variant dark (&:is(.dark *));
+
 :root {
-  --background: #FBF9F5;
-  --foreground: #1A1A1A;
+  --background: #FFFBF5;
+  --foreground: #1F1611;
   --card: #FFFFFF;
-  --card-foreground: #1A1A1A;
+  --card-foreground: #1F1611;
   --popover: #FFFFFF;
-  --popover-foreground: #1A1A1A;
-  --primary: #C68A1E;
-  --primary-foreground: #FEFDFC;
-  --secondary: #F5F3EE;
-  --secondary-foreground: #4A463E;
-  --muted: #F5F3EE;
-  --muted-foreground: #8A8275;
-  --accent: #F0EDE6;
-  --accent-foreground: #4A463E;
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: #E4DDCE;
-  --input: #E4DDCE;
-  --ring: #C68A1E;
-  --primary-background: #FEFDFC;
-  --primary-hover: #B27A18;
-  --primary-border: #E8C97A;
-  --brand-ink: #7A5310;
-  --surface-hover: #F5F3EE;
-  --surface-active: #F0EDE6;
-  --ink-secondary: #4A463E;
-  --ink-muted: #8A8275;
-  --ink-faint: #B8B0A1;
+  --popover-foreground: #1F1611;
+  --primary: #F97316;
+  --primary-foreground: #FFFFFF;
+  --primary-hover: #EA580C;
+  --primary-background: #FFF7ED;
+  --primary-border: #FED7AA;
+  --brand-ink: #9A3412;
+  --secondary: #FFF4E6;
+  --secondary-foreground: #57361A;
+  --muted: #FFF4E6;
+  --muted-foreground: #8B7355;
+  --surface-hover: #FFF4E6;
+  --surface-active: #FFEDD5;
+  --accent: #FFEDD5;
+  --accent-foreground: #57361A;
+  --ink-secondary: #57361A;
+  --ink-muted: #8B7355;
+  --ink-faint: #BFA88E;
+  --destructive: #DC2626;
+  --destructive-foreground: #FFFFFF;
+  --border: #F4E4CF;
+  --input: #F4E4CF;
+  --ring: #F97316;
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  --radius: 0.5rem;
+  --sidebar: #FFFFFF;
+  --sidebar-foreground: #1C1917;
+  --sidebar-primary: #F97316;
+  --sidebar-primary-foreground: #FFFFFF;
+  --sidebar-accent: #FFF4E6;
+  --sidebar-accent-foreground: #57361A;
+  --sidebar-border: #F4E4CF;
+  --sidebar-ring: #F97316;
 }
+
 :root.dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
@@ -83,25 +80,37 @@
   --border: oklch(0.269 0 0);
   --input: oklch(0.269 0 0);
   --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
 }
+
 @layer base {
   * {
     @apply border-border outline-ring;
   }
   body {
     @apply bg-background text-foreground;
+    font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+    font-feature-settings: 'cv11', 'ss01', 'ss03';
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
+}
+
+/* Thin custom scrollbar — kicks in on `.retina-thin-scroll` */
+.retina-thin-scroll {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(139, 115, 85, 0.35) transparent;
+}
+.retina-thin-scroll::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.retina-thin-scroll::-webkit-scrollbar-track {
+  background: transparent;
+}
+.retina-thin-scroll::-webkit-scrollbar-thumb {
+  background-color: rgba(139, 115, 85, 0.35);
+  border-radius: 9999px;
+}
+.retina-thin-scroll::-webkit-scrollbar-thumb:hover {
+  background-color: rgba(139, 115, 85, 0.6);
 }

@@ -89,7 +89,7 @@ export function Dashboard({
   selectedSites = SITES,
   setHighlightArtIds,
 }: DashboardProps) {
-  const siteArts = ARTS.filter(a => selectedSites.includes(a.site));
+  const siteArts = selectedSites.length === 0 ? ARTS : ARTS;
   const [weekOffset, setWeekOffset] = useState(0);
 
   const chartData = WEEK_HISTORY[String(weekOffset)] ?? WEEK_HISTORY['0'];
