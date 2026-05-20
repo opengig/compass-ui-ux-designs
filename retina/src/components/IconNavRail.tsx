@@ -1,5 +1,5 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Inbox,
   LayoutDashboard,
@@ -9,7 +9,7 @@ import {
   ChevronLeft,
   LogOut,
 } from 'lucide-react';
-import { ROUTES } from '../router/routes';
+import { ROUTES, SHARED_ROUTES } from '../router/routes';
 
 type NavItemDef = {
   to: string;
@@ -19,6 +19,7 @@ type NavItemDef = {
 };
 
 export function IconNavRail() {
+  const navigate = useNavigate();
   const [expanded, setExpanded] = React.useState<boolean>(() => {
     if (typeof window === 'undefined') {
       return false;
@@ -26,6 +27,7 @@ export function IconNavRail() {
     return window.localStorage.getItem('retina:nav-expanded') === '1';
   });
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const [confirmSignOut, setConfirmSignOut] = React.useState(false);
   const profileRef = React.useRef<HTMLDivElement | null>(null);
 
   const toggleExpanded = () => {
@@ -127,7 +129,10 @@ export function IconNavRail() {
                 Settings
               </NavLink>
               <button
-                onClick={() => setProfileOpen(false)}
+                onClick={() => {
+                  setProfileOpen(false);
+                  setConfirmSignOut(true);
+                }}
                 className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-foreground hover:bg-muted/40 border-t border-border/70"
               >
                 <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
@@ -137,7 +142,71 @@ export function IconNavRail() {
           ) : null}
         </div>
       </div>
+
+      {confirmSignOut ? (
+        <SignOutConfirm
+          onCancel={() => setConfirmSignOut(false)}
+          onConfirm={() => {
+            setConfirmSignOut(false);
+            navigate(SHARED_ROUTES.login);
+          }}
+        />
+      ) : null}
     </aside>
+  );
+}
+
+function SignOutConfirm({
+  onCancel,
+  onConfirm,
+}: {
+  onCancel: () => void;
+  onConfirm: () => void;
+}) {
+  React.useEffect(() => {
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onCancel();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [onCancel]);
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="signout-title"
+    >
+      <div
+        className="absolute inset-0 bg-foreground/30"
+        onClick={onCancel}
+      />
+      <div className="relative bg-card border border-border rounded-lg shadow-soft w-[360px] max-w-[92vw] p-5">
+        <h2 id="signout-title" className="text-[15px] font-semibold text-foreground">
+          Sign out?
+        </h2>
+        <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-relaxed">
+          You&apos;ll be returned to the Compass SSO login screen. Any unsaved edits on the current article will remain in this browser.
+        </p>
+        <div className="mt-4 flex items-center justify-end gap-2">
+          <button
+            type="button"
+            onClick={onCancel}
+            className="h-8 px-3 rounded-md text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted/40"
+          >
+            Cancel
+          </button>
+          <button
+            type="button"
+            onClick={onConfirm}
+            className="h-8 px-3.5 rounded-md bg-primary text-primary-foreground text-[12.5px] font-semibold hover:bg-primary-hover transition-colors"
+          >
+            Sign out
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }
 

@@ -1,6 +1,13 @@
-import { MapPin, ChevronRight, LogOut, List, BarChart3, UserCircle } from 'lucide-react';
+import { useState } from 'react';
+import { MapPin, ChevronDown, LogOut, List, BarChart3, UserCircle, Check } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { STORE_MANAGER_ROUTES } from '../../../router/routes';
+
+const SITES = [
+  { id: 'bck-001', name: 'Bengaluru Central Kitchen', code: 'BCK-001 · Primary' },
+  { id: 'bck-002', name: 'Whitefield Kitchen',         code: 'BCK-002' },
+  { id: 'bck-003', name: 'Electronic City Kitchen',    code: 'BCK-003' },
+];
 
 const RetinaLogo = ({ size = 20 }: { size?: number }) => (
   <svg
@@ -23,9 +30,15 @@ const RetinaLogo = ({ size = 20 }: { size?: number }) => (
 
 export function AccountScreen() {
   const navigate = useNavigate();
+  const [siteOpen, setSiteOpen] = useState(false);
+  const [siteId, setSiteId] = useState(SITES[0].id);
+  const [signOutOpen, setSignOutOpen] = useState(false);
+
   const onSignOut = () => navigate(STORE_MANAGER_ROUTES.login);
   const onOpenArticles = () => navigate(STORE_MANAGER_ROUTES.articles);
   const onOpenProgress = () => navigate(STORE_MANAGER_ROUTES.progress);
+  const currentSite = SITES.find((s) => s.id === siteId) ?? SITES[0];
+
   return (
     <>
       <div
@@ -47,7 +60,7 @@ export function AccountScreen() {
 
       <div
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
-        style={{ background: '#F5F5F4', padding: '12px 16px' }}
+        style={{ background: '#FCF8F0', padding: '12px 16px' }}
       >
         <div
           className="flex items-center gap-3"
@@ -105,31 +118,36 @@ export function AccountScreen() {
           >
             Site
           </div>
-          <div
-            className="flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
+          <button
+            type="button"
+            onClick={() => setSiteOpen(true)}
+            className="w-full flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
             style={{
               padding: '12px 14px',
               minHeight: '48px',
               borderTop: '1px solid #ECECEB',
+              background: 'transparent',
+              border: 'none',
+              textAlign: 'left',
             }}
           >
             <MapPin
               className="w-4 h-4 flex-shrink-0"
-              style={{ color: '#71717A' }}
+              style={{ color: '#C68A1E' }}
             />
             <div className="flex-1 min-w-0">
               <div className="text-[14px]" style={{ color: '#1F1611' }}>
-                Bengaluru Central Kitchen
+                {currentSite.name}
               </div>
               <div className="text-[12px] mt-[1px]" style={{ color: '#71717A' }}>
-                BCK-001 · Primary
+                {currentSite.code}
               </div>
             </div>
-            <ChevronRight
+            <ChevronDown
               className="w-[16px] h-[16px]"
-              style={{ color: '#A1A1AA' }}
+              style={{ color: '#C68A1E' }}
             />
-          </div>
+          </button>
         </div>
 
         <div
@@ -140,10 +158,17 @@ export function AccountScreen() {
             overflow: 'hidden',
           }}
         >
-          <div
-            className="flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
-            style={{ padding: '14px 14px', minHeight: '48px' }}
-            onClick={onSignOut}
+          <button
+            type="button"
+            className="w-full flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
+            style={{
+              padding: '14px 14px',
+              minHeight: '48px',
+              background: 'transparent',
+              border: 'none',
+              textAlign: 'left',
+            }}
+            onClick={() => setSignOutOpen(true)}
           >
             <LogOut
               className="w-4 h-4 flex-shrink-0"
@@ -155,7 +180,7 @@ export function AccountScreen() {
             >
               Sign out
             </div>
-          </div>
+          </button>
         </div>
       </div>
 
@@ -195,17 +220,118 @@ export function AccountScreen() {
         </div>
         <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]">
           <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#FB923C', marginBottom: '1px' }}
+            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }}
           />
-          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#1F1611' }} />
+          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#C68A1E' }} />
           <span
             className="text-[10px] font-medium"
-            style={{ color: '#1F1611' }}
+            style={{ color: '#C68A1E' }}
           >
             Account
           </span>
         </div>
       </div>
+
+      {/* Site picker action sheet */}
+      {siteOpen && (
+        <>
+          <div className="sm-overlay" onClick={() => setSiteOpen(false)} />
+          <div className="sm-sheet" style={{ maxHeight: '70%' }}>
+            <div className="sm-handle" />
+            <div className="flex items-center gap-3" style={{ padding: '12px 16px 8px' }}>
+              <span
+                className="flex-1 font-semibold"
+                style={{ fontSize: '16px', color: '#1F1611' }}
+              >
+                Select site
+              </span>
+            </div>
+            <div className="overflow-y-auto" style={{ paddingBottom: '8px' }}>
+              {SITES.map((s) => {
+                const on = s.id === siteId;
+                return (
+                  <div
+                    key={s.id}
+                    onClick={() => {
+                      setSiteId(s.id);
+                      setSiteOpen(false);
+                    }}
+                    className="flex items-center gap-[10px] cursor-pointer active:bg-[#F5F5F4]"
+                    style={{
+                      padding: '12px 16px',
+                      minHeight: '48px',
+                      borderBottom: '1px solid #ECECEB',
+                      background: on ? '#FBF3E0' : 'transparent',
+                    }}
+                  >
+                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: on ? '#C68A1E' : '#71717A' }} />
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[14px]" style={{ color: '#1F1611', fontWeight: on ? 600 : 400 }}>
+                        {s.name}
+                      </div>
+                      <div className="text-[12px] mt-[1px]" style={{ color: '#71717A' }}>
+                        {s.code}
+                      </div>
+                    </div>
+                    {on && <Check className="w-[16px] h-[16px]" style={{ color: '#C68A1E' }} />}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        </>
+      )}
+
+      {/* Sign-out confirmation */}
+      {signOutOpen && (
+        <>
+          <div className="sm-overlay" onClick={() => setSignOutOpen(false)} />
+          <div className="sm-sheet" style={{ paddingBottom: 'max(20px, calc(env(safe-area-inset-bottom) + 8px))' }}>
+            <div className="sm-handle" />
+            <div style={{ padding: '16px 20px 4px' }}>
+              <div className="text-[16px] font-semibold" style={{ color: '#1F1611' }}>
+                Sign out?
+              </div>
+              <div className="text-[13px] mt-[4px]" style={{ color: '#71717A' }}>
+                You'll need to sign back in to continue scanning.
+              </div>
+            </div>
+            <div className="flex gap-2" style={{ padding: '14px 20px 8px' }}>
+              <button
+                type="button"
+                onClick={() => setSignOutOpen(false)}
+                className="flex-1 flex items-center justify-center text-[14px] font-medium active:opacity-80"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  background: '#fff',
+                  border: '1px solid #E5E5E4',
+                  color: '#1F1611',
+                  minHeight: '48px',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={onSignOut}
+                className="flex-1 flex items-center justify-center gap-1.5 text-[14px] font-medium active:opacity-90"
+                style={{
+                  padding: '12px 16px',
+                  borderRadius: '8px',
+                  background: '#A32D2D',
+                  color: '#fff',
+                  border: '1px solid #A32D2D',
+                  minHeight: '48px',
+                }}
+              >
+                <LogOut className="w-[15px] h-[15px]" />
+                Sign out
+              </button>
+            </div>
+          </div>
+        </>
+      )}
     </>
   );
 }

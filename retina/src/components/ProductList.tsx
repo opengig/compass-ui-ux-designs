@@ -1,8 +1,10 @@
 import React from 'react';
-import { Check, X } from 'lucide-react';
+import { Check, Search, X } from 'lucide-react';
 import { useReviewStore } from '../stores/useReviewStore';
 import type { ArticleData, ArticleStatus } from '../data/mockData';
 import { getFrontImage } from '../data/offImages';
+import { useQueueFilter } from '../hooks/useQueueFilter';
+import { FilterPopover } from './FilterPopover';
 
 const MOVE_TARGETS: { label: string; tone: string; confidence: number }[] = [
   { label: 'Match', tone: 'text-emerald-700 hover:bg-emerald-50 border-emerald-300', confidence: 92 },
@@ -104,6 +106,7 @@ export function ProductList({
   onClearSelection,
 }: ProductListProps) {
   const { articles, getUnsavedEditCount, bulkSetConfidence } = useReviewStore();
+  const { searchQuery, setSearchQuery } = useQueueFilter(articles);
   const [shownCount, setShownCount] = React.useState(BATCH_SIZE);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
 
@@ -141,9 +144,33 @@ export function ProductList({
       className="hidden md:flex flex-col min-h-0 bg-card border-r border-border"
       style={{ width, flexShrink: 0 }}
     >
+      {/* Search + filter — scoped to the article list panel */}
+      <div className="flex items-center gap-1.5 px-2 h-10 border-b border-border">
+        <div className="relative flex-1 min-w-0">
+          <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            value={searchQuery}
+            onChange={(event) => setSearchQuery(event.target.value)}
+            placeholder="Search article or APL…"
+            className="h-7 w-full rounded-md border border-border bg-card pl-7 pr-7 text-[12px] placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+          />
+          {searchQuery ? (
+            <button
+              type="button"
+              onClick={() => setSearchQuery('')}
+              aria-label="Clear search"
+              className="absolute right-0.5 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-5 h-5 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40"
+            >
+              <X className="w-3 h-3" />
+            </button>
+          ) : null}
+        </div>
+        <FilterPopover />
+      </div>
+
       {/* Select-all header — morphs into bulk-action toolbar when selection > 0 */}
       {selectionEnabled ? (
-        <div className="flex items-center gap-2 px-2.5 h-9 border-b border-border">
+        <div className="flex items-center flex-nowrap gap-2 px-2.5 h-9 border-b border-border overflow-x-auto retina-thin-scroll min-w-0">
           <button
             type="button"
             role="checkbox"
@@ -169,13 +196,10 @@ export function ProductList({
             </span>
           ) : (
             <>
-              <span className="text-[11.5px] font-medium text-foreground tabular-nums">
+              <span className="text-[11.5px] font-medium text-foreground tabular-nums whitespace-nowrap shrink-0">
                 {selectedIds!.size} selected
               </span>
-              <div className="ml-auto flex items-center gap-1">
-                <span className="text-[10.5px] uppercase tracking-wider text-muted-foreground/70 mr-1">
-                  Move
-                </span>
+              <div className="ml-auto flex items-center gap-1 flex-nowrap shrink-0">
                 {MOVE_TARGETS.map((target) => (
                   <button
                     key={target.label}
@@ -229,7 +253,7 @@ export function ProductList({
                 title={product.name}
                 className={`group flex items-start gap-2 px-2 py-1.5 rounded-md cursor-pointer transition-colors border-l-2 -ml-px ${
                   isActive
-                    ? 'border-primary bg-primary/5'
+                    ? 'border-primary bg-[#FBF3E0]'
                     : 'border-transparent hover:bg-muted/30'
                 }`}
               >

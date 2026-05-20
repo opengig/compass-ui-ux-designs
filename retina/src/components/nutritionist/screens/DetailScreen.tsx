@@ -136,11 +136,10 @@ export function DetailScreen() {
                 )}
               </p>
 
-              {/* Main image */}
+              {/* Main image — lightbox/zoom disabled in nutritionist flow */}
               <div
-                className="relative rounded-xl overflow-hidden cursor-zoom-in flex items-center justify-center mb-3"
-                style={{border:`1px solid ${C.border}`, backgroundColor:C.muted, aspectRatio:"1/1", boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}
-                onClick={()=>{ const u = detailOffImgs?.[activeImg]; if(u) setLightbox({url:u, label:["Front","Back (Nutrition)","Side (Ingredients)","Barcode"][activeImg]||"Image"}) }}>
+                className="relative rounded-xl overflow-hidden flex items-center justify-center mb-3"
+                style={{border:`1px solid ${C.border}`, backgroundColor:C.muted, aspectRatio:"1/1", boxShadow:"0 1px 4px rgba(0,0,0,0.06)"}}>
                 {detailOffImgs?.[activeImg] ? (
                   <img
                     key={detailOffImgs[activeImg]}

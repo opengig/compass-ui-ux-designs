@@ -8,7 +8,9 @@ import { AuditLog } from './components/AuditLog';
 import { SITES } from './data/mockData';
 import { ReviewStoreProvider } from './stores/useReviewStore';
 import { ExpandProvider } from './stores/ExpandSections';
-import { ROUTES, NUTRITIONIST_ROUTES, STORE_MANAGER_ROUTES } from './router/routes';
+import { ROUTES, NUTRITIONIST_ROUTES, STORE_MANAGER_ROUTES, SHARED_ROUTES } from './router/routes';
+import { UnifiedLoginScreen } from './components/shared/UnifiedLoginScreen';
+import { RolePickerScreen } from './components/shared/RolePickerScreen';
 import { NutritionistShell } from './components/nutritionist/NutritionistShell';
 import { LoginScreen as NutritionistLogin } from './components/nutritionist/screens/LoginScreen';
 import { DashboardScreen as NutritionistDashboard } from './components/nutritionist/screens/DashboardScreen';
@@ -68,7 +70,9 @@ export function App() {
       <ExpandProvider>
       <BrowserRouter>
         <Routes>
-          <Route path="/" element={<Navigate to={ROUTES.review} replace />} />
+          <Route path="/" element={<Navigate to={SHARED_ROUTES.login} replace />} />
+          <Route path={SHARED_ROUTES.login} element={<UnifiedLoginScreen />} />
+          <Route path={SHARED_ROUTES.index} element={<RolePickerScreen />} />
           <Route path={ROUTES.base} element={<Navigate to={ROUTES.review} replace />} />
           <Route element={<Shell />}>
             <Route path={ROUTES.review} element={<QueueScreen />} />
@@ -118,7 +122,7 @@ export function App() {
             <Route path="home" element={<Navigate to={STORE_MANAGER_ROUTES.articles} replace />} />
           </Route>
 
-          <Route path="*" element={<Navigate to={ROUTES.review} replace />} />
+          <Route path="*" element={<Navigate to={SHARED_ROUTES.login} replace />} />
         </Routes>
       </BrowserRouter>
       </ExpandProvider>

@@ -8,14 +8,14 @@
 /* Full-screen wrapper — no phone bezel, content fills the viewport.
    Use browser devtools to simulate mobile widths if needed. */
 .sm-outer {
-  background: #F5F5F4;
+  background: #FCF8F0;
   display: flex;
   flex-direction: column;
   flex: 1;
   min-height: 0;
 }
 .sm-phone {
-  background: #F5F5F4;
+  background: #FCF8F0;
   flex: 1;
   width: 100%;
   display: flex;
@@ -122,7 +122,7 @@
   left: 50%;
   bottom: 84px;
   transform: translateX(-50%) translateY(8px);
-  background: #FB923C;
+  background: #C68A1E;
   color: #fff;
   font-size: 12px;
   padding: 9px 14px;
@@ -155,18 +155,18 @@
   white-space: nowrap;
 }
 .sm-pill.on {
-  background: #FB923C;
+  background: #C68A1E;
   color: #fff;
-  border-color: #FB923C;
+  border-color: #C68A1E;
   font-weight: 500;
 }
 
 /* Filter chip hover (mirrors source #filter-strip behaviours) */
 .sm-fchip {
   font-size: 11px;
-  color: #44403C;
-  background: #ECECEB;
-  border: 1px solid #E5E5E4;
+  color: #C68A1E;
+  background: #FBF3E0;
+  border: 1px solid #F4E4BC;
   padding: 3px 10px;
   border-radius: 99px;
   white-space: nowrap;
@@ -177,8 +177,9 @@
   flex-shrink: 0;
 }
 .sm-fchip-more {
-  background: #FB923C !important;
+  background: #C68A1E !important;
   color: #fff !important;
+  border-color: #C68A1E !important;
   font-weight: 600;
   padding: 4px 9px;
   display: inline-flex;
@@ -186,10 +187,10 @@
   gap: 2px;
 }
 .sm-fchip-more:hover {
-  background: #1F1F1F !important;
+  background: #A8741A !important;
 }
 .sm-filter-strip:hover .sm-fchip:not(.sm-fchip-more) {
-  background: #E5E5E4;
+  background: #F6E8C7;
 }
 .sm-filter-strip:active {
   opacity: 0.85;

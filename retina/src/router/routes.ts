@@ -1,3 +1,10 @@
+// Shared (cross-role) entry points.
+// `/login` is the unified SSO landing; `/index` is the role picker shown after sign-in.
+export const SHARED_ROUTES = {
+  login: '/login',
+  index: '/index',
+} as const;
+
 export const ROUTES = {
   base: '/article-sme',
   review: '/article-sme/review',

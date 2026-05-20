@@ -103,12 +103,11 @@ export function ApprovedScreen() {
   }
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden" style={{backgroundColor:C.page}}>
+    <div className="flex flex-col flex-1 overflow-hidden bg-background">
       <PageHeader title="Approved Profiles"/>
 
       {/* ── Compact filter bar ── */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2"
-        style={{backgroundColor:C.card, borderBottom:`1px solid ${C.border}`}}>
+      <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2 bg-card border-b border-border">
 
         {/* Date — segmented pill group */}
         <div className="flex items-center rounded-md overflow-hidden flex-shrink-0"
@@ -208,17 +207,15 @@ export function ApprovedScreen() {
       <div ref={containerRef} className="flex flex-1 overflow-hidden">
 
         {/* TABLE COLUMN */}
-        <div className="flex flex-col overflow-hidden"
+        <div className={`flex flex-col overflow-hidden bg-background ${viewPanelArtId ? "border-r border-border" : ""}`}
           style={{
             width: viewPanelArtId ? 280 : "100%",
             flex: viewPanelArtId ? "none" : 1,
             flexShrink: viewPanelArtId ? 0 : 1,
-            backgroundColor:C.page,
-            borderRight: viewPanelArtId ? `1px solid ${C.border}` : "none",
           }}>
           <div className="flex-1 overflow-y-auto">
             <div>
-              <Card className="shadow-sm overflow-hidden rounded-none border-x-0 border-t-0" style={{borderRadius:0}}>
+              <Card className="shadow-none overflow-hidden rounded-none border-x-0 border-t-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <tbody>
@@ -245,20 +242,18 @@ export function ApprovedScreen() {
                         const art = ARTS.find(x=>x.id===a.artId)
                         const isActive = a.artId === viewPanelArtId
                         return (
-                          <tr key={a.id} className="cursor-pointer transition-colors"
-                            style={{
-                              borderBottom:`1px solid ${C.border}`,
-                              backgroundColor: isActive ? C.pr : "transparent",
-                              borderLeft: isActive ? `3px solid ${C.pr}` : "3px solid transparent",
-                            }}
-                            onClick={()=>setViewPanelArtId(a.artId)}
-                            onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.backgroundColor=C.page }}
-                            onMouseLeave={e=>{ if(!isActive) e.currentTarget.style.backgroundColor="transparent" }}>
+                          <tr key={a.id}
+                            className={`cursor-pointer transition-colors border-b border-border/60 border-l-[3px] ${
+                              isActive
+                                ? "bg-primary/10 border-l-primary"
+                                : "border-l-transparent hover:bg-muted/40"
+                            }`}
+                            onClick={()=>setViewPanelArtId(a.artId)}>
                             <td className="px-4 py-3">
-                              <p style={{...T.tableNm, fontSize: viewPanelArtId?12:13, color: isActive ? "#fff" : T.tableNm.color}}>{art?.name}</p>
-                              <p style={{...T.tableApl, color: isActive ? "rgba(255,255,255,0.85)" : T.tableApl.color}}>{art?.apl}</p>
+                              <p className={`${viewPanelArtId ? "text-[12px]" : "text-[13px]"} font-medium text-foreground`}>{art?.name}</p>
+                              <p className="text-[11.5px] text-muted-foreground">{art?.apl}</p>
                             </td>
-                            {!viewPanelArtId && <td className="px-4 py-3" style={{...T.tableMeta,whiteSpace:"nowrap", color: isActive ? "rgba(255,255,255,0.85)" : T.tableMeta.color}}>{a.date}</td>}
+                            {!viewPanelArtId && <td className="px-4 py-3 whitespace-nowrap text-[12px] text-muted-foreground">{a.date}</td>}
                           </tr>
                         )
                       })}

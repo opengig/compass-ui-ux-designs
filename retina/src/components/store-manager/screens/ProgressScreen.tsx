@@ -48,12 +48,12 @@ export function ProgressScreen() {
 
       <div
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
-        style={{ padding: '10px 14px 12px', background: '#F5F5F4' }}
+        style={{ padding: '10px 14px 12px', background: '#FCF8F0' }}
       >
         {/* Gamification banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg,#FB923C,#44403C)',
+            background: 'linear-gradient(135deg,#C68A1E,#44403C)',
             borderRadius: '12px',
             padding: '13px 15px',
             position: 'relative',
@@ -191,7 +191,7 @@ export function ProgressScreen() {
                       width: '30px',
                       height: '30px',
                       borderRadius: '50%',
-                      background: '#FB923C',
+                      background: '#C68A1E',
                       border: '2px solid #E5E5E4',
                       display: 'flex',
                       alignItems: 'center',
@@ -322,9 +322,9 @@ export function ProgressScreen() {
           style={{
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#FB923C',
+            background: '#C68A1E',
             color: '#fff',
-            border: '1px solid #FB923C',
+            border: '1px solid #C68A1E',
             minHeight: '48px',
           }}
         >
@@ -357,12 +357,12 @@ export function ProgressScreen() {
         </div>
         <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]">
           <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#FB923C', marginBottom: '1px' }}
+            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }}
           />
-          <BarChart3 className="w-[22px] h-[22px]" style={{ color: '#1F1611' }} />
+          <BarChart3 className="w-[22px] h-[22px]" style={{ color: '#C68A1E' }} />
           <span
             className="text-[10px] font-medium"
-            style={{ color: '#1F1611' }}
+            style={{ color: '#C68A1E' }}
           >
             Progress
           </span>

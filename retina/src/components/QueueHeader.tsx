@@ -1,8 +1,7 @@
-import { ChevronsDownUp, ChevronsUpDown, Search } from 'lucide-react';
+import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
 import { useReviewStore } from '../stores/useReviewStore';
 import { useQueueFilter, type QueueTab } from '../hooks/useQueueFilter';
 import { useExpandSections } from '../stores/ExpandSections';
-import { FilterPopover } from './FilterPopover';
 
 type PillSpec = {
   tab: QueueTab;
@@ -21,7 +20,7 @@ const PILLS: PillSpec[] = [
 
 export function QueueHeader() {
   const { articles, isSubmitted } = useReviewStore();
-  const { queueTab, setQueueTab, searchQuery, setSearchQuery } = useQueueFilter(articles);
+  const { queueTab, setQueueTab } = useQueueFilter(articles);
   const { isExpanded, toggle } = useExpandSections();
 
   const counts = (() => {
@@ -88,18 +87,6 @@ export function QueueHeader() {
             </>
           )}
         </button>
-
-        <div className="relative">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="Search ingredient or article…"
-            className="h-8 w-64 rounded-md border border-border bg-card pl-8 pr-3 text-[12.5px] placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-        </div>
-
-        <FilterPopover />
       </div>
     </header>
   );

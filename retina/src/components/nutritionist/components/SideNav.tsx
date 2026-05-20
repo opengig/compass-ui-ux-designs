@@ -3,9 +3,8 @@ import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard, ClipboardList, CheckCircle2, BookOpen,
-  ChevronLeft, ChevronRight, Building, Check,
+  Building, Check,
 } from "lucide-react";
-import { C } from "../data/tokens";
 import { ALL_SITES } from "../data/sites";
 import { ARTS } from "../data/mockData";
 import { COMPASS_LOGO } from "../data/images";
@@ -14,245 +13,188 @@ import { useNutritionist } from "../NutritionistContext";
 
 /**
  * Left-side icon nav rail for the nutritionist flow.
- *
- * Route-driven: highlights the active item from useLocation() and navigates
- * via useNavigate(). Site filter comes from NutritionistContext (shared
- * across every screen).
+ * Mirrors IconNavRail (Article SME) token usage: bg-card, border-border,
+ * active = bg-primary/15 + text-primary, hover = bg-muted/40 + text-foreground.
  */
 export function SideNav() {
   const location = useLocation();
   const navigate = useNavigate();
   const { selectedSites, setSelectedSites } = useNutritionist();
-  const [siteOpen, setSiteOpen] = useState(false)
-  const pendingCount = ARTS.filter(a => selectedSites.includes(a.site)).length
+  const [siteOpen, setSiteOpen] = useState(false);
+  const pendingCount = ARTS.filter((a) => selectedSites.includes(a.site)).length;
+
   const NAV = [
-    {key:"dashboard", label:"Dashboard", icon:<LayoutDashboard size={17}/>, path: NUTRITIONIST_ROUTES.dashboard },
-    {key:"queue",     label:"Tasks",     icon:<ClipboardList size={17}/>,  badge: pendingCount > 0 ? pendingCount : null, path: NUTRITIONIST_ROUTES.queue },
-    {key:"approved",  label:"Approved",  icon:<CheckCircle2 size={17}/>,                                                  path: NUTRITIONIST_ROUTES.approved },
-    {key:"audit",     label:"Audit",     icon:<BookOpen size={17}/>,                                                       path: NUTRITIONIST_ROUTES.audit },
-  ]
-  const pathname = location.pathname
+    { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard, path: NUTRITIONIST_ROUTES.dashboard },
+    { key: "queue",     label: "Tasks",     Icon: ClipboardList,   path: NUTRITIONIST_ROUTES.queue, badge: pendingCount > 0 ? pendingCount : null },
+    { key: "approved",  label: "Approved",  Icon: CheckCircle2,    path: NUTRITIONIST_ROUTES.approved },
+    { key: "audit",     label: "Audit",     Icon: BookOpen,        path: NUTRITIONIST_ROUTES.audit },
+  ];
+
+  const pathname = location.pathname;
   const active =
     pathname.startsWith("/nutritionist/dashboard") ? "dashboard" :
     pathname.startsWith("/nutritionist/queue") ? "queue" :
     pathname.startsWith("/nutritionist/article") ? "queue" :
     pathname.startsWith("/nutritionist/approved") ? "approved" :
     pathname.startsWith("/nutritionist/audit") ? "audit" :
-    "dashboard"
-  const goApp = (item) => navigate(item.path)
+    "dashboard";
+
   const toggleSite = (s) =>
-    setSelectedSites(prev => prev.includes(s) ? prev.filter(x=>x!==s) : [...prev, s])
-  const allSelected = selectedSites.length === ALL_SITES.length
-  const siteLabel = allSelected ? "All Sites" : selectedSites.length === 0 ? "No Sites" : selectedSites.length === 1 ? selectedSites[0] : `${selectedSites.length} Sites`
-
-  /* single icon+label nav button */
-  const NavBtn = ({item}) => {
-    const isActive = active === item.key
-    const [hov, setHov] = useState(false)
-    return (
-      <button
-        key={item.key}
-        onClick={() => goApp(item)}
-        title={item.label}
-        className="relative flex flex-col items-center justify-center w-full"
-        style={{
-          height: 64,
-          border: "none",
-          cursor: "pointer",
-          backgroundColor: "transparent",
-          gap: 3,
-          transition: "background-color 0.15s",
-        }}
-        onMouseEnter={()=>setHov(true)}
-        onMouseLeave={()=>setHov(false)}>
-
-        {/* Active indicator — thin left rail */}
-        {isActive && (
-          <div style={{
-            position:"absolute", left:0, top:"50%", transform:"translateY(-50%)",
-            width: 3, height: 28, borderRadius: "0 3px 3px 0",
-            backgroundColor: C.pr,
-          }}/>
-        )}
-
-        {/* icon pill */}
-        <div className="relative flex items-center justify-center"
-          style={{
-            width: 40, height: 32, borderRadius: 8,
-            backgroundColor: "transparent",
-            transition: "background-color 0.15s",
-          }}>
-          <span style={{
-            color: isActive ? C.pr : hov ? C.ink2 : C.mutedFg,
-            transition: "color 0.15s",
-            display:"flex",
-          }}>
-            {item.icon}
-          </span>
-          {/* badge */}
-          {item.badge && (
-            <span className="absolute flex items-center justify-center rounded-full"
-              style={{
-                top: -4, right: -5,
-                minWidth: 17, height: 17,
-                fontSize: 9, fontWeight: 600,
-                backgroundColor: C.rdBg, color: C.rd,
-                padding: "0 3px", lineHeight: 1,
-              }}>
-              {item.badge}
-            </span>
-          )}
-        </div>
-
-        {/* label */}
-        <span style={{
-          fontSize: 10,
-          fontWeight: isActive ? 600 : 400,
-          color: isActive ? C.pr : hov ? C.ink2 : C.mutedFg,
-          letterSpacing: "0.01em",
-          lineHeight: 1,
-          transition: "color 0.15s",
-        }}>
-          {item.label}
-        </span>
-      </button>
-    )
-  }
+    setSelectedSites((prev) => (prev.includes(s) ? prev.filter((x) => x !== s) : [...prev, s]));
+  const allSelected = selectedSites.length === ALL_SITES.length;
+  const siteLabel =
+    allSelected ? "All Sites" :
+    selectedSites.length === 0 ? "No Sites" :
+    selectedSites.length === 1 ? selectedSites[0] :
+    `${selectedSites.length} Sites`;
+  const sitesIndicate = siteOpen || !allSelected;
 
   return (
-    <div className="flex-shrink-0 flex flex-col h-full"
-      style={{width: 72, backgroundColor: C.card, borderRight: `1px solid ${C.border}`, overflow: "visible", position: "relative", zIndex: 100}}>
-
+    <aside className="flex-shrink-0 flex flex-col w-[72px] bg-card border-r border-border relative z-[100]">
       {/* Logo */}
-      <div className="flex items-center justify-center flex-shrink-0"
-        style={{height: 72, borderBottom: `1px solid ${C.border}`, padding: "10px 8px"}}>
-        <img
-          src={COMPASS_LOGO}
-          alt="Compass Group"
-          style={{width: 44, height: 44, objectFit: "contain"}}
-        />
+      <div className="flex items-center justify-center flex-shrink-0 h-[72px] border-b border-border px-2 py-2.5">
+        <img src={COMPASS_LOGO} alt="Compass Group" className="w-11 h-11 object-contain" />
       </div>
 
-      {/* Nav items */}
-      <div className="flex-1 flex flex-col overflow-y-auto">
-        {NAV.map(item => <NavBtn key={item.key} item={item}/>)}
-      </div>
+      {/* Main nav */}
+      <nav className="flex-1 flex flex-col overflow-y-auto py-1">
+        {NAV.map((item) => (
+          <NavBtn
+            key={item.key}
+            item={item}
+            isActive={active === item.key}
+            onClick={() => navigate(item.path)}
+          />
+        ))}
+      </nav>
 
-      {/* Sites nav button */}
-      <div className="flex-shrink-0 relative" style={{borderTop:`1px solid ${C.border}`}}>
+      {/* Sites filter */}
+      <div className="flex-shrink-0 relative border-t border-border">
         <button
-          onClick={()=>setSiteOpen(o=>!o)}
+          onClick={() => setSiteOpen((o) => !o)}
           title={siteLabel}
-          className="relative flex flex-col items-center justify-center w-full"
-          style={{
-            height: 64, border:"none", cursor:"pointer",
-            backgroundColor: siteOpen ? C.surfHov : "transparent",
-            gap:3, transition:"background-color 0.15s",
-          }}
-          onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.surfHov}
-          onMouseLeave={e=>{ if(!siteOpen) e.currentTarget.style.backgroundColor="transparent" }}>
-          {/* Active indicator — thin left rail when open */}
-          {siteOpen && (
-            <div style={{
-              position:"absolute", left:0, top:"50%", transform:"translateY(-50%)",
-              width:3, height:28, borderRadius:"0 3px 3px 0",
-              backgroundColor: C.pr,
-            }}/>
+          className={`relative w-full h-16 flex flex-col items-center justify-center gap-[3px] transition-colors ${
+            siteOpen ? "bg-muted/40" : "hover:bg-muted/40"
+          }`}
+        >
+          {sitesIndicate && (
+            <span
+              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-r-full bg-primary"
+              aria-hidden
+            />
           )}
-          {/* icon with badge */}
-          <div className="relative flex items-center justify-center"
-            style={{width:40, height:32, borderRadius:8}}>
-            <Building size={17} style={{color: siteOpen || !allSelected ? C.pr : C.mutedFg, transition:"color 0.15s"}}/>
+          <div className="relative flex items-center justify-center w-10 h-8 rounded-lg">
+            <Building
+              size={17}
+              className={sitesIndicate ? "text-primary" : "text-muted-foreground"}
+            />
             {selectedSites.length > 0 && selectedSites.length < ALL_SITES.length && (
-              <span className="absolute flex items-center justify-center rounded-full"
-                style={{
-                  top:-4, right:-5,
-                  minWidth:17, height:17,
-                  fontSize:9, fontWeight:700,
-                  backgroundColor:C.pr, color:"#fff",
-                  padding:"0 3px", lineHeight:1,
-                }}>
+              <span className="absolute -top-1 -right-1.5 inline-flex items-center justify-center min-w-[17px] h-[17px] px-[3px] rounded-full bg-primary text-primary-foreground text-[9px] font-bold tabular-nums leading-none">
                 {selectedSites.length}
               </span>
             )}
           </div>
-          <span style={{
-            fontSize:10, fontWeight: siteOpen || !allSelected ? 600 : 400,
-            color: siteOpen || !allSelected ? C.pr : C.mutedFg,
-            letterSpacing:"0.01em", lineHeight:1, transition:"color 0.15s",
-          }}>
+          <span
+            className={`text-[10px] tracking-wide leading-none ${
+              sitesIndicate ? "text-primary font-semibold" : "text-muted-foreground font-normal"
+            }`}
+          >
             Sites
           </span>
         </button>
 
-        {/* Site popover */}
         {siteOpen && (
           <>
-            <div className="fixed inset-0 z-40" onClick={()=>setSiteOpen(false)}/>
-            <div className="absolute z-50 rounded-xl p-2"
-              style={{
-                bottom: 0, left: "calc(100% + 8px)", width: 168,
-                backgroundColor: C.card,
-                border: `1px solid ${C.border3}`,
-                boxShadow: "0 8px 24px rgba(26,26,26,0.13)",
-              }}>
-              <button
-                onClick={()=> allSelected ? setSelectedSites([]) : setSelectedSites([...ALL_SITES])}
-                className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg"
-                style={{fontSize:12,fontWeight:600,color:allSelected?C.am:C.fg,
-                        backgroundColor:allSelected?C.prBg:"transparent",border:"none",cursor:"pointer"}}
-                onMouseEnter={e=>{ if(!allSelected) e.currentTarget.style.backgroundColor=C.surfHov }}
-                onMouseLeave={e=>{ if(!allSelected) e.currentTarget.style.backgroundColor="transparent" }}>
-                <div style={{width:14,height:14,borderRadius:3,flexShrink:0,
-                  border:`1.5px solid ${allSelected?C.pr:C.border}`,
-                  backgroundColor:allSelected?C.pr:"transparent",
-                  display:"flex",alignItems:"center",justifyContent:"center"}}>
-                  {allSelected && <Check size={9} color="#fff" strokeWidth={3}/>}
-                </div>
-                All Sites
-              </button>
-              <div style={{height:1,backgroundColor:C.border,margin:"4px 8px"}}/>
-              {ALL_SITES.map(s=>{
-                const on = selectedSites.includes(s)
-                return (
-                  <button key={s} onClick={()=>toggleSite(s)}
-                    className="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg"
-                    style={{fontSize:12,fontWeight:on?600:400,color:on?C.am:C.fg,
-                            backgroundColor:on?C.prBg:"transparent",border:"none",cursor:"pointer"}}
-                    onMouseEnter={e=>{ if(!on) e.currentTarget.style.backgroundColor=C.surfHov }}
-                    onMouseLeave={e=>{ if(!on) e.currentTarget.style.backgroundColor="transparent" }}>
-                    <div style={{width:14,height:14,borderRadius:3,flexShrink:0,
-                      border:`1.5px solid ${on?C.pr:C.border}`,
-                      backgroundColor:on?C.pr:"transparent",
-                      display:"flex",alignItems:"center",justifyContent:"center"}}>
-                      {on && <Check size={9} color="#fff" strokeWidth={3}/>}
-                    </div>
-                    {s}
-                  </button>
-                )
-              })}
+            <div className="fixed inset-0 z-40" onClick={() => setSiteOpen(false)} />
+            <div className="absolute z-50 rounded-xl p-2 w-[168px] bg-card border border-border shadow-lg"
+              style={{ bottom: 0, left: "calc(100% + 8px)" }}
+            >
+              <SitePopoverItem
+                label="All Sites"
+                selected={allSelected}
+                onClick={() => (allSelected ? setSelectedSites([]) : setSelectedSites([...ALL_SITES]))}
+              />
+              <div className="h-px bg-border my-1 mx-2" />
+              {ALL_SITES.map((s) => (
+                <SitePopoverItem
+                  key={s}
+                  label={s}
+                  selected={selectedSites.includes(s)}
+                  onClick={() => toggleSite(s)}
+                />
+              ))}
             </div>
           </>
         )}
       </div>
 
-      {/* User avatar at bottom */}
-      <div className="flex-shrink-0 flex flex-col items-center justify-center py-3 gap-1"
-        style={{borderTop:`1px solid ${C.border}`}}>
-        <div className="flex items-center justify-center rounded-lg"
-          style={{
-            width: 32, height: 32,
-            backgroundColor: C.muted,
-            border: `1px solid ${C.border}`,
-          }}>
-          <span style={{fontSize:11,fontWeight:600,color:C.mutedFg,letterSpacing:"-0.01em"}}>PS</span>
+      {/* User avatar */}
+      <div className="flex-shrink-0 flex flex-col items-center justify-center py-3 gap-1 border-t border-border">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted border border-border">
+          <span className="text-[11px] font-semibold text-muted-foreground -tracking-[0.01em]">PS</span>
         </div>
-        <span style={{fontSize:10,fontWeight:400,color:C.ink4,letterSpacing:"0.01em",lineHeight:1}}>Priya</span>
+        <span className="text-[10px] text-muted-foreground/80 tracking-wide leading-none">Priya</span>
       </div>
-    </div>
-  )
+    </aside>
+  );
 }
 
-/* ═══════════════════════════════════════════════
-   LOGIN
-═══════════════════════════════════════════════ */
+function NavBtn({ item, isActive, onClick }) {
+  const { Icon } = item;
+  return (
+    <button
+      onClick={onClick}
+      title={item.label}
+      className={`relative w-full h-16 flex flex-col items-center justify-center gap-[3px] transition-colors ${
+        isActive ? "" : "hover:bg-muted/40"
+      }`}
+    >
+      {isActive && (
+        <span
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-r-full bg-primary"
+          aria-hidden
+        />
+      )}
+      <div className="relative flex items-center justify-center w-10 h-8 rounded-lg">
+        <Icon
+          size={17}
+          className={isActive ? "text-primary" : "text-muted-foreground"}
+        />
+        {item.badge ? (
+          <span className="absolute -top-1 -right-1.5 inline-flex items-center justify-center min-w-[17px] h-[17px] px-[3px] rounded-full bg-destructive/15 text-destructive text-[9px] font-semibold tabular-nums leading-none">
+            {item.badge}
+          </span>
+        ) : null}
+      </div>
+      <span
+        className={`text-[10px] tracking-wide leading-none ${
+          isActive ? "text-primary font-semibold" : "text-muted-foreground font-normal"
+        }`}
+      >
+        {item.label}
+      </span>
+    </button>
+  );
+}
+
+function SitePopoverItem({ label, selected, onClick }) {
+  return (
+    <button
+      onClick={onClick}
+      className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[12px] transition-colors ${
+        selected
+          ? "bg-primary/10 text-primary font-semibold"
+          : "text-foreground hover:bg-muted/40 font-normal"
+      }`}
+    >
+      <span
+        className={`w-3.5 h-3.5 rounded-[3px] flex items-center justify-center flex-shrink-0 border-[1.5px] ${
+          selected ? "bg-primary border-primary" : "border-border"
+        }`}
+      >
+        {selected && <Check size={9} className="text-primary-foreground" strokeWidth={3} />}
+      </span>
+      {label}
+    </button>
+  );
+}

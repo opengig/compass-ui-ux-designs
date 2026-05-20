@@ -9,22 +9,19 @@ import { computeDisplayNuts } from "../data/nutrients";
 
 export function StatusBadge({ status, className="" }) {
   const cfg = {
-    green:  {bg:C.grBg,   color:C.gr,      border:C.gr,      dot:C.gr,      label:"MATCHED"},
-    amber:  {bg:C.warnBg, color:C.am,      border:C.pr,      dot:C.pr,      label:"LIKELY MATCH"},
-    red:    {bg:C.rdBg,   color:C.rd,      border:C.rd,      dot:C.rd,      label:"NO MATCH"},
-    blue:   {bg:C.infoBg, color:C.info,    border:C.info,    dot:C.info,    label:"FROM SME"},
-    gray:   {bg:C.page,   color:C.mutedFg, border:C.border,  dot:C.mutedFg, label:"UNKNOWN"},
-    purple: {bg:"#F0EDFA",color:"#5B21B6", border:"#C4B5FD", dot:"#7C3AED", label:"SKIPPED"},
+    green:  { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500", label: "MATCHED" },
+    amber:  { cls: "bg-amber-50 text-amber-700 border-amber-200",       dot: "bg-amber-500",   label: "LIKELY MATCH" },
+    red:    { cls: "bg-rose-50 text-rose-700 border-rose-200",          dot: "bg-rose-500",    label: "NO MATCH" },
+    blue:   { cls: "bg-sky-50 text-sky-700 border-sky-200",             dot: "bg-sky-500",     label: "FROM SME" },
+    gray:   { cls: "bg-muted text-muted-foreground border-border",      dot: "bg-muted-foreground", label: "UNKNOWN" },
+    purple: { cls: "bg-violet-50 text-violet-700 border-violet-200",    dot: "bg-violet-500",  label: "SKIPPED" },
   }
   const s = cfg[status] || cfg.gray
   return (
-    <span className={`inline-flex items-center gap-1.5 whitespace-nowrap ${className}`}
-      style={{
-        backgroundColor:s.bg, color:s.color, border:`1px solid ${s.border}`,
-        fontSize:11, fontWeight:600, letterSpacing:"0.1em", textTransform:"uppercase", lineHeight:1.4,
-        padding:"4px 10px", borderRadius:12, height:22,
-      }}>
-      <span style={{width:6,height:6,borderRadius:"50%",backgroundColor:s.dot,flexShrink:0}}/>
+    <span
+      className={`inline-flex items-center gap-1.5 whitespace-nowrap h-[22px] px-2.5 rounded-full border text-[11px] font-semibold uppercase tracking-[0.1em] leading-[1.4] ${s.cls} ${className}`}
+    >
+      <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${s.dot}`} />
       {s.label}
     </span>
   )
@@ -64,23 +61,19 @@ export function NutBadge({ c }) {
   )
 }
 
-// DS §6: TopBar h48, --panel bg, 1px --line bottom, z100; title H2 18px 600; right: refresh timestamp
-
 export function PageHeader({ title, subtitle }) {
   const now = new Date()
   const stamp = now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:false})
     + " IST · " + now.toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"})
   return (
-    <div className="flex-shrink-0 flex items-center justify-between px-6"
-      style={{height:48, backgroundColor:C.card, borderBottom:`1px solid ${C.border}`,
-              zIndex:100, boxShadow:"0 1px 2px rgba(26,26,26,0.05)"}}>
+    <div className="flex-shrink-0 flex items-center justify-between h-12 px-6 bg-card border-b border-border z-[100]">
       <div className="flex items-center gap-3">
-        <h1 style={{...T.h2, margin:0}}>{title}</h1>
-        {subtitle && <span style={{...T.small}}>{subtitle}</span>}
+        <h1 className="m-0 text-[15px] font-semibold text-foreground">{title}</h1>
+        {subtitle && <span className="text-[12px] text-muted-foreground">{subtitle}</span>}
       </div>
       <div className="flex items-center gap-2">
-        <Clock size={12} style={{color:C.mutedFg}}/>
-        <span style={{...T.mono, color:C.mutedFg}}>{stamp}</span>
+        <Clock size={12} className="text-muted-foreground"/>
+        <span className="font-mono text-[11.5px] text-muted-foreground">{stamp}</span>
       </div>
     </div>
   )

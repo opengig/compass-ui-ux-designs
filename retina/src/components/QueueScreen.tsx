@@ -28,11 +28,22 @@ export function QueueScreen() {
   const [imageWidth, setImageWidth, persistImageWidth] = usePersistedWidth('image-v4', defaultImageWidth);
 
   const [selectedIds, setSelectedIds] = React.useState<Set<string>>(new Set());
+  const [imageExpanded, setImageExpanded] = React.useState(false);
 
   // Drop selection when filter changes
   React.useEffect(() => {
     setSelectedIds(new Set());
   }, [queueTab]);
+
+  // ESC collapses the expanded image viewer
+  React.useEffect(() => {
+    if (!imageExpanded) return;
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setImageExpanded(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [imageExpanded]);
 
   const onSelectProduct = (productId: string) => {
     const next = new URLSearchParams(searchParams);
@@ -76,27 +87,33 @@ export function QueueScreen() {
     <div className="flex-1 flex flex-col min-h-0 bg-background">
       <QueueHeader />
       <div className="relative flex flex-1 min-h-0 overflow-hidden">
-        <ProductList
-          selectedProductId={selectedVisibleArticleId}
-          onSelectProduct={onSelectProduct}
-          visibleArticleIds={filteredArticles.map((item) => item.id)}
-          width={listWidth}
-          selectedIds={selectedIds}
-          onToggleSelect={toggleSelected}
-          onToggleSelectAll={toggleSelectAll}
-          onClearSelection={() => setSelectedIds(new Set())}
-        />
-        <Resizer
-          onResize={onListResize}
-          onResizeEnd={() => persistListWidth(listWidth)}
-          ariaLabel="Resize article list"
-        />
+        {!imageExpanded ? (
+          <>
+            <ProductList
+              selectedProductId={selectedVisibleArticleId}
+              onSelectProduct={onSelectProduct}
+              visibleArticleIds={filteredArticles.map((item) => item.id)}
+              width={listWidth}
+              selectedIds={selectedIds}
+              onToggleSelect={toggleSelected}
+              onToggleSelectAll={toggleSelectAll}
+              onClearSelection={() => setSelectedIds(new Set())}
+            />
+            <Resizer
+              onResize={onListResize}
+              onResizeEnd={() => persistListWidth(listWidth)}
+              ariaLabel="Resize article list"
+            />
+          </>
+        ) : null}
         {activeArticle ? (
           <>
             <ProductImagePanel
               key={`image-${activeArticle.id}`}
               article={activeArticle}
-              width={imageWidth}
+              width={imageExpanded ? listWidth + 4 + imageWidth : imageWidth}
+              expanded={imageExpanded}
+              onToggleExpand={() => setImageExpanded((prev) => !prev)}
             />
             <Resizer
               onResize={onImageResize}

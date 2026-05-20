@@ -10,9 +10,9 @@ type ExpandValue = {
 const ExpandContext = React.createContext<ExpandValue | null>(null);
 
 export function ExpandProvider({ children }: { children: React.ReactNode }) {
-  const [expandSignal, setExpandSignal] = React.useState(0);
+  const [expandSignal, setExpandSignal] = React.useState(1);
   const [collapseSignal, setCollapseSignal] = React.useState(0);
-  const [isExpanded, setIsExpanded] = React.useState(false);
+  const [isExpanded, setIsExpanded] = React.useState(true);
 
   const toggle = React.useCallback(() => {
     if (isExpanded) {

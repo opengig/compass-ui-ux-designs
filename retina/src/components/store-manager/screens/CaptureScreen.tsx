@@ -211,7 +211,7 @@ export function CaptureScreen() {
                 height: '52px',
                 borderRadius: '8px',
                 border: isActive
-                  ? '2px solid #FB923C'
+                  ? '2px solid #C68A1E'
                   : isDone
                     ? '1px solid #7DBD3B'
                     : '1px solid #E5E5E4',
@@ -242,7 +242,7 @@ export function CaptureScreen() {
             borderRadius: '8px',
             border:
               capture.active === 'more'
-                ? '2px solid #FB923C'
+                ? '2px solid #C68A1E'
                 : '1px dashed #E5E5E4',
             background: '#F5F5F4',
             fontSize: '9px',
@@ -258,7 +258,7 @@ export function CaptureScreen() {
                 top: '-3px',
                 right: '-3px',
                 fontSize: '8px',
-                background: '#FB923C',
+                background: '#C68A1E',
                 color: '#fff',
                 padding: '1px 4px',
                 borderRadius: '99px',
@@ -305,9 +305,9 @@ export function CaptureScreen() {
           style={{
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#FB923C',
+            background: '#C68A1E',
             color: '#fff',
-            border: '1px solid #FB923C',
+            border: '1px solid #C68A1E',
             opacity: capture.active ? 1 : 0.55,
             pointerEvents: capture.active ? 'auto' : 'none',
             minHeight: '48px',

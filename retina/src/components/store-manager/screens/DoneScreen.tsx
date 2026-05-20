@@ -36,7 +36,7 @@ export function DoneScreen() {
         padding: '24px 20px',
         paddingTop: 'max(24px, env(safe-area-inset-top))',
         paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 1rem))',
-        background: '#F5F5F4',
+        background: '#FCF8F0',
       }}
     >
       <div
@@ -112,7 +112,7 @@ export function DoneScreen() {
       <div
         className="w-full max-w-md flex items-center gap-2.5"
         style={{
-          background: '#FB923C',
+          background: '#C68A1E',
           borderRadius: '10px',
           padding: '12px 14px',
         }}
@@ -160,9 +160,9 @@ export function DoneScreen() {
           style={{
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#FB923C',
+            background: '#C68A1E',
             color: '#fff',
-            border: '1px solid #FB923C',
+            border: '1px solid #C68A1E',
             minHeight: '48px',
           }}
         >

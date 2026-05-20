@@ -30,10 +30,36 @@ export function buildGtin(apl) {
   return `8901${apl.replace("APL-","").padStart(9,"0")}`
 }
 
-// Single real product image used for all slots
+// Generic Grofers product photo pool — rotated deterministically per article id.
+// Slot order: [front, nutrition-back, ingredients-side, barcode].
+// Resize params stripped from the original cdn-cgi URLs so the panel renders at full resolution.
+const GROFERS_POOL = [
+  "https://cdn.grofers.com/da/cms-assets/cms/product_videos_thumbnails/0ed19481-8778-4c7a-97ef-5d1a493a689b.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/b35984c4-92ae-4094-b6d9-134baec38542.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/6742679a-3efe-4368-845c-eec1222cc618.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/ffc9c1ed-b9bb-497e-9136-6b02ab1c9445.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/9e82e99d-660b-4ce9-acf4-d85bff75e4d7.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/445b8a70-bbeb-448f-9d4c-6f9d015b5107.jpg",
+  "https://cdn.grofers.com/da/cms-assets/cms/product/9fcf2e06-9263-48d0-8861-8c4d84aed4c5.jpg",
+]
 
-export function makePicsums(_artId) {
-  return [FRONT_IMG, BACK_IMG, SIDE_IMG, BARCODE_IMG]
+function poolOffset(artId) {
+  // Stable hash so the same article always gets the same images
+  if (typeof artId === "number" && Number.isFinite(artId)) return Math.abs(artId)
+  let h = 0
+  for (const ch of String(artId ?? "")) h = (h * 31 + ch.charCodeAt(0)) >>> 0
+  return h
+}
+
+export function makePicsums(artId) {
+  const base = poolOffset(artId) % GROFERS_POOL.length
+  // Front / nutrition / ingredients slots from the Grofers pool; barcode slot keeps the data URL.
+  return [
+    GROFERS_POOL[base],
+    GROFERS_POOL[(base + 1) % GROFERS_POOL.length],
+    GROFERS_POOL[(base + 2) % GROFERS_POOL.length],
+    BARCODE_IMG,
+  ]
 }
 
 // Dynamic image generator — picsum w/ deterministic sig per article

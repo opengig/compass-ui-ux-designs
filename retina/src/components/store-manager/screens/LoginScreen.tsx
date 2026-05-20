@@ -15,7 +15,7 @@ export function LoginScreen() {
       {/* Logo / hero block — vertically centered in the available space */}
       <div className="flex-1 flex flex-col items-center justify-center gap-4 px-6">
         <svg width="72" height="72" viewBox="0 0 44 44" aria-hidden="true">
-          <rect width="44" height="44" rx="11" fill="#FB923C" />
+          <rect width="44" height="44" rx="11" fill="#C68A1E" />
           <line
             x1="10"
             y1="34"
@@ -55,7 +55,7 @@ export function LoginScreen() {
           onClick={onSignIn}
           className="w-full flex items-center justify-center gap-2 rounded-xl text-[15px] font-medium active:opacity-90"
           style={{
-            background: '#FB923C',
+            background: '#C68A1E',
             color: '#fff',
             padding: '15px 16px',
           }}

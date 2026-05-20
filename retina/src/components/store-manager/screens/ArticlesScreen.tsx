@@ -6,7 +6,6 @@ import {
   ChevronDown,
   MapPin,
   Filter,
-  ChevronRight,
   MoreVertical,
   Check,
   RefreshCw,
@@ -57,6 +56,34 @@ const RetinaLogo = ({ size = 20 }: { size?: number }) => (
 );
 
 type AnyArticle = Article | MappedArticle | LooseArticle;
+
+type StatusKind = 'failed' | 'done' | 'todo' | 'mapped';
+const STATUS_PILL: Record<StatusKind, { label: string; bg: string; color: string }> = {
+  failed: { label: 'FAILED',  bg: '#FDE7E7', color: '#A32D2D' },
+  done:   { label: 'DONE',    bg: '#E2EFC8', color: '#3B6D11' },
+  todo:   { label: 'TO SCAN', bg: '#ECECEB', color: '#71717A' },
+  mapped: { label: 'MAPPED',  bg: '#E2EFC8', color: '#3B6D11' },
+};
+
+function StatusPill({ kind }: { kind: StatusKind }) {
+  const s = STATUS_PILL[kind];
+  return (
+    <span
+      className="inline-flex items-center font-semibold tracking-wide"
+      style={{
+        background: s.bg,
+        color: s.color,
+        fontSize: '9.5px',
+        padding: '2px 6px',
+        borderRadius: '4px',
+        lineHeight: 1.2,
+        letterSpacing: '0.04em',
+      }}
+    >
+      {s.label}
+    </span>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /* Action-sheet & filter state types                                  */
@@ -275,33 +302,32 @@ export function ArticlesScreen() {
               opacity: 0.78,
             }}
           >
-            <div
-              className="self-stretch flex-shrink-0"
-              style={{ width: '4px', borderRadius: '2px', background: '#A1A1AA' }}
-            />
             <div className="flex-1 min-w-0">
+              <span
+                className="inline-flex items-center font-semibold tracking-wide"
+                style={{
+                  background: '#ECECEB',
+                  color: '#71717A',
+                  fontSize: '9.5px',
+                  padding: '2px 6px',
+                  borderRadius: '4px',
+                  lineHeight: 1.2,
+                  letterSpacing: '0.04em',
+                }}
+              >
+                NOT IN STORE
+              </span>
               <div
-                className="text-[13.5px] leading-[1.3]"
+                className="text-[13.5px] leading-[1.3] mt-[5px]"
                 style={{ color: '#71717A', fontWeight: 400 }}
               >
                 Amul Paneer
               </div>
               <div
-                className="text-[11.5px] mt-[3px] flex items-center gap-1.5"
-                style={{ color: '#71717A' }}
+                className="text-[11.5px] mt-[3px]"
+                style={{ color: '#A1A1AA' }}
               >
-                <span
-                  className="text-[10.5px] font-medium"
-                  style={{
-                    color: '#71717A',
-                    background: '#ECECEB',
-                    padding: '2px 7px',
-                    borderRadius: '99px',
-                  }}
-                >
-                  Not in store
-                </span>
-                <span style={{ color: '#A1A1AA' }}>ART-10234</span>
+                ART-10234
               </div>
             </div>
             <button
@@ -337,15 +363,12 @@ export function ArticlesScreen() {
             key={a.id}
             onClick={onOpenRetry}
             className="rounded-[10px] p-[12px_13px] flex items-center gap-[10px] cursor-pointer relative active:opacity-90"
-            style={{ background: '#F5F5F4', border: '1px solid #F09595' }}
+            style={{ background: '#FFF5F5', border: '1px solid #F09595' }}
           >
-            <div
-              className="self-stretch flex-shrink-0"
-              style={{ width: '4px', borderRadius: '2px', background: '#E24B4A' }}
-            />
             <div className="flex-1 min-w-0">
+              <StatusPill kind="failed" />
               <div
-                className="text-[13.5px] font-medium leading-[1.3]"
+                className="text-[13.5px] font-medium leading-[1.3] mt-[5px]"
                 style={{
                   color: '#1F1611',
                   display: '-webkit-box',
@@ -369,18 +392,15 @@ export function ArticlesScreen() {
         return (
           <div
             key={a.id}
-            className="bg-white rounded-[10px] p-[12px_13px] flex items-center gap-[10px] relative"
-            style={{ border: '1px solid #E5E5E4' }}
+            className="rounded-[10px] p-[12px_13px] flex items-center gap-[10px] relative"
+            style={{ background: '#F2F8E8', border: '1px solid #D9E8C0' }}
           >
-            <div
-              className="self-stretch flex-shrink-0"
-              style={{ width: '4px', borderRadius: '2px', background: '#5A8C1A' }}
-            />
             <div className="flex-1 min-w-0">
+              <StatusPill kind="done" />
               <div
-                className="text-[13.5px] font-medium leading-[1.3]"
+                className="text-[13.5px] font-medium leading-[1.3] mt-[5px]"
                 style={{
-                  color: '#3B6D11',
+                  color: '#1F1611',
                   display: '-webkit-box',
                   WebkitLineClamp: 2,
                   WebkitBoxOrient: 'vertical',
@@ -406,10 +426,6 @@ export function ArticlesScreen() {
           className="bg-white rounded-[10px] p-[12px_13px] flex items-center gap-[10px] cursor-pointer relative active:bg-[#F5F5F4]"
           style={{ border: '1px solid #E5E5E4' }}
         >
-          <div
-            className="self-stretch flex-shrink-0"
-            style={{ width: '4px', borderRadius: '2px', background: '#A1A1AA' }}
-          />
           <div className="flex-1 min-w-0">
             <div
               className="text-[13.5px] font-medium leading-[1.3]"
@@ -431,7 +447,6 @@ export function ArticlesScreen() {
             </div>
           </div>
           <div className="flex items-center gap-1">
-            <ChevronRight className="w-[18px] h-[18px]" style={{ color: '#A1A1AA' }} />
             <button
               type="button"
               onClick={(e) => {
@@ -441,7 +456,7 @@ export function ArticlesScreen() {
               aria-label="More actions"
               className="active:opacity-70"
               style={{
-                background: '#ECECEB',
+                background: 'transparent',
                 borderRadius: '6px',
                 padding: '7px',
                 border: 'none',
@@ -450,7 +465,7 @@ export function ArticlesScreen() {
                 minHeight: '32px',
               }}
             >
-              <MoreVertical className="w-4 h-4" style={{ color: '#71717A' }} />
+              <MoreVertical className="w-4 h-4" style={{ color: '#C68A1E' }} />
             </button>
           </div>
         </div>
@@ -482,18 +497,15 @@ export function ArticlesScreen() {
     return all.map((article) => (
       <div
         key={article.id}
-        className="bg-white rounded-[10px] p-[12px_13px] flex items-center gap-[10px] relative"
-        style={{ border: '1px solid #E5E5E4' }}
+        className="rounded-[10px] p-[12px_13px] flex items-center gap-[10px] relative"
+        style={{ background: '#F2F8E8', border: '1px solid #D9E8C0' }}
       >
-        <div
-          className="self-stretch flex-shrink-0"
-          style={{ width: '4px', borderRadius: '2px', background: '#5A8C1A' }}
-        />
         <div className="flex-1 min-w-0">
+          <StatusPill kind="mapped" />
           <div
-            className="text-[13.5px] font-medium leading-[1.3]"
+            className="text-[13.5px] font-medium leading-[1.3] mt-[5px]"
             style={{
-              color: '#3B6D11',
+              color: '#1F1611',
               display: '-webkit-box',
               WebkitLineClamp: 2,
               WebkitBoxOrient: 'vertical',
@@ -521,10 +533,6 @@ export function ArticlesScreen() {
           className="bg-white rounded-[10px] p-[12px_13px] flex items-center gap-[10px] cursor-pointer relative active:bg-[#F5F5F4]"
           style={{ border: '1px solid #E5E5E4' }}
         >
-          <div
-            className="self-stretch flex-shrink-0"
-            style={{ width: '4px', borderRadius: '2px', background: '#A1A1AA' }}
-          />
           <div className="flex-1 min-w-0">
             <div
               className="text-[13.5px] font-medium leading-[1.3]"
@@ -543,7 +551,6 @@ export function ArticlesScreen() {
             </div>
           </div>
           <div className="flex items-center gap-1 flex-shrink-0">
-            <ChevronRight className="w-[18px] h-[18px]" style={{ color: '#A1A1AA' }} />
             <button
               type="button"
               onClick={(e) => {
@@ -553,7 +560,7 @@ export function ArticlesScreen() {
               aria-label="More actions"
               className="active:opacity-70"
               style={{
-                background: '#ECECEB',
+                background: 'transparent',
                 borderRadius: '6px',
                 padding: '7px',
                 border: 'none',
@@ -562,7 +569,7 @@ export function ArticlesScreen() {
                 minHeight: '32px',
               }}
             >
-              <MoreVertical className="w-4 h-4" style={{ color: '#71717A' }} />
+              <MoreVertical className="w-4 h-4" style={{ color: '#C68A1E' }} />
             </button>
           </div>
         </div>
@@ -623,7 +630,10 @@ export function ArticlesScreen() {
             onClick={() => setFilterSheetOpen(true)}
             aria-label="Filters"
           >
-            <SlidersHorizontal className="w-[20px] h-[20px]" style={{ color: '#1F1611' }} />
+            <SlidersHorizontal
+              className="w-[20px] h-[20px]"
+              style={{ color: selectedChips.length > 0 ? '#C68A1E' : '#1F1611' }}
+            />
             {selectedChips.length > 0 && (
               <div
                 className="absolute"
@@ -633,7 +643,7 @@ export function ArticlesScreen() {
                   width: '7px',
                   height: '7px',
                   borderRadius: '50%',
-                  background: '#E5E5E4',
+                  background: '#C68A1E',
                   border: '1.5px solid #fff',
                 }}
               />
@@ -655,9 +665,9 @@ export function ArticlesScreen() {
             <div
               className="flex-1 flex items-center gap-[7px]"
               style={{
-                background: '#ECECEB',
+                background: '#F9F4EA',
                 borderRadius: '8px',
-                padding: '10px 12px',
+                padding: '7px 10px',
               }}
             >
               <Search className="w-[15px] h-[15px]" style={{ color: '#71717A' }} />
@@ -717,7 +727,7 @@ export function ArticlesScreen() {
                 className="flex-1 flex items-center justify-center cursor-pointer gap-1 active:bg-[#F5F5F4]"
                 style={{
                   height: '44px',
-                  borderBottom: active ? '2px solid #FB923C' : '2px solid transparent',
+                  borderBottom: active ? '2px solid #C68A1E' : '2px solid transparent',
                   fontSize: '12.5px',
                   color: active ? '#1F1611' : '#71717A',
                   fontWeight: active ? 600 : 400,
@@ -731,7 +741,7 @@ export function ArticlesScreen() {
                     fontSize: '10.5px',
                     padding: '1px 6px',
                     borderRadius: '99px',
-                    background: t.cls === 'green' ? '#EAF3DE' : '#FB923C',
+                    background: t.cls === 'green' ? '#EAF3DE' : '#C68A1E',
                     color: t.cls === 'green' ? '#3B6D11' : '#fff',
                     fontWeight: 600,
                   }}
@@ -787,7 +797,7 @@ export function ArticlesScreen() {
         {currentTab === 'scan' && (
           <div
             className="flex-1 overflow-y-auto flex flex-col gap-1.5"
-            style={{ padding: '8px 14px 16px', background: '#F5F5F4' }}
+            style={{ padding: '8px 14px 16px', background: '#FCF8F0' }}
           >
             {filteredArticles.length === 0 ? (
               <div
@@ -811,45 +821,7 @@ export function ArticlesScreen() {
                 </div>
               </div>
             ) : (
-              <>
-                {/* Status legend */}
-                <div className="flex gap-2 flex-wrap" style={{ padding: '2px 0 4px' }}>
-                  <div className="flex items-center gap-1 text-[10px]" style={{ color: '#71717A' }}>
-                    <div
-                      style={{
-                        width: '7px',
-                        height: '7px',
-                        borderRadius: '50%',
-                        background: '#E24B4A',
-                      }}
-                    />
-                    Failed
-                  </div>
-                  <div className="flex items-center gap-1 text-[10px]" style={{ color: '#71717A' }}>
-                    <div
-                      style={{
-                        width: '7px',
-                        height: '7px',
-                        borderRadius: '50%',
-                        background: '#5A8C1A',
-                      }}
-                    />
-                    Done
-                  </div>
-                  <div className="flex items-center gap-1 text-[10px]" style={{ color: '#71717A' }}>
-                    <div
-                      style={{
-                        width: '7px',
-                        height: '7px',
-                        borderRadius: '50%',
-                        background: '#A1A1AA',
-                      }}
-                    />
-                    To scan
-                  </div>
-                </div>
-                {renderScanCards()}
-              </>
+              renderScanCards()
             )}
           </div>
         )}
@@ -857,7 +829,7 @@ export function ArticlesScreen() {
         {currentTab === 'mapped' && (
           <div
             className="flex-1 overflow-y-auto flex flex-col gap-1.5"
-            style={{ padding: '8px 14px 16px', background: '#F5F5F4' }}
+            style={{ padding: '8px 14px 16px', background: '#FCF8F0' }}
           >
             <div className="text-[11.5px]" style={{ color: '#71717A', padding: '2px 0 4px' }}>
               Scanned by your site or another store
@@ -869,7 +841,7 @@ export function ArticlesScreen() {
         {currentTab === 'loose' && (
           <div
             className="flex-1 overflow-y-auto flex flex-col gap-1.5"
-            style={{ padding: '8px 14px 16px', background: '#F5F5F4' }}
+            style={{ padding: '8px 14px 16px', background: '#FCF8F0' }}
           >
             <div className="text-[11.5px]" style={{ color: '#71717A', padding: '2px 0 4px' }}>
               Items without barcodes — capture images directly
@@ -891,10 +863,10 @@ export function ArticlesScreen() {
       >
         <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]">
           <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#FB923C', marginBottom: '1px' }}
+            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }}
           />
-          <List className="w-[22px] h-[22px]" style={{ color: '#1F1611' }} />
-          <span className="text-[10.5px] font-medium" style={{ color: '#1F1611' }}>
+          <List className="w-[22px] h-[22px]" style={{ color: '#C68A1E' }} />
+          <span className="text-[10.5px] font-medium" style={{ color: '#C68A1E' }}>
             Articles
           </span>
         </div>
@@ -975,8 +947,8 @@ export function ArticlesScreen() {
                         height: '20px',
                         borderRadius: '4px',
                         border: '1.5px solid #A1A1AA',
-                        background: on ? '#FB923C' : 'transparent',
-                        borderColor: on ? '#FB923C' : '#A1A1AA',
+                        background: on ? '#C68A1E' : 'transparent',
+                        borderColor: on ? '#C68A1E' : '#A1A1AA',
                       }}
                     >
                       {on && (
@@ -1009,9 +981,9 @@ export function ArticlesScreen() {
                 onClick={() => setFilterSheetOpen(false)}
                 className="w-full flex items-center justify-center gap-1.5 text-[14px] font-medium active:opacity-90"
                 style={{
-                  background: '#FB923C',
+                  background: '#C68A1E',
                   color: '#fff',
-                  border: '1px solid #FB923C',
+                  border: '1px solid #C68A1E',
                   borderRadius: '8px',
                   padding: '14px 16px',
                   minHeight: '48px',

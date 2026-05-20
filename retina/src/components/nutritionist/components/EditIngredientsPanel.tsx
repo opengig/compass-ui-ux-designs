@@ -193,16 +193,13 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
           <div className="flex-shrink-0 flex flex-col overflow-hidden"
             style={{width: photoCollapsed ? 0 : "50%", borderLeft: photoCollapsed ? "none" : `1px solid ${C.border}`, backgroundColor:"#fff", transition:"width 0.25s ease"}}>
 
-                  {/* Main image — Amazon-style zoom on hover */}
+                  {/* Main image — zoom-on-hover disabled in nutritionist flow */}
                   <div
                     ref={imgContainerRef}
-                    onMouseEnter={()=>setZoom(true)}
-                    onMouseLeave={()=>setZoom(false)}
-                    onMouseMove={handleMouseMove}
                     style={{
                       flex:1, position:"relative",
                       backgroundColor:C.muted, overflow:"hidden",
-                      cursor: zoom ? "crosshair" : "default",
+                      cursor:"default",
                     }}>
                     {(() => {
                       const imgSrc = resolvedImgs(activeImg)
@@ -214,11 +211,6 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                         style={{
                           width:"100%", height:"100%",
                           objectFit:"cover", display:"block",
-                          transition: zoom ? "none" : "transform 0.2s",
-                          transform: zoom
-                            ? `scale(2.2) translate(${(50-zoomPos.x)*0.7}%, ${(50-zoomPos.y)*0.7}%)`
-                            : "scale(1)",
-                          transformOrigin:`${zoomPos.x}% ${zoomPos.y}%`,
                         }}
                       />
                     ) : (
@@ -557,26 +549,34 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
             <div style={{borderBottom:`1px solid ${C.border}`}}>
               <SectionHdr k="nutrients" label="Nutrients"/>
               {sec.nutrients && (
-                <div style={{backgroundColor:"#fff"}}>
+                <div className="px-5 py-3" style={{backgroundColor:"#fff"}}>
                   {/* Per 100g banner */}
-                  <div className="mx-5 mt-4 mb-3 px-3 py-1.5 rounded-r"
+                  <div className="mb-3 px-3 py-1.5 rounded-r"
                     style={{backgroundColor:C.prBg,borderLeft:`2px solid ${C.pr}`,
                             fontSize:12,fontWeight:600,color:C.pr}}>
                     All values per 100g / 100ml
                   </div>
+                  {/* Nutrients table — matches Allergens table styling for uniformity */}
+                  <div className="rounded-lg overflow-hidden" style={{border:`1px solid ${C.border}`}}>
+                    {/* Table header */}
+                    <div className="flex" style={{backgroundColor:C.muted, borderBottom:`1px solid ${C.border2}`}}>
+                      <div className="px-3 py-2 flex-1" style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg}}>Nutrient</div>
+                      <div className="px-3 py-2" style={{width:200,flexShrink:0,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg,borderLeft:`1px solid ${C.border2}`,textAlign:"right"}}>Value</div>
+                    </div>
                   {/* Rows */}
-                  {Object.entries(displayNuts).map(([k,n])=>{
+                  {Object.entries(displayNuts).map(([k,n], idx, arr)=>{
                     const miss = n.c==="missing"
                     const isLLM = n.c==="llm"
                     const isNA  = n.c==="na"
                     const edited = nutEdited[k]
                     const badge  = nutBadge(n.c)
                     const rStyle = nutRowStyle(n.c)
+                    const isLast = idx === arr.length - 1
                     return (
                       <div key={k}
-                        className="flex items-center px-5 py-3 gap-3"
+                        className="flex items-center px-3 py-2.5 gap-3"
                         style={{
-                          borderBottom:`1px solid ${C.border}`,
+                          borderBottom: isLast ? "none" : `1px solid ${C.border}`,
                           borderLeft: rStyle.borderLeft,
                           backgroundColor: rStyle.backgroundColor,
                         }}>
@@ -633,6 +633,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                       </div>
                     )
                   })}
+                  </div>
                 </div>
               )}
             </div>

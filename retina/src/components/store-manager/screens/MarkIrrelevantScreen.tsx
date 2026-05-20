@@ -74,22 +74,22 @@ export function MarkIrrelevantScreen() {
 
       <div
         className="flex-1 flex flex-col gap-3 overflow-y-auto"
-        style={{ padding: '16px', background: '#F5F5F4' }}
+        style={{ padding: '16px', background: '#FCF8F0' }}
       >
         <div
           className="flex gap-[9px]"
           style={{
-            background: '#ECECEB',
+            background: '#FBF3E0',
             borderRadius: '10px',
             padding: '13px 14px',
-            border: '1px solid #A1A1AA',
+            border: '1px solid #F4E4BC',
           }}
         >
           <Info
             className="w-4 h-4 flex-shrink-0 mt-[1px]"
-            style={{ color: '#44403C' }}
+            style={{ color: '#C68A1E' }}
           />
-          <div className="text-[12.5px] leading-[1.6]" style={{ color: '#44403C' }}>
+          <div className="text-[12.5px] leading-[1.6]" style={{ color: '#7A5310' }}>
             {info}
           </div>
         </div>
@@ -194,9 +194,9 @@ export function MarkIrrelevantScreen() {
             flex: 1,
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#44403C',
+            background: '#C68A1E',
             color: '#fff',
-            border: '1px solid #44403C',
+            border: '1px solid #C68A1E',
             minHeight: '48px',
           }}
         >

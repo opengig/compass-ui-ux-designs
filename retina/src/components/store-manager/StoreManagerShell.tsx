@@ -12,7 +12,7 @@ import { Outlet } from 'react-router-dom';
  */
 export function StoreManagerShell() {
   return (
-    <div className="w-screen h-screen overflow-hidden flex flex-col bg-[#F5F5F4] font-heading text-foreground">
+    <div className="w-screen h-screen overflow-hidden flex flex-col bg-[#FCF8F0] font-heading text-foreground">
       <Outlet />
     </div>
   );

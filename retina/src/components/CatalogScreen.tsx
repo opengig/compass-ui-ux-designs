@@ -62,8 +62,8 @@ export function CatalogScreen() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-background">
-      {/* Sub-header — matches QueueHeader: h-12, px-3, segmented control on left, search on right */}
-      <header className="flex-shrink-0 h-12 border-b border-border bg-card flex items-center gap-2 px-3">
+      {/* Sub-header — tab control left, search centered, spacer right */}
+      <header className="flex-shrink-0 h-12 border-b border-border bg-card flex items-center gap-2 px-3 relative">
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {TABS.map((t) => {
             const isActive = tab === t.key;
@@ -92,30 +92,32 @@ export function CatalogScreen() {
           })}
         </nav>
 
-        <div className="ml-auto relative shrink-0">
-          <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
-          <input
-            value={query}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder={`Search ${tab}`}
-            className="h-8 w-72 rounded-md border border-border bg-card pl-8 pr-8 text-[12.5px] placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
-          />
-          {query ? (
-            <button
-              type="button"
-              onClick={() => setQuery('')}
-              aria-label="Clear search"
-              className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40"
-            >
-              ×
-            </button>
-          ) : null}
+        <div className="absolute left-1/2 -translate-x-1/2 shrink-0">
+          <div className="relative">
+            <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder={`Search ${tab}`}
+              className="h-8 w-72 rounded-md border border-border bg-card pl-8 pr-8 text-[12.5px] placeholder:text-muted-foreground/70 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+            />
+            {query ? (
+              <button
+                type="button"
+                onClick={() => setQuery('')}
+                aria-label="Clear search"
+                className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40"
+              >
+                ×
+              </button>
+            ) : null}
+          </div>
         </div>
       </header>
 
       {/* Table area */}
       <div className="flex-1 overflow-auto retina-thin-scroll">
-        <div className="px-5 py-5 max-w-6xl mx-auto w-full">
+        <div className="px-5 py-5 w-full">
           <div className="rounded-lg border border-border bg-card overflow-hidden">
             {results.kind === 'ingredients' ? (
               <IngredientsTable matches={results.matches} query={query} />

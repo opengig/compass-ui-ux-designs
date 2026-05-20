@@ -20,7 +20,7 @@ function AllergenChip({ allergen }: { allergen: string }) {
     return <span className="text-[11px] text-muted-foreground/40">—</span>;
   }
   return (
-    <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[11px] font-medium border border-rose-300 text-rose-700">
+    <span className="inline-flex w-fit items-center self-start px-1.5 py-0.5 rounded text-[11px] font-medium border border-rose-300 text-rose-700 bg-rose-50">
       {allergen}
     </span>
   );

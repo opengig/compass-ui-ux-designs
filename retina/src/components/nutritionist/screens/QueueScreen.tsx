@@ -111,12 +111,13 @@ export function QueueScreen() {
   const toggleIssue = (k) => { setQIssues(prev => prev.includes(k) ? prev.filter(x=>x!==k) : [...prev,k]); setVisibleCount(10) }
 
   const siteFilteredArts = ARTS.filter(a => selectedSites.includes(a.site))
+  // Tab labels + dot styles mirror /article-sme/review for consistency
   const STATUS_TABS = [
-    {key:"all",  label:"All Articles",    count: siteFilteredArts.length},
-    {key:"green",label:"High confidence", count: siteFilteredArts.filter(a=>a.status==="green").length},
-    {key:"amber",label:"Need review",     count: siteFilteredArts.filter(a=>a.status==="amber").length},
-    {key:"red",  label:"Low confidence",  count: siteFilteredArts.filter(a=>a.status==="red").length},
-    {key:"sme",  label:"From Article SME",count: siteFilteredArts.filter(a=>a.sme===true).length},
+    {key:"all",  label:"Inbox", dotClass: null,             count: siteFilteredArts.length},
+    {key:"green",label:"Match", dotClass:"bg-emerald-500",  count: siteFilteredArts.filter(a=>a.status==="green").length},
+    {key:"amber",label:"Review",dotClass:"bg-amber-500",    count: siteFilteredArts.filter(a=>a.status==="amber").length},
+    {key:"red",  label:"Fix",   dotClass:"bg-rose-500",     count: siteFilteredArts.filter(a=>a.status==="red").length},
+    {key:"sme",  label:"From SME", dotClass:"bg-sky-500",   count: siteFilteredArts.filter(a=>a.sme===true).length},
   ]
   const ISSUE_DEFS = [
     {key:"allergen",label:"Allergen",cls:"bg-[#FCEAEA] text-[#C53030] border-[#EFA0A0]"},
@@ -161,68 +162,39 @@ export function QueueScreen() {
   }, [isLoadingMore, visibleCount, list.length])
 
   return (
-    <div className="flex flex-col flex-1 overflow-hidden" style={{backgroundColor:C.page}}>
+    <div className="flex flex-col flex-1 overflow-hidden bg-background">
       <PageHeader title="My Tasks"/>
-      {/* Status tab bar + filter btn */}
-      <div className="flex-shrink-0 flex items-center px-5" style={{backgroundColor:C.card, borderBottom:`1px solid ${C.border}`}}>
-        {/* Underline tabs */}
-        <div className="flex items-end gap-0 flex-1">
+      {/* Status tabs + filter — segmented pill control, matches /article-sme/review */}
+      <div className="flex-shrink-0 flex items-center px-3 h-12 bg-card border-b border-border gap-2">
+        <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {STATUS_TABS.map(t => {
             const on = qf === t.key
-            const badgeCfg = {
-              all:   {bg:C.prBg,    color:C.pr},
-              green: {bg:C.grBg,    color:C.gr},
-              amber: {bg:C.warnBg,  color:C.am},
-              red:   {bg:C.rdBg,    color:C.rd},
-              sme:   {bg:C.infoBg,  color:C.info},
-            }
-            const badge = badgeCfg[t.key] || badgeCfg.all
-            const allChecked = list.length > 0 && list.every(a => selectedArticles.has(a.id))
-            const someChecked = list.some(a => selectedArticles.has(a.id)) && !allChecked
             return (
               <button key={t.key}
                 onClick={()=>setQf(qf===t.key&&t.key!=="all"?"all":t.key)}
-                className="flex items-center gap-1.5 px-3 pt-3 pb-2.5 transition-colors whitespace-nowrap"
-                style={{
-                  fontSize:13, fontWeight: on ? 700 : 400,
-                  color: on ? C.pr : C.mutedFg,
-                  borderBottom: on ? `2.5px solid ${C.pr}` : "2.5px solid transparent",
-                }}>
-                {t.key === "all" && (
-                  <span
-                    onClick={e => {
-                      e.stopPropagation()
-                      if (allChecked) {
-                        setSelectedArticles(prev => { const next = new Set(prev); list.forEach(a => next.delete(a.id)); return next })
-                      } else {
-                        setSelectedArticles(prev => { const next = new Set(prev); list.forEach(a => next.add(a.id)); return next })
-                      }
-                    }}
-                    style={{
-                      display:"inline-flex", alignItems:"center", justifyContent:"center",
-                      width:14, height:14, borderRadius:3, flexShrink:0,
-                      border:`1.5px solid ${allChecked || someChecked ? C.pr : C.border}`,
-                      backgroundColor: allChecked ? C.pr : "transparent",
-                      cursor:"pointer",
-                    }}>
-                    {allChecked && <Check size={9} color="#fff" strokeWidth={3}/>}
-                    {someChecked && <span style={{width:6,height:2,borderRadius:1,backgroundColor:C.pr,display:"block"}}/>}
-                  </span>
-                )}
-                {t.label}
-                <span className="inline-flex items-center justify-center rounded-full font-bold"
-                  style={{
-                    fontSize:10, minWidth:18, height:18, padding:"0 5px",
-                    backgroundColor:badge.bg, color:badge.color,
-                  }}>
+                className={`inline-flex items-center gap-2 h-7 px-2.5 rounded-md transition-all shrink-0 ${
+                  on
+                    ? "bg-card text-foreground font-semibold shadow-soft"
+                    : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-card/50"
+                }`}
+              >
+                {t.dotClass ? (
+                  <span className={`inline-block w-1.5 h-1.5 rounded-full ${t.dotClass}`}/>
+                ) : null}
+                <span className="text-[12.5px] whitespace-nowrap">{t.label}</span>
+                <span
+                  className={`tabular-nums text-[11px] px-1.5 py-0.5 rounded font-semibold ${
+                    on ? "bg-foreground/10 text-foreground/85" : "bg-stone-300/60 text-muted-foreground/90"
+                  }`}
+                >
                   {t.count}
                 </span>
               </button>
             )
           })}
-        </div>
+        </nav>
         {/* Filter button — right aligned, vertically centred */}
-        <div className="relative flex-shrink-0">
+        <div className="relative flex-shrink-0 ml-auto">
           <div className="relative inline-flex">
             <BtnSecondary
               className={activeFilters>0?"border-[#E8C97A] text-[#C68A1E] bg-[#FEF9EE]":""}
@@ -309,11 +281,11 @@ export function QueueScreen() {
       <div ref={containerRef} className="flex flex-1 overflow-hidden">
 
         {/* ── TABLE COLUMN — resizable via drag handle ── */}
-        <div className="flex flex-col overflow-hidden flex-shrink-0"
-          style={{width:listWidth, minWidth:180, maxWidth:520, backgroundColor:C.page, position:"relative"}}>
+        <div className="flex flex-col overflow-hidden flex-shrink-0 bg-background relative"
+          style={{width:listWidth, minWidth:180, maxWidth:520}}>
           <div className="flex-1 overflow-y-auto">
             <div>
-              <Card className="shadow-sm overflow-hidden rounded-none border-x-0 border-t-0" style={{borderRadius:0}}>
+              <Card className="shadow-none overflow-hidden rounded-none border-x-0 border-t-0">
                 <div className="overflow-x-auto">
                   <table className="w-full text-left">
                     <tbody>
@@ -321,23 +293,18 @@ export function QueueScreen() {
                         const isActive = a.id === editPanelArtId
                         const highlightIndex = highlightArtIds.indexOf(a.id)
                         const isHighlighted = highlightIndex !== -1
-                        // Selected article row always uses brand amber for fill + rail.
-                        // Status colour is still shown via the bullet/badge inside the row.
-                        const selectorColor = C.pr
-                        const selectorBg    = C.pr
                         return (
-                          <tr key={a.id} data-art-id={a.id} className="cursor-pointer transition-colors"
+                          <tr key={a.id} data-art-id={a.id}
+                            className={`cursor-pointer transition-colors border-b border-border/60 border-l-[3px] ${
+                              isActive
+                                ? "bg-[#FBF3E0] border-l-primary"
+                                : "border-l-transparent hover:bg-muted/40"
+                            }`}
                             style={{
-                              borderBottom:`1px solid ${isHighlighted ? C.border3 : C.border}`,
-                              backgroundColor: isActive ? selectorBg : "transparent",
-                              borderLeft: `3px solid ${isActive ? selectorColor : "transparent"}`,
-                              color: isActive ? "#fff" : undefined,
                               animation: isHighlighted ? `artGlow 2s ease-in-out 0s both` : "none",
                             }}
-                            onClick={()=>setEditPanelArtId(a.id)}
-                            onMouseEnter={e=>{ if(!isActive) e.currentTarget.style.backgroundColor=C.surfHov }}
-                            onMouseLeave={e=>{ if(!isActive) e.currentTarget.style.backgroundColor="transparent" }}>
-                            <td className="pl-3 pr-1 py-3" style={{width:28,verticalAlign:"middle"}}>
+                            onClick={()=>setEditPanelArtId(a.id)}>
+                            <td className="pl-3 pr-1 py-3 align-middle" style={{width:28}}>
                               <span
                                 onClick={e => {
                                   e.stopPropagation()
@@ -347,29 +314,36 @@ export function QueueScreen() {
                                     return next
                                   })
                                 }}
-                                style={{
-                                  display:"inline-flex", alignItems:"center", justifyContent:"center",
-                                  width:14, height:14, borderRadius:3, flexShrink:0,
-                                  border:`1.5px solid ${selectedArticles.has(a.id) ? C.pr : C.border}`,
-                                  backgroundColor: selectedArticles.has(a.id) ? C.pr : "transparent",
-                                  cursor:"pointer",
-                                }}>
-                                {selectedArticles.has(a.id) && <Check size={9} color="#fff" strokeWidth={3}/>}
+                                className={`inline-flex items-center justify-center w-3.5 h-3.5 rounded-[3px] flex-shrink-0 cursor-pointer border-[1.5px] ${
+                                  selectedArticles.has(a.id)
+                                    ? "bg-primary border-primary"
+                                    : "bg-transparent border-border"
+                                }`}>
+                                {selectedArticles.has(a.id) && <Check size={9} className="text-primary-foreground" strokeWidth={3}/>}
                               </span>
                             </td>
                             <td className="pr-4 py-3">
                               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                                <p style={{...T.tableNm, fontSize: editPanelArtId?12:13, color: isActive ? "#fff" : T.tableNm.color}}>{a.name}</p>
+                                <span
+                                  className={`inline-block w-2 h-2 rounded-full shrink-0 ${
+                                    a.status === 'green'
+                                      ? 'bg-emerald-500'
+                                      : a.status === 'amber'
+                                        ? 'bg-amber-500'
+                                        : a.status === 'red'
+                                          ? 'bg-rose-500'
+                                          : 'bg-stone-400'
+                                  }`}
+                                  aria-label={`Status: ${a.status}`}
+                                />
+                                <p className={`${editPanelArtId ? "text-[12px]" : "text-[13px]"} font-medium ${isActive ? "text-foreground" : "text-foreground"}`}>{a.name}</p>
                                 {a.sme && (
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border flex-shrink-0"
-                                    style={{fontSize:9,fontWeight:700,letterSpacing:"0.03em",
-                                            backgroundColor:isActive?"#fff":C.prBg,color:C.pr,borderColor:isActive?"#fff":C.prBdr,
-                                            textTransform:"uppercase"}}>
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border flex-shrink-0 text-[9px] font-bold uppercase tracking-wide bg-primary/10 text-primary border-primary/30">
                                     SME Updated
                                   </span>
                                 )}
                               </div>
-                              <p style={{...T.tableApl, color: isActive ? "rgba(255,255,255,0.85)" : T.tableApl.color}}>{a.apl}</p>
+                              <p className={`text-[11.5px] ${isActive ? "text-muted-foreground" : "text-muted-foreground"}`}>{a.apl}</p>
                             </td>
                             {!editPanelArtId && <td className="px-4 py-3"><IssueChips art={a}/></td>}
                           </tr>

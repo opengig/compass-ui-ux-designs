@@ -34,7 +34,7 @@ export function RetryScreen() {
 
       <div
         className="flex-1 flex flex-col gap-2.5 overflow-y-auto"
-        style={{ padding: '12px 16px', background: '#F5F5F4' }}
+        style={{ padding: '12px 16px', background: '#FCF8F0' }}
       >
         <div
           style={{
@@ -174,9 +174,9 @@ export function RetryScreen() {
           style={{
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#FB923C',
+            background: '#C68A1E',
             color: '#fff',
-            border: '1px solid #FB923C',
+            border: '1px solid #C68A1E',
             minHeight: '48px',
           }}
         >

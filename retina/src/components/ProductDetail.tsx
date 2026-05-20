@@ -281,17 +281,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
               <span className="font-medium tabular-nums text-foreground">{article.confidence}%</span>
             </MetaField>
 
-            <span className="h-3.5 w-px bg-border/70" />
-
-            <MetaField icon={ScanLine} label="Scanned">
-              <span className="font-medium text-foreground tracking-tight">{dateOnly(article.extractedAt)}</span>
-            </MetaField>
-
-            <MetaField icon={RefreshCw} label="Updated">
-              <span className="font-medium text-foreground tracking-tight">
-                {dateOnly(article.approvedAt ?? article.extractedAt)}
-              </span>
-            </MetaField>
           </div>
 
           {/* Ingredients */}
@@ -387,12 +376,30 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
         </div>
       </div>
 
-      {/* Sticky bottom action bar — hidden in read-only mode */}
+      {/* Sticky bottom action bar — hidden in read-only mode.
+          Scanned/Updated dates sit on the left, Submit CTA on the right, all aligned to one baseline. */}
       {!showSubmit ? (
-        <div className="flex-shrink-0 h-12 border-t border-border bg-card px-5 flex items-center justify-between">
-          <div className="text-[12px] text-muted-foreground">
+        <div className="flex-shrink-0 border-t border-border bg-card px-5 py-2.5 flex items-center gap-4">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11.5px] min-w-0">
+            <span className="inline-flex items-center gap-1.5 leading-none">
+              <ScanLine className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+              <span className="text-muted-foreground/70">Scanned at</span>
+              <span className="font-medium text-foreground tracking-tight">
+                {dateOnly(article.extractedAt)}
+              </span>
+            </span>
+            <span className="inline-flex items-center gap-1.5 leading-none">
+              <RefreshCw className="w-3.5 h-3.5 text-muted-foreground/60 shrink-0" />
+              <span className="text-muted-foreground/70">Updated at</span>
+              <span className="font-medium text-foreground tracking-tight">
+                {dateOnly(article.approvedAt ?? article.extractedAt)}
+              </span>
+            </span>
+          </div>
+
+          <div className="ml-auto flex items-center gap-2 shrink-0">
             {isReadOnly ? (
-              <span className="inline-flex items-center gap-1.5">
+              <span className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
                 <span
                   className={`w-1.5 h-1.5 rounded-full ${
                     article.status === 'approved' ? 'bg-sky-500' : 'bg-stone-400'
@@ -403,31 +410,31 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                   : `Submitted · ${submission?.submittedAt ?? ''}`}
                 <span className="text-muted-foreground/70 ml-1">read only</span>
               </span>
-            ) : unsavedEdits > 0 ? (
-              <span className="inline-flex items-center gap-1.5">
-                <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
-                {unsavedEdits} unsaved edit{unsavedEdits === 1 ? '' : 's'}
-              </span>
-            ) : null}
-          </div>
-          {!isReadOnly ? (
-            <div className="flex items-center gap-2">
-              {queueTab === 'amber' && unsavedEdits === 0 ? (
+            ) : (
+              <>
+                {unsavedEdits > 0 ? (
+                  <span className="text-[12px] text-muted-foreground inline-flex items-center gap-1.5 mr-1">
+                    <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                    {unsavedEdits} unsaved edit{unsavedEdits === 1 ? '' : 's'}
+                  </span>
+                ) : null}
+                {queueTab === 'amber' && unsavedEdits === 0 ? (
+                  <button
+                    className="h-8 px-3 rounded-md text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
+                    onClick={() => moveToLow(article.id)}
+                  >
+                    Send to Low Confidence
+                  </button>
+                ) : null}
                 <button
-                  className="h-8 px-3 rounded-md text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
-                  onClick={() => moveToLow(article.id)}
+                  className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
+                  onClick={openSubmit}
                 >
-                  Send to Low Confidence
+                  {unsavedEdits > 0 ? 'Save changes' : 'Submit for review'}
                 </button>
-              ) : null}
-              <button
-                className="h-8 px-3.5 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
-                onClick={openSubmit}
-              >
-                {unsavedEdits > 0 ? 'Save changes' : 'Submit for review'}
-              </button>
-            </div>
-          ) : null}
+              </>
+            )}
+          </div>
         </div>
       ) : null}
     </div>

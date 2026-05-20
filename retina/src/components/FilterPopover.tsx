@@ -95,7 +95,7 @@ export function FilterPopover() {
       </button>
 
       {open ? (
-        <div className="absolute right-0 top-[calc(100%+6px)] w-80 rounded-lg border border-border bg-card shadow-soft z-40 overflow-hidden">
+        <div className="absolute right-auto left-0 top-[calc(100%+6px)] w-80 rounded-lg border border-border bg-card shadow-soft z-50 overflow-hidden">
           <div className="flex items-center justify-between px-3 py-2 border-b border-border/70">
             <div className="text-[12.5px] font-semibold text-foreground">Filter by category</div>
             <button
