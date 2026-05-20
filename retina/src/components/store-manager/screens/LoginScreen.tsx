@@ -21,24 +21,24 @@ export function LoginScreen() {
             y1="34"
             x2="34"
             y2="10"
-            stroke="#E5E5E4"
+            stroke="#F1ECDD"
             strokeWidth="1.4"
             strokeLinecap="round"
           />
-          <polygon points="34,10 29,14 32,17" fill="#E5E5E4" />
-          <polygon points="10,34 15,30 12,27" fill="#71717A" />
-          <circle cx="22" cy="22" r="2.2" fill="#E5E5E4" />
+          <polygon points="34,10 29,14 32,17" fill="#F1ECDD" />
+          <polygon points="10,34 15,30 12,27" fill="#9C9B94" />
+          <circle cx="22" cy="22" r="2.2" fill="#F1ECDD" />
         </svg>
         <div className="text-center">
           <div
             className="text-[28px] font-bold leading-none"
-            style={{ color: '#1F1611', letterSpacing: '-0.4px' }}
+            style={{ color: '#2B2A26', letterSpacing: '-0.4px' }}
           >
-            RETINA <span style={{ color: '#A1A1AA' }}>AI</span>
+            RETINA <span style={{ color: '#C5C4BC' }}>AI</span>
           </div>
           <div
             className="text-[11px] uppercase mt-2"
-            style={{ color: '#71717A', letterSpacing: '0.18em' }}
+            style={{ color: '#9C9B94', letterSpacing: '0.18em' }}
           >
             by Compass Group
           </div>
@@ -63,10 +63,10 @@ export function LoginScreen() {
           <Square className="w-[18px] h-[18px]" strokeWidth={2} />
           Sign in with Compass SSO
         </button>
-        <div className="text-[12px] text-center" style={{ color: '#71717A' }}>
+        <div className="text-[12px] text-center" style={{ color: '#9C9B94' }}>
           Use your Compass Group email
         </div>
-        <div className="text-[11px] text-center mt-4" style={{ color: '#A1A1AA' }}>
+        <div className="text-[11px] text-center mt-4" style={{ color: '#C5C4BC' }}>
           Secured by Microsoft Entra ID
         </div>
       </div>

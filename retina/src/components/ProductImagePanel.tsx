@@ -18,9 +18,8 @@ type ProductImagePanelProps = {
   onToggleExpand?: () => void;
 };
 
-const LENS_WIDTH = 240;
-const LENS_HEIGHT = 180;
-const LENS_MAGNIFICATION = 2.3;
+const LENS_SIZE = 180;
+const LENS_MAGNIFICATION = 2.6;
 
 function FallbackImage({ image }: { image: ProductImage }) {
   if (image.kind === 'barcode') {
@@ -46,17 +45,15 @@ function FallbackImage({ image }: { image: ProductImage }) {
   );
 }
 
-function ImageWithFallback({
-  image,
-  className,
-  draggable,
-  style,
-}: {
-  image: ProductImage;
-  className?: string;
-  draggable?: boolean;
-  style?: React.CSSProperties;
-}) {
+const ImageWithFallback = React.forwardRef<
+  HTMLImageElement,
+  {
+    image: ProductImage;
+    className?: string;
+    draggable?: boolean;
+    style?: React.CSSProperties;
+  }
+>(function ImageWithFallback({ image, className, draggable, style }, ref) {
   const [errored, setErrored] = React.useState(false);
   React.useEffect(() => {
     setErrored(false);
@@ -70,6 +67,7 @@ function ImageWithFallback({
   }
   return (
     <img
+      ref={ref}
       src={image.url}
       alt={image.label}
       onError={() => setErrored(true)}
@@ -78,7 +76,7 @@ function ImageWithFallback({
       draggable={draggable ?? false}
     />
   );
-}
+});
 
 export function ProductImagePanel({
   article,
@@ -89,20 +87,87 @@ export function ProductImagePanel({
   const images = React.useMemo(() => getProductImages(article.barcode, { count: 6 }), [article.barcode]);
   const [selectedOrdinal, setSelectedOrdinal] = React.useState<number>(1);
   const [zoom, setZoom] = React.useState<number>(1);
-  const [lens, setLens] = React.useState<{ x: number; y: number; w: number; h: number } | null>(null);
+  // Lens position is stored in *container* coordinates plus the image-relative
+  // cursor offset (cxImg/cyImg) so the magnifier maths matches what the image
+  // is actually showing, not the padded letterbox area around it.
+  const [lens, setLens] = React.useState<{
+    cx: number;
+    cy: number;
+    cxImg: number;
+    cyImg: number;
+    imgW: number;
+    imgH: number;
+  } | null>(null);
+  // Pan offset (CSS px, unscaled) for drag-to-move when expanded + zoomed in.
+  const [pan, setPan] = React.useState<{ x: number; y: number }>({ x: 0, y: 0 });
+  const dragRef = React.useRef<{ startX: number; startY: number; panX: number; panY: number } | null>(null);
   const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const imgRef = React.useRef<HTMLImageElement | null>(null);
 
   React.useEffect(() => {
     setSelectedOrdinal(1);
     setZoom(1);
     setLens(null);
+    setPan({ x: 0, y: 0 });
   }, [article.id]);
 
-  // Reset zoom when toggling expanded mode so the image refits cleanly
+  // Reset zoom + pan when toggling expanded mode so the image refits cleanly
   React.useEffect(() => {
     setZoom(1);
     setLens(null);
+    setPan({ x: 0, y: 0 });
   }, [expanded]);
+
+  // When user returns to 100% zoom, snap pan back to centre
+  React.useEffect(() => {
+    if (zoom === 1) setPan({ x: 0, y: 0 });
+  }, [zoom]);
+
+  const canPan = expanded && zoom > 1;
+
+  // Mouse-wheel zoom on the image canvas. Bound via useEffect with passive:false
+  // because React's synthetic onWheel is passive — preventDefault wouldn't stop
+  // the page from scrolling underneath.
+  React.useEffect(() => {
+    const el = containerRef.current;
+    if (!el) return;
+    const maxZoom = expanded ? 4 : 3;
+    const minZoom = 0.5;
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      // Normalise: trackpad pixels vs mouse-line vs page units.
+      const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? 100 : 1;
+      const step = (event.deltaY * unit) / 800; // ~0.1 per typical mouse notch
+      setZoom((prev) => Math.min(maxZoom, Math.max(minZoom, prev - step)));
+    };
+    el.addEventListener('wheel', onWheel, { passive: false });
+    return () => el.removeEventListener('wheel', onWheel);
+  }, [expanded]);
+
+  const onPanDown = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!canPan) return;
+    dragRef.current = {
+      startX: event.clientX,
+      startY: event.clientY,
+      panX: pan.x,
+      panY: pan.y,
+    };
+    (event.target as HTMLElement).setPointerCapture?.(event.pointerId);
+  };
+  const onPanMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!dragRef.current) return;
+    const dx = event.clientX - dragRef.current.startX;
+    const dy = event.clientY - dragRef.current.startY;
+    setPan({ x: dragRef.current.panX + dx, y: dragRef.current.panY + dy });
+  };
+  const onPanUp = (event: React.PointerEvent<HTMLDivElement>) => {
+    dragRef.current = null;
+    try {
+      (event.target as HTMLElement).releasePointerCapture?.(event.pointerId);
+    } catch {
+      /* ignore */
+    }
+  };
 
   const active = images.find((image) => image.ordinal === selectedOrdinal) ?? images[0] ?? null;
 
@@ -140,17 +205,37 @@ export function ProductImagePanel({
     return () => window.removeEventListener('keydown', handler);
   }, [expanded, cycleImage]);
 
+  // Lens is hidden in expanded mode (zoom buttons own that flow) and whenever
+  // the zoom controls are already active — the magnifier is for inspecting
+  // detail at the base size, redundant once the user has zoomed in.
+  const lensEnabled = !expanded && zoom === 1;
+
   const onMouseMove = (event: React.MouseEvent<HTMLDivElement>) => {
-    if (expanded) {
-      // Disable lens magnifier in expanded mode — actual zoom buttons take over
+    if (!lensEnabled) {
+      if (lens) setLens(null);
       return;
     }
-    const target = event.currentTarget.getBoundingClientRect();
+    const container = containerRef.current;
+    const imgEl = imgRef.current;
+    if (!container || !imgEl) return;
+    const containerRect = container.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
+    const cxImg = event.clientX - imgRect.left;
+    const cyImg = event.clientY - imgRect.top;
+    // Only fire while the cursor is over the actual rendered image, not the
+    // letterboxed padding around it — outside the image there's nothing real
+    // to magnify.
+    if (cxImg < 0 || cyImg < 0 || cxImg > imgRect.width || cyImg > imgRect.height) {
+      if (lens) setLens(null);
+      return;
+    }
     setLens({
-      x: event.clientX - target.left,
-      y: event.clientY - target.top,
-      w: target.width,
-      h: target.height,
+      cx: event.clientX - containerRect.left,
+      cy: event.clientY - containerRect.top,
+      cxImg,
+      cyImg,
+      imgW: imgRect.width,
+      imgH: imgRect.height,
     });
   };
 
@@ -216,9 +301,21 @@ export function ProductImagePanel({
           <button
             onClick={onToggleExpand}
             title={expanded ? 'Collapse image (Esc)' : 'Expand image'}
-            className="w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 flex items-center justify-center"
+            aria-label={expanded ? 'Collapse image' : 'Expand image'}
+            className={
+              expanded
+                ? 'ml-1 inline-flex items-center gap-1 h-8 px-2.5 rounded-md bg-primary text-primary-foreground hover:bg-primary-hover shadow-soft transition-colors text-[12px] font-semibold'
+                : 'w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 flex items-center justify-center'
+            }
           >
-            {expanded ? <X className="w-3.5 h-3.5" /> : <Maximize2 className="w-3.5 h-3.5" />}
+            {expanded ? (
+              <>
+                <X className="w-4 h-4" strokeWidth={2.5} />
+                Close
+              </>
+            ) : (
+              <Maximize2 className="w-3.5 h-3.5" />
+            )}
           </button>
         </div>
       </div>
@@ -231,34 +328,53 @@ export function ProductImagePanel({
           onMouseEnter={onMouseMove}
           onMouseMove={onMouseMove}
           onMouseLeave={() => setLens(null)}
+          onPointerDown={onPanDown}
+          onPointerMove={onPanMove}
+          onPointerUp={onPanUp}
+          onPointerCancel={onPanUp}
+          style={{
+            cursor: canPan ? (dragRef.current ? 'grabbing' : 'grab') : 'default',
+            touchAction: canPan ? 'none' : undefined,
+          }}
         >
           <div
-            className="relative max-w-full max-h-full transition-transform"
-            style={{ transform: `scale(${zoom})` }}
+            className="relative max-w-full max-h-full"
+            style={{
+              transform: `translate(${pan.x}px, ${pan.y}px) scale(${zoom})`,
+              transition: dragRef.current ? 'none' : 'transform 0.15s ease',
+            }}
           >
             <ImageWithFallback
+              ref={imgRef}
               image={active}
-              className={`max-w-full ${expanded ? 'max-h-[82vh]' : 'max-h-[72vh]'} object-contain`}
+              className={`max-w-full ${expanded ? 'max-h-[82vh]' : 'max-h-[72vh]'} object-contain select-none`}
+              draggable={false}
             />
           </div>
 
-          {lens && !expanded ? (
+          {lens && lensEnabled ? (
             <div
-              className="pointer-events-none absolute rounded-md border-2 border-primary/70 shadow-soft overflow-hidden"
+              className="pointer-events-none absolute rounded-full border-2 border-primary shadow-lg overflow-hidden"
               style={{
-                left: lens.x - LENS_WIDTH / 2,
-                top: lens.y - LENS_HEIGHT / 2,
-                width: LENS_WIDTH,
-                height: LENS_HEIGHT,
+                left: lens.cx - LENS_SIZE / 2,
+                top: lens.cy - LENS_SIZE / 2,
+                width: LENS_SIZE,
+                height: LENS_SIZE,
                 backgroundImage: `url(${active.url})`,
                 backgroundRepeat: 'no-repeat',
-                backgroundSize: `${lens.w * LENS_MAGNIFICATION}px ${lens.h * LENS_MAGNIFICATION}px`,
-                backgroundPosition: `-${lens.x * LENS_MAGNIFICATION - LENS_WIDTH / 2}px -${
-                  lens.y * LENS_MAGNIFICATION - LENS_HEIGHT / 2
+                backgroundSize: `${lens.imgW * LENS_MAGNIFICATION}px ${lens.imgH * LENS_MAGNIFICATION}px`,
+                backgroundPosition: `${LENS_SIZE / 2 - lens.cxImg * LENS_MAGNIFICATION}px ${
+                  LENS_SIZE / 2 - lens.cyImg * LENS_MAGNIFICATION
                 }px`,
                 backgroundColor: 'white',
               }}
-            />
+            >
+              {/* center crosshair */}
+              <div
+                aria-hidden
+                className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-primary/70 ring-2 ring-white"
+              />
+            </div>
           ) : null}
         </div>
       </div>

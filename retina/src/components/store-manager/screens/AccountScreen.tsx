@@ -51,7 +51,7 @@ export function AccountScreen() {
       >
         <div
           className="font-semibold flex items-center gap-[7px]"
-          style={{ fontSize: '17px', color: '#1F1611' }}
+          style={{ fontSize: '17px', color: '#2B2A26' }}
         >
           <RetinaLogo />
           Account
@@ -60,13 +60,13 @@ export function AccountScreen() {
 
       <div
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
-        style={{ background: '#FCF8F0', padding: '12px 16px' }}
+        style={{ background: '#FBF8F0', padding: '12px 16px' }}
       >
         <div
           className="flex items-center gap-3"
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '12px',
             padding: '16px',
           }}
@@ -87,14 +87,14 @@ export function AccountScreen() {
           <div className="min-w-0">
             <div
               className="text-[15px] font-medium"
-              style={{ color: '#1F1611' }}
+              style={{ color: '#2B2A26' }}
             >
               Ravi Kumar
             </div>
-            <div className="text-[12px] mt-[2px] truncate" style={{ color: '#71717A' }}>
+            <div className="text-[12px] mt-[2px] truncate" style={{ color: '#9C9B94' }}>
               ravi.kumar@compass-group.com
             </div>
-            <div className="text-[12px] mt-[1px]" style={{ color: '#71717A' }}>
+            <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
               Store Manager · Bengaluru
             </div>
           </div>
@@ -103,7 +103,7 @@ export function AccountScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '12px',
             overflow: 'hidden',
           }}
@@ -111,7 +111,7 @@ export function AccountScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.06em',
               padding: '10px 14px 6px',
             }}
@@ -125,7 +125,7 @@ export function AccountScreen() {
             style={{
               padding: '12px 14px',
               minHeight: '48px',
-              borderTop: '1px solid #ECECEB',
+              borderTop: '1px solid #F1ECDD',
               background: 'transparent',
               border: 'none',
               textAlign: 'left',
@@ -136,10 +136,10 @@ export function AccountScreen() {
               style={{ color: '#C68A1E' }}
             />
             <div className="flex-1 min-w-0">
-              <div className="text-[14px]" style={{ color: '#1F1611' }}>
+              <div className="text-[14px]" style={{ color: '#2B2A26' }}>
                 {currentSite.name}
               </div>
-              <div className="text-[12px] mt-[1px]" style={{ color: '#71717A' }}>
+              <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
                 {currentSite.code}
               </div>
             </div>
@@ -153,7 +153,7 @@ export function AccountScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '12px',
             overflow: 'hidden',
           }}
@@ -189,7 +189,7 @@ export function AccountScreen() {
         className="flex flex-shrink-0"
         style={{
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
           padding: '6px 0 0',
           paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
         }}
@@ -201,8 +201,8 @@ export function AccountScreen() {
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <List className="w-[22px] h-[22px]" style={{ color: '#71717A' }} />
-          <span className="text-[10px]" style={{ color: '#71717A' }}>
+          <List className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
+          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Articles
           </span>
         </div>
@@ -213,8 +213,8 @@ export function AccountScreen() {
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <BarChart3 className="w-[22px] h-[22px]" style={{ color: '#71717A' }} />
-          <span className="text-[10px]" style={{ color: '#71717A' }}>
+          <BarChart3 className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
+          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Progress
           </span>
         </div>
@@ -241,7 +241,7 @@ export function AccountScreen() {
             <div className="flex items-center gap-3" style={{ padding: '12px 16px 8px' }}>
               <span
                 className="flex-1 font-semibold"
-                style={{ fontSize: '16px', color: '#1F1611' }}
+                style={{ fontSize: '16px', color: '#2B2A26' }}
               >
                 Select site
               </span>
@@ -260,16 +260,16 @@ export function AccountScreen() {
                     style={{
                       padding: '12px 16px',
                       minHeight: '48px',
-                      borderBottom: '1px solid #ECECEB',
+                      borderBottom: '1px solid #F1ECDD',
                       background: on ? '#FBF3E0' : 'transparent',
                     }}
                   >
-                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: on ? '#C68A1E' : '#71717A' }} />
+                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: on ? '#C68A1E' : '#9C9B94' }} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px]" style={{ color: '#1F1611', fontWeight: on ? 600 : 400 }}>
+                      <div className="text-[14px]" style={{ color: '#2B2A26', fontWeight: on ? 600 : 400 }}>
                         {s.name}
                       </div>
-                      <div className="text-[12px] mt-[1px]" style={{ color: '#71717A' }}>
+                      <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
                         {s.code}
                       </div>
                     </div>
@@ -289,10 +289,10 @@ export function AccountScreen() {
           <div className="sm-sheet" style={{ paddingBottom: 'max(20px, calc(env(safe-area-inset-bottom) + 8px))' }}>
             <div className="sm-handle" />
             <div style={{ padding: '16px 20px 4px' }}>
-              <div className="text-[16px] font-semibold" style={{ color: '#1F1611' }}>
+              <div className="text-[16px] font-semibold" style={{ color: '#2B2A26' }}>
                 Sign out?
               </div>
-              <div className="text-[13px] mt-[4px]" style={{ color: '#71717A' }}>
+              <div className="text-[13px] mt-[4px]" style={{ color: '#9C9B94' }}>
                 You'll need to sign back in to continue scanning.
               </div>
             </div>
@@ -305,8 +305,8 @@ export function AccountScreen() {
                   padding: '12px 16px',
                   borderRadius: '8px',
                   background: '#fff',
-                  border: '1px solid #E5E5E4',
-                  color: '#1F1611',
+                  border: '1px solid #F1ECDD',
+                  color: '#2B2A26',
                   minHeight: '48px',
                 }}
               >

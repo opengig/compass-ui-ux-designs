@@ -34,13 +34,13 @@ export function SsoScreen() {
             <rect x="0" y="11" width="10" height="10" fill="#00A4EF" />
             <rect x="11" y="11" width="10" height="10" fill="#FFB900" />
           </svg>
-          <span className="text-[14px]" style={{ color: '#1F1611' }}>
+          <span className="text-[14px]" style={{ color: '#2B2A26' }}>
             Microsoft
           </span>
         </div>
         <div
           className="font-semibold mb-4"
-          style={{ fontSize: '24px', color: '#1F1611', lineHeight: 1.15 }}
+          style={{ fontSize: '24px', color: '#2B2A26', lineHeight: 1.15 }}
         >
           Sign in
         </div>
@@ -54,7 +54,7 @@ export function SsoScreen() {
           <div className="text-[11px] mb-0.5" style={{ color: '#0067B8' }}>
             Email
           </div>
-          <div className="text-[14px]" style={{ color: '#1F1611' }}>
+          <div className="text-[14px]" style={{ color: '#2B2A26' }}>
             ravi.kumar@compass-group.com
           </div>
         </div>

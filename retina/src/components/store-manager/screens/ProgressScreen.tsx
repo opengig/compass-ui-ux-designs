@@ -39,7 +39,7 @@ export function ProgressScreen() {
       >
         <div
           className="font-semibold flex items-center gap-[7px]"
-          style={{ fontSize: '17px', color: '#1F1611' }}
+          style={{ fontSize: '17px', color: '#2B2A26' }}
         >
           <RetinaLogo />
           Progress
@@ -48,7 +48,7 @@ export function ProgressScreen() {
 
       <div
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
-        style={{ padding: '10px 14px 12px', background: '#FCF8F0' }}
+        style={{ padding: '10px 14px 12px', background: '#FBF8F0' }}
       >
         {/* Gamification banner */}
         <div
@@ -72,7 +72,7 @@ export function ProgressScreen() {
           <div className="flex items-center gap-2.5">
             <div
               className="font-bold"
-              style={{ fontSize: '28px', color: '#E5E5E4', lineHeight: 1 }}
+              style={{ fontSize: '28px', color: '#F1ECDD', lineHeight: 1 }}
             >
               7
             </div>
@@ -99,7 +99,7 @@ export function ProgressScreen() {
                   flex: 1,
                   height: '4px',
                   borderRadius: '2px',
-                  background: i < 7 ? '#E5E5E4' : 'rgba(255,255,255,0.15)',
+                  background: i < 7 ? '#F1ECDD' : 'rgba(255,255,255,0.15)',
                 }}
               />
             ))}
@@ -164,7 +164,7 @@ export function ProgressScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '10px 12px',
           }}
@@ -172,7 +172,7 @@ export function ProgressScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.05em',
               marginBottom: '6px',
             }}
@@ -192,7 +192,7 @@ export function ProgressScreen() {
                       height: '30px',
                       borderRadius: '50%',
                       background: '#C68A1E',
-                      border: '2px solid #E5E5E4',
+                      border: '2px solid #F1ECDD',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -200,7 +200,7 @@ export function ProgressScreen() {
                   >
                     <span
                       className="font-bold"
-                      style={{ fontSize: '10px', color: '#E5E5E4' }}
+                      style={{ fontSize: '10px', color: '#F1ECDD' }}
                     >
                       7
                     </span>
@@ -212,13 +212,13 @@ export function ProgressScreen() {
                       height: '30px',
                       borderRadius: '50%',
                       background: '#ECECEB',
-                      border: '1.5px dashed #A1A1AA',
+                      border: '1.5px dashed #C5C4BC',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Lock className="w-[12px] h-[12px]" style={{ color: '#A1A1AA' }} />
+                    <Lock className="w-[12px] h-[12px]" style={{ color: '#C5C4BC' }} />
                   </div>
                 ) : (
                   <div
@@ -240,10 +240,10 @@ export function ProgressScreen() {
                   style={{
                     color:
                       d === 'Thu'
-                        ? '#E5E5E4'
+                        ? '#F1ECDD'
                         : d === 'Fri'
-                          ? '#A1A1AA'
-                          : '#71717A',
+                          ? '#C5C4BC'
+                          : '#9C9B94',
                     fontWeight: d === 'Thu' ? 500 : 400,
                   }}
                 >
@@ -258,7 +258,7 @@ export function ProgressScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '10px 12px',
           }}
@@ -266,7 +266,7 @@ export function ProgressScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.05em',
               marginBottom: '6px',
             }}
@@ -287,11 +287,11 @@ export function ProgressScreen() {
                 />
                 <span
                   className="flex-1 text-[12.5px] truncate"
-                  style={{ color: '#1F1611' }}
+                  style={{ color: '#2B2A26' }}
                 >
                   {r.name}
                 </span>
-                <span className="text-[11px]" style={{ color: '#71717A' }}>
+                <span className="text-[11px]" style={{ color: '#9C9B94' }}>
                   {r.time}
                 </span>
                 {r.status === 'done' ? (
@@ -338,7 +338,7 @@ export function ProgressScreen() {
         className="flex flex-shrink-0"
         style={{
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
           padding: '6px 0 0',
           paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
         }}
@@ -350,8 +350,8 @@ export function ProgressScreen() {
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <List className="w-[22px] h-[22px]" style={{ color: '#71717A' }} />
-          <span className="text-[10px]" style={{ color: '#71717A' }}>
+          <List className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
+          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Articles
           </span>
         </div>
@@ -374,8 +374,8 @@ export function ProgressScreen() {
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#71717A' }} />
-          <span className="text-[10px]" style={{ color: '#71717A' }}>
+          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
+          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Account
           </span>
         </div>

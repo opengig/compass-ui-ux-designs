@@ -53,4 +53,17 @@ export const STORE_MANAGER_ROUTES = {
   home: '/store-manager/home',
 } as const;
 
+// Admin flow — sibling role tree under /admin/*
+// Each screen is its own route (deep-linkable, back/forward works, AdminShell
+// uses <NavLink> for active state). :userId is the AdminUser.userId.
+export const ADMIN_ROUTES = {
+  base: '/admin',
+  dashboard: '/admin/dashboard',
+  users: '/admin/users',
+  newUser: '/admin/users/new',
+  userDetail: '/admin/users/:userId',
+  sites: '/admin/sites',
+  config: '/admin/config',
+} as const;
+
 export type RoutePath = (typeof ROUTES)[keyof typeof ROUTES];

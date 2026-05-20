@@ -42,6 +42,7 @@ type ReviewAction =
   | { type: 'REDO'; payload: { articleId: string } }
   | { type: 'SUBMIT_ARTICLE'; payload: { articleId: string; comment: string; submittedBy?: string } }
   | { type: 'MOVE_TO_LOW'; payload: { articleId: string; editedBy?: string } }
+  | { type: 'MOVE_TO_BUCKET'; payload: { articleId: string; bucket: 'high' | 'amber' | 'low'; editedBy?: string } }
   | { type: 'MARK_NEEDS_REVIEW'; payload: { articleId: string; editedBy?: string } }
   | { type: 'BULK_SET_CONFIDENCE'; payload: { articleIds: string[]; confidence: number; editedBy?: string } };
 
@@ -59,6 +60,7 @@ interface ReviewStoreContextValue {
   undo: (articleId: string) => void;
   redo: (articleId: string) => void;
   moveToLow: (articleId: string) => void;
+  moveToBucket: (articleId: string, bucket: 'high' | 'amber' | 'low') => void;
   markNeedsReview: (articleId: string) => void;
   bulkSetConfidence: (articleIds: string[], confidence: number) => void;
   getArticleById: (articleId: string | null) => ArticleData | null;
@@ -253,6 +255,33 @@ function reviewStoreReducer(state: ReviewState, action: ReviewAction): ReviewSta
         field: 'decision',
         oldValue: `${article.status} (confidence ${article.confidence}%)`,
         newValue: 'rejected — moved to Low',
+        editedBy: editedBy ?? DEFAULT_USER,
+        editedAt: nowLabel(),
+        status: 'applied',
+      };
+      return {
+        ...state,
+        articles: { ...state.articles, [articleId]: updatedArticle },
+        editLog: [entry, ...state.editLog],
+      };
+    }
+    case 'MOVE_TO_BUCKET': {
+      const { articleId, bucket, editedBy } = action.payload;
+      const article = state.articles[articleId];
+      if (!article) return state;
+      // Bucket boundaries mirror useQueueFilter: high ≥ 90, amber 80-89, low < 80.
+      const target =
+        bucket === 'high'  ? { confidence: 95, status: 'in_review' as ArticleStatus, label: 'Match' } :
+        bucket === 'amber' ? { confidence: 85, status: 'in_review' as ArticleStatus, label: 'Review' } :
+                             { confidence: 50, status: 'rejected' as ArticleStatus,  label: 'Fix' };
+      const updatedArticle: ArticleData = { ...article, confidence: target.confidence, status: target.status };
+      const entry: EditLogEntry = {
+        id: makeLogId(),
+        articleId,
+        section: 'claims',
+        field: 'decision',
+        oldValue: `${article.status} (confidence ${article.confidence}%)`,
+        newValue: `moved to ${target.label} (${target.confidence}%)`,
         editedBy: editedBy ?? DEFAULT_USER,
         editedAt: nowLabel(),
         status: 'applied',
@@ -467,6 +496,7 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
       undo: (articleId) => dispatch({ type: 'UNDO', payload: { articleId } }),
       redo: (articleId) => dispatch({ type: 'REDO', payload: { articleId } }),
       moveToLow: (articleId) => dispatch({ type: 'MOVE_TO_LOW', payload: { articleId } }),
+      moveToBucket: (articleId, bucket) => dispatch({ type: 'MOVE_TO_BUCKET', payload: { articleId, bucket } }),
       markNeedsReview: (articleId) => dispatch({ type: 'MARK_NEEDS_REVIEW', payload: { articleId } }),
       bulkSetConfidence: (articleIds, confidence) =>
         dispatch({ type: 'BULK_SET_CONFIDENCE', payload: { articleIds, confidence } }),

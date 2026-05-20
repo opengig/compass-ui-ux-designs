@@ -8,7 +8,14 @@ import { AuditLog } from './components/AuditLog';
 import { SITES } from './data/mockData';
 import { ReviewStoreProvider } from './stores/useReviewStore';
 import { ExpandProvider } from './stores/ExpandSections';
-import { ROUTES, NUTRITIONIST_ROUTES, STORE_MANAGER_ROUTES, SHARED_ROUTES } from './router/routes';
+import { ROUTES, NUTRITIONIST_ROUTES, STORE_MANAGER_ROUTES, SHARED_ROUTES, ADMIN_ROUTES } from './router/routes';
+import { AdminShell } from './components/admin/AdminShell';
+import { DashboardScreen as AdminDashboard } from './components/admin/screens/DashboardScreen';
+import { UsersListScreen as AdminUsersList } from './components/admin/screens/UsersListScreen';
+import { NewUserScreen as AdminNewUser } from './components/admin/screens/NewUserScreen';
+import { UserDetailScreen as AdminUserDetail } from './components/admin/screens/UserDetailScreen';
+import { SitesScreen as AdminSites } from './components/admin/screens/SitesScreen';
+import { ConfigScreen as AdminConfig } from './components/admin/screens/ConfigScreen';
 import { UnifiedLoginScreen } from './components/shared/UnifiedLoginScreen';
 import { RolePickerScreen } from './components/shared/RolePickerScreen';
 import { NutritionistShell } from './components/nutritionist/NutritionistShell';
@@ -120,6 +127,17 @@ export function App() {
             </Route>
             {/* back-compat: old /store-manager/home links redirect to /articles */}
             <Route path="home" element={<Navigate to={STORE_MANAGER_ROUTES.articles} replace />} />
+          </Route>
+
+          {/* Admin flow — sibling role tree under /admin/* */}
+          <Route path={ADMIN_ROUTES.base} element={<Navigate to={ADMIN_ROUTES.dashboard} replace />} />
+          <Route element={<AdminShell />}>
+            <Route path={ADMIN_ROUTES.dashboard} element={<AdminDashboard />} />
+            <Route path={ADMIN_ROUTES.users} element={<AdminUsersList />} />
+            <Route path={ADMIN_ROUTES.newUser} element={<AdminNewUser />} />
+            <Route path={ADMIN_ROUTES.userDetail} element={<AdminUserDetail />} />
+            <Route path={ADMIN_ROUTES.sites} element={<AdminSites />} />
+            <Route path={ADMIN_ROUTES.config} element={<AdminConfig />} />
           </Route>
 
           <Route path="*" element={<Navigate to={SHARED_ROUTES.login} replace />} />

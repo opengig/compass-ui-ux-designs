@@ -28,7 +28,7 @@ export function UnifiedLoginScreen() {
           }}
         >
           <svg width="72" height="72" viewBox="0 0 44 44" aria-hidden="true">
-            <rect width="44" height="44" rx="11" fill="#FB923C" />
+            <rect width="44" height="44" rx="11" fill="#C68A1E" />
             <line
               x1="10"
               y1="34"

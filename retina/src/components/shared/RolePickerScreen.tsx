@@ -1,13 +1,14 @@
 import { useNavigate } from 'react-router-dom';
-import { ClipboardList, Salad, ScanLine } from 'lucide-react';
+import { ClipboardList, Salad, ScanLine, ShieldCheck } from 'lucide-react';
 import {
+  ADMIN_ROUTES,
   NUTRITIONIST_ROUTES,
   ROUTES,
   STORE_MANAGER_ROUTES,
 } from '../../router/routes';
 
 type Role = {
-  key: 'store-manager' | 'nutritionist' | 'article-sme';
+  key: 'store-manager' | 'nutritionist' | 'article-sme' | 'admin';
   title: string;
   subtitle: string;
   description: string;
@@ -25,8 +26,8 @@ const ROLES: Role[] = [
     description:
       'Scan barcodes, capture article images, and submit new SKUs from the unit.',
     icon: <ScanLine className="w-6 h-6" strokeWidth={1.75} />,
-    accent: '#FB923C',
-    accentBg: '#FFF7ED',
+    accent: '#C68A1E',
+    accentBg: '#FBF3E0',
     to: STORE_MANAGER_ROUTES.articles,
   },
   {
@@ -37,7 +38,7 @@ const ROLES: Role[] = [
       'Review extracted nutrition data, validate ingredients and allergens, and approve.',
     icon: <Salad className="w-6 h-6" strokeWidth={1.75} />,
     accent: '#C68A1E',
-    accentBg: '#FEF7E6',
+    accentBg: '#FBF3E0',
     to: NUTRITIONIST_ROUTES.dashboard,
   },
   {
@@ -50,6 +51,17 @@ const ROLES: Role[] = [
     accent: '#0E7C66',
     accentBg: '#E7F6F1',
     to: ROUTES.review,
+  },
+  {
+    key: 'admin',
+    title: 'Administrator',
+    subtitle: 'Platform admin',
+    description:
+      'Manage users, sites, and system configuration — feature flags and pipeline parameters.',
+    icon: <ShieldCheck className="w-6 h-6" strokeWidth={1.75} />,
+    accent: '#5B21B6',
+    accentBg: '#F0EDFA',
+    to: ADMIN_ROUTES.dashboard,
   },
 ];
 
@@ -64,13 +76,13 @@ export function RolePickerScreen() {
       className="min-h-screen w-full flex flex-col"
       style={{
         background:
-          'radial-gradient(1200px 600px at 50% -10%, #FFF7ED 0%, #FFFFFF 60%)',
+          'radial-gradient(1200px 600px at 50% -10%, #FBF3E0 0%, #FFFFFF 60%)',
       }}
     >
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="flex flex-col items-center mb-10">
           <svg width="48" height="48" viewBox="0 0 44 44" aria-hidden="true">
-            <rect width="44" height="44" rx="11" fill="#FB923C" />
+            <rect width="44" height="44" rx="11" fill="#C68A1E" />
             <line
               x1="10"
               y1="34"
@@ -98,7 +110,7 @@ export function RolePickerScreen() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 w-full max-w-[960px]">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full max-w-[1200px]">
           {ROLES.map((role) => (
             <button
               key={role.key}
@@ -164,7 +176,7 @@ export function RolePickerScreen() {
               background: 'none',
               border: 'none',
               padding: 0,
-              color: '#FB923C',
+              color: '#C68A1E',
               cursor: 'pointer',
               fontSize: 12,
             }}

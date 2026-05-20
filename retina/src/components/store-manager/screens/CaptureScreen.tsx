@@ -63,25 +63,25 @@ export function CaptureScreen() {
           type="button"
           onClick={onCancel}
           aria-label="back"
-          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#ECECEB] rounded-full"
+          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#71717A' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
         </button>
         <div className="flex-1 min-w-0">
           <div
             className="font-semibold truncate"
-            style={{ fontSize: '16px', color: '#1F1611' }}
+            style={{ fontSize: '16px', color: '#2B2A26' }}
           >
             {capture.title}
           </div>
-          <div className="text-[11.5px] mt-[1px]" style={{ color: '#71717A' }}>
+          <div className="text-[11.5px] mt-[1px]" style={{ color: '#9C9B94' }}>
             {captionText}
           </div>
         </div>
         <span
           className="text-[11px] flex-shrink-0"
           style={{
-            color: '#71717A',
+            color: '#9C9B94',
             background: '#ECECEB',
             padding: '4px 9px',
             borderRadius: '5px',
@@ -165,7 +165,7 @@ export function CaptureScreen() {
       >
         <div
           className="flex justify-between text-[11.5px]"
-          style={{ color: '#71717A', marginBottom: '3px' }}
+          style={{ color: '#9C9B94', marginBottom: '3px' }}
         >
           <span>Quality</span>
           <span style={{ color: '#5A8C1A', fontWeight: 500 }}>Good</span>
@@ -173,7 +173,7 @@ export function CaptureScreen() {
         <div
           style={{
             height: '4px',
-            background: '#E5E5E4',
+            background: '#F1ECDD',
             borderRadius: '2px',
           }}
         >
@@ -194,7 +194,7 @@ export function CaptureScreen() {
         style={{
           padding: '8px 14px',
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
         }}
       >
         {(['barcode', 'front', 'back'] as const).map((k) => {
@@ -214,10 +214,10 @@ export function CaptureScreen() {
                   ? '2px solid #C68A1E'
                   : isDone
                     ? '1px solid #7DBD3B'
-                    : '1px solid #E5E5E4',
+                    : '1px solid #F1ECDD',
                 background: isDone ? '#EAF3DE' : '#F5F5F4',
                 fontSize: '9px',
-                color: isDone ? '#3B6D11' : '#71717A',
+                color: isDone ? '#3B6D11' : '#9C9B94',
               }}
             >
               {isDone ? (
@@ -243,13 +243,13 @@ export function CaptureScreen() {
             border:
               capture.active === 'more'
                 ? '2px solid #C68A1E'
-                : '1px dashed #E5E5E4',
+                : '1px dashed #F1ECDD',
             background: '#F5F5F4',
             fontSize: '9px',
-            color: '#71717A',
+            color: '#9C9B94',
           }}
         >
-          <Plus className="w-3 h-3" style={{ color: '#A1A1AA' }} />
+          <Plus className="w-3 h-3" style={{ color: '#C5C4BC' }} />
           <span>More</span>
           {capture.more > 0 && (
             <span
@@ -278,7 +278,7 @@ export function CaptureScreen() {
           padding: '10px 16px',
           paddingBottom: 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
         }}
       >
         <button
@@ -290,8 +290,8 @@ export function CaptureScreen() {
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
-            border: '1px solid #A1A1AA',
-            color: '#1F1611',
+            border: '1px solid #C5C4BC',
+            color: '#2B2A26',
             minHeight: '48px',
           }}
         >

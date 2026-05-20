@@ -20,13 +20,13 @@ export function RetryScreen() {
           type="button"
           onClick={onCancel}
           aria-label="back"
-          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#ECECEB] rounded-full"
+          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#71717A' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
         </button>
         <div
           className="font-semibold flex-1"
-          style={{ fontSize: '17px', color: '#1F1611' }}
+          style={{ fontSize: '17px', color: '#2B2A26' }}
         >
           Upload failed
         </div>
@@ -34,7 +34,7 @@ export function RetryScreen() {
 
       <div
         className="flex-1 flex flex-col gap-2.5 overflow-y-auto"
-        style={{ padding: '12px 16px', background: '#FCF8F0' }}
+        style={{ padding: '12px 16px', background: '#FBF8F0' }}
       >
         <div
           style={{
@@ -59,7 +59,7 @@ export function RetryScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '12px 14px',
           }}
@@ -67,7 +67,7 @@ export function RetryScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.05em',
               marginBottom: '5px',
             }}
@@ -92,11 +92,11 @@ export function RetryScreen() {
             <div className="min-w-0">
               <div
                 className="text-[13.5px] font-medium"
-                style={{ color: '#1F1611' }}
+                style={{ color: '#2B2A26' }}
               >
                 MDH Chana Masala 100g
               </div>
-              <div className="text-[12px]" style={{ color: '#71717A' }}>
+              <div className="text-[12px]" style={{ color: '#9C9B94' }}>
                 ART-10102 · 3 images saved
               </div>
             </div>
@@ -106,7 +106,7 @@ export function RetryScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '12px 14px',
           }}
@@ -114,7 +114,7 @@ export function RetryScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.05em',
               marginBottom: '5px',
             }}
@@ -147,7 +147,7 @@ export function RetryScreen() {
           padding: '10px 16px',
           paddingBottom: 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
         }}
       >
         <button
@@ -159,8 +159,8 @@ export function RetryScreen() {
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
-            border: '1px solid #A1A1AA',
-            color: '#1F1611',
+            border: '1px solid #C5C4BC',
+            color: '#2B2A26',
             minHeight: '48px',
           }}
         >

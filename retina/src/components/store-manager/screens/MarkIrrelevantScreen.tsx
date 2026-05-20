@@ -55,18 +55,18 @@ export function MarkIrrelevantScreen() {
           type="button"
           onClick={onCancel}
           aria-label="back"
-          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#ECECEB] rounded-full"
+          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#71717A' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
         </button>
         <div className="flex-1 min-w-0">
           <div
             className="font-semibold"
-            style={{ fontSize: '17px', color: '#1F1611' }}
+            style={{ fontSize: '17px', color: '#2B2A26' }}
           >
             {title}
           </div>
-          <div className="text-[11.5px] mt-[1px] truncate" style={{ color: '#71717A' }}>
+          <div className="text-[11.5px] mt-[1px] truncate" style={{ color: '#9C9B94' }}>
             Amul Paneer 1kg · ART-10234
           </div>
         </div>
@@ -74,7 +74,7 @@ export function MarkIrrelevantScreen() {
 
       <div
         className="flex-1 flex flex-col gap-3 overflow-y-auto"
-        style={{ padding: '16px', background: '#FCF8F0' }}
+        style={{ padding: '16px', background: '#FBF8F0' }}
       >
         <div
           className="flex gap-[9px]"
@@ -97,7 +97,7 @@ export function MarkIrrelevantScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             overflow: 'hidden',
           }}
@@ -105,7 +105,7 @@ export function MarkIrrelevantScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#71717A',
+              color: '#9C9B94',
               letterSpacing: '0.06em',
               padding: '10px 14px 6px',
             }}
@@ -120,7 +120,7 @@ export function MarkIrrelevantScreen() {
               <label
                 key={r}
                 className="flex items-center gap-[10px] cursor-pointer text-[13.5px] active:bg-[#F5F5F4]"
-                style={{ color: '#1F1611', padding: '10px 0', minHeight: '44px' }}
+                style={{ color: '#2B2A26', padding: '10px 0', minHeight: '44px' }}
               >
                 <input
                   type="radio"
@@ -138,19 +138,19 @@ export function MarkIrrelevantScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '12px 14px',
           }}
         >
-          <div className="text-[11.5px]" style={{ color: '#71717A', marginBottom: '6px' }}>
+          <div className="text-[11.5px]" style={{ color: '#9C9B94', marginBottom: '6px' }}>
             Additional note (optional)
           </div>
           <textarea
             className="w-full text-[13px] resize-none"
             placeholder="e.g. This product was replaced by a newer SKU..."
             style={{
-              border: '1px solid #E5E5E4',
+              border: '1px solid #F1ECDD',
               borderRadius: '7px',
               padding: '10px 12px',
               fontFamily: 'inherit',
@@ -167,7 +167,7 @@ export function MarkIrrelevantScreen() {
           padding: '10px 16px',
           paddingBottom: 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
         }}
       >
         <button
@@ -179,8 +179,8 @@ export function MarkIrrelevantScreen() {
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
-            border: '1px solid #A1A1AA',
-            color: '#1F1611',
+            border: '1px solid #C5C4BC',
+            color: '#2B2A26',
             minHeight: '48px',
           }}
         >

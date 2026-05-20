@@ -11,6 +11,7 @@ import {
   RefreshCw,
   Barcode,
   Hash,
+  ArrowRightLeft,
 } from 'lucide-react';
 import { useReviewStore } from '../stores/useReviewStore';
 import { useExpandSections } from '../stores/ExpandSections';
@@ -152,7 +153,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
     redo,
     getCanUndo,
     getCanRedo,
-    moveToLow,
+    moveToBucket,
     getArticleEditLog,
   } = reviewStore;
   const article = getArticleById(selectedArticleId) ?? articles[0] ?? null;
@@ -160,6 +161,25 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   const submitRef = React.useRef<HTMLDivElement | null>(null);
   const [showSubmit, setShowSubmit] = React.useState(false);
   const [comment, setComment] = React.useState('');
+  const [moveOpen, setMoveOpen] = React.useState(false);
+  const moveRef = React.useRef<HTMLDivElement | null>(null);
+
+  // Close the Move-to picker on outside click / Esc.
+  React.useEffect(() => {
+    if (!moveOpen) return;
+    const onDoc = (e: MouseEvent) => {
+      if (moveRef.current && !moveRef.current.contains(e.target as Node)) setMoveOpen(false);
+    };
+    const onEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setMoveOpen(false);
+    };
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onEsc);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onEsc);
+    };
+  }, [moveOpen]);
 
   // Reset state when switching articles
   React.useEffect(() => {
@@ -418,14 +438,64 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                     {unsavedEdits} unsaved edit{unsavedEdits === 1 ? '' : 's'}
                   </span>
                 ) : null}
-                {queueTab === 'amber' && unsavedEdits === 0 ? (
-                  <button
-                    className="h-8 px-3 rounded-md text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
-                    onClick={() => moveToLow(article.id)}
-                  >
-                    Send to Low Confidence
-                  </button>
-                ) : null}
+                {unsavedEdits === 0 ? (() => {
+                  // Current bucket is derived the same way as useQueueFilter.
+                  const currentBucket: 'high' | 'amber' | 'low' =
+                    article.confidence >= 90 ? 'high' : article.confidence >= 80 ? 'amber' : 'low';
+                  const BUCKETS: { key: 'high' | 'amber' | 'low'; label: string; dot: string; sub: string }[] = [
+                    { key: 'high',  label: 'Match',  dot: 'bg-emerald-500', sub: 'High confidence (95%)' },
+                    { key: 'amber', label: 'Review', dot: 'bg-amber-500',   sub: 'Needs a second look (85%)' },
+                    { key: 'low',   label: 'Fix',    dot: 'bg-rose-500',    sub: 'Low confidence — rework (50%)' },
+                  ];
+                  const targets = BUCKETS.filter((b) => b.key !== currentBucket);
+                  return (
+                    <div className="relative" ref={moveRef}>
+                      <button
+                        type="button"
+                        onClick={() => setMoveOpen((o) => !o)}
+                        className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[12.5px] font-medium transition-colors ${
+                          moveOpen
+                            ? 'border-primary/40 bg-primary/10 text-foreground'
+                            : 'border-border bg-card text-foreground hover:bg-muted hover:border-foreground/20'
+                        }`}
+                      >
+                        <ArrowRightLeft className="w-3.5 h-3.5" />
+                        Move to…
+                      </button>
+                      {moveOpen ? (
+                        <div className="absolute right-0 top-[calc(100%+6px)] w-64 rounded-lg border border-border bg-card shadow-soft z-50 overflow-hidden">
+                          <div className="px-3 py-2 border-b border-border/70">
+                            <p className="text-[11px] font-semibold tracking-[0.06em] uppercase text-muted-foreground">
+                              Move to bucket
+                            </p>
+                            <p className="text-[11.5px] text-muted-foreground/80 mt-0.5">
+                              Currently in {BUCKETS.find((b) => b.key === currentBucket)?.label}
+                            </p>
+                          </div>
+                          <div className="p-1">
+                            {targets.map((t) => (
+                              <button
+                                key={t.key}
+                                type="button"
+                                onClick={() => {
+                                  moveToBucket(article.id, t.key);
+                                  setMoveOpen(false);
+                                }}
+                                className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md text-left hover:bg-muted/40 transition-colors"
+                              >
+                                <span className={`w-1.5 h-1.5 rounded-full ${t.dot} shrink-0`} />
+                                <span className="flex-1 min-w-0">
+                                  <span className="block text-[13px] font-medium text-foreground">{t.label}</span>
+                                  <span className="block text-[11.5px] text-muted-foreground truncate">{t.sub}</span>
+                                </span>
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      ) : null}
+                    </div>
+                  );
+                })() : null}
                 <button
                   className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
                   onClick={openSubmit}

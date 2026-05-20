@@ -109,6 +109,7 @@ export function ProductList({
   const { searchQuery, setSearchQuery } = useQueueFilter(articles);
   const [shownCount, setShownCount] = React.useState(BATCH_SIZE);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+  const filterRowRef = React.useRef<HTMLDivElement | null>(null);
 
   const visibleArticles = React.useMemo(
     () =>
@@ -145,7 +146,7 @@ export function ProductList({
       style={{ width, flexShrink: 0 }}
     >
       {/* Search + filter — scoped to the article list panel */}
-      <div className="flex items-center gap-1.5 px-2 h-10 border-b border-border">
+      <div ref={filterRowRef} className="flex items-center gap-1.5 px-2 h-10 border-b border-border">
         <div className="relative flex-1 min-w-0">
           <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-muted-foreground pointer-events-none" />
           <input
@@ -165,7 +166,7 @@ export function ProductList({
             </button>
           ) : null}
         </div>
-        <FilterPopover />
+        <FilterPopover anchorRef={filterRowRef} />
       </div>
 
       {/* Select-all header — morphs into bulk-action toolbar when selection > 0 */}

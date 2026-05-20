@@ -62,8 +62,12 @@ export function CatalogScreen() {
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-background">
-      {/* Sub-header — tab control left, search centered, spacer right */}
-      <header className="flex-shrink-0 h-12 border-b border-border bg-card flex items-center gap-2 px-3 relative">
+      {/* Sub-header — screen title + tab control left, search centered */}
+      <header className="flex-shrink-0 h-12 border-b border-border bg-card flex items-center gap-3 px-3 relative">
+        <h1 className="text-[14px] font-semibold text-foreground tracking-tight shrink-0">
+          Catalog
+        </h1>
+        <span className="h-5 w-px bg-border shrink-0" aria-hidden />
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {TABS.map((t) => {
             const isActive = tab === t.key;

@@ -45,13 +45,13 @@ export function ReviewScreen() {
           type="button"
           onClick={onRetake}
           aria-label="back"
-          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#ECECEB] rounded-full"
+          className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#71717A' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
         </button>
         <div
           className="font-semibold flex-1"
-          style={{ fontSize: '17px', color: '#1F1611' }}
+          style={{ fontSize: '17px', color: '#2B2A26' }}
         >
           Review &amp; submit
         </div>
@@ -61,24 +61,24 @@ export function ReviewScreen() {
         style={{
           padding: '10px 16px 8px',
           background: '#fff',
-          borderBottom: '1px solid #E5E5E4',
+          borderBottom: '1px solid #F1ECDD',
           flexShrink: 0,
         }}
       >
         <div
           className="text-[14px] font-medium"
-          style={{ color: '#1F1611' }}
+          style={{ color: '#2B2A26' }}
         >
           {capture.title}
         </div>
-        <div className="text-[12px] mt-[2px]" style={{ color: '#71717A' }}>
+        <div className="text-[12px] mt-[2px]" style={{ color: '#9C9B94' }}>
           {detailParts.join(' · ')}
         </div>
       </div>
 
       <div
         className="flex-1 flex flex-col gap-2.5 overflow-y-auto"
-        style={{ padding: '12px 16px', background: '#FCF8F0' }}
+        style={{ padding: '12px 16px', background: '#FBF8F0' }}
       >
         <div className="flex gap-[7px] flex-wrap">
           {thumbs.map((t, i) => (
@@ -127,15 +127,15 @@ export function ReviewScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #E5E5E4',
+            border: '1px solid #F1ECDD',
             borderRadius: '10px',
             padding: '12px 13px',
           }}
         >
-          <div className="text-[11.5px]" style={{ color: '#71717A', marginBottom: '3px' }}>
+          <div className="text-[11.5px]" style={{ color: '#9C9B94', marginBottom: '3px' }}>
             What happens next
           </div>
-          <div className="text-[12.5px] leading-[1.6]" style={{ color: '#71717A' }}>
+          <div className="text-[12.5px] leading-[1.6]" style={{ color: '#9C9B94' }}>
             AI extracts allergens, ingredients and nutrition in the background. You can keep
             scanning.
           </div>
@@ -148,7 +148,7 @@ export function ReviewScreen() {
           padding: '10px 16px',
           paddingBottom: 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
           background: '#fff',
-          borderTop: '1px solid #E5E5E4',
+          borderTop: '1px solid #F1ECDD',
         }}
       >
         <button
@@ -160,8 +160,8 @@ export function ReviewScreen() {
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
-            border: '1px solid #A1A1AA',
-            color: '#1F1611',
+            border: '1px solid #C5C4BC',
+            color: '#2B2A26',
             minHeight: '48px',
           }}
         >

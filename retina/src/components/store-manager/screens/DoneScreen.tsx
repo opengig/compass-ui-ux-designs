@@ -36,7 +36,7 @@ export function DoneScreen() {
         padding: '24px 20px',
         paddingTop: 'max(24px, env(safe-area-inset-top))',
         paddingBottom: 'max(24px, calc(env(safe-area-inset-bottom) + 1rem))',
-        background: '#FCF8F0',
+        background: '#FBF8F0',
       }}
     >
       <div
@@ -54,13 +54,13 @@ export function DoneScreen() {
       </div>
       <div
         className="font-semibold text-center"
-        style={{ fontSize: '22px', color: '#1F1611' }}
+        style={{ fontSize: '22px', color: '#2B2A26' }}
       >
         Submitted!
       </div>
       <div
         className="text-[14px] text-center leading-[1.6]"
-        style={{ color: '#71717A' }}
+        style={{ color: '#9C9B94' }}
       >
         Submitted — keep scanning your next article.
       </div>
@@ -69,7 +69,7 @@ export function DoneScreen() {
         className="w-full max-w-md"
         style={{
           background: '#fff',
-          border: '1px solid #E5E5E4',
+          border: '1px solid #F1ECDD',
           borderRadius: '10px',
           padding: '12px 14px',
         }}
@@ -77,7 +77,7 @@ export function DoneScreen() {
         <div
           className="text-[10px] font-semibold uppercase"
           style={{
-            color: '#71717A',
+            color: '#9C9B94',
             letterSpacing: '0.05em',
             marginBottom: '5px',
           }}
@@ -95,7 +95,7 @@ export function DoneScreen() {
           <Row label="Scanned at" value={`${time} · ${date}`} />
           <Row label="Scanned by" value="Ravi Kumar · BCK-001" />
           <div className="flex justify-between">
-            <span className="text-[11.5px]" style={{ color: '#71717A' }}>
+            <span className="text-[11.5px]" style={{ color: '#9C9B94' }}>
               Status
             </span>
             <span
@@ -126,7 +126,7 @@ export function DoneScreen() {
           </div>
           <div
             className="font-bold"
-            style={{ fontSize: '17px', color: '#E5E5E4' }}
+            style={{ fontSize: '17px', color: '#F1ECDD' }}
           >
             8{' '}
             <span
@@ -148,7 +148,7 @@ export function DoneScreen() {
             justifyContent: 'center',
           }}
         >
-          <Flame className="w-[18px] h-[18px]" style={{ color: '#E5E5E4' }} />
+          <Flame className="w-[18px] h-[18px]" style={{ color: '#F1ECDD' }} />
         </div>
       </div>
 
@@ -177,8 +177,8 @@ export function DoneScreen() {
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
-            color: '#71717A',
-            border: '1px solid #E5E5E4',
+            color: '#9C9B94',
+            border: '1px solid #F1ECDD',
             minHeight: '48px',
           }}
         >
@@ -192,12 +192,12 @@ export function DoneScreen() {
 function Row({ label, value }: { label: string; value: string }) {
   return (
     <div className="flex justify-between gap-2">
-      <span className="text-[11.5px] flex-shrink-0" style={{ color: '#71717A' }}>
+      <span className="text-[11.5px] flex-shrink-0" style={{ color: '#9C9B94' }}>
         {label}
       </span>
       <span
         className="text-[12.5px] font-medium text-right"
-        style={{ color: '#1F1611' }}
+        style={{ color: '#2B2A26' }}
       >
         {value}
       </span>

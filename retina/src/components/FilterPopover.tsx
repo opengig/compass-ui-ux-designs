@@ -21,18 +21,48 @@ const CATEGORIES = [
   'Personal Care',
 ];
 
-export function FilterPopover() {
+type FilterPopoverProps = {
+  /** Optional element to anchor the popover to. When provided, the panel
+   *  spans the anchor's full width (e.g. the article-list search row),
+   *  so the dropdown matches the sidebar instead of hanging off the trigger. */
+  anchorRef?: React.RefObject<HTMLElement | null>;
+};
+
+export function FilterPopover({ anchorRef }: FilterPopoverProps = {}) {
   const [open, setOpen] = React.useState(false);
   const [selected, setSelected] = React.useState<Set<string>>(new Set());
   const [search, setSearch] = React.useState('');
   const ref = React.useRef<HTMLDivElement | null>(null);
+  const panelRef = React.useRef<HTMLDivElement | null>(null);
+  const [anchorRect, setAnchorRect] = React.useState<DOMRect | null>(null);
+
+  // Track anchor's screen position so the panel can mirror its width.
+  React.useLayoutEffect(() => {
+    if (!open || !anchorRef?.current) {
+      setAnchorRect(null);
+      return;
+    }
+    const update = () => {
+      if (anchorRef.current) setAnchorRect(anchorRef.current.getBoundingClientRect());
+    };
+    update();
+    window.addEventListener('resize', update);
+    window.addEventListener('scroll', update, true);
+    return () => {
+      window.removeEventListener('resize', update);
+      window.removeEventListener('scroll', update, true);
+    };
+  }, [open, anchorRef]);
 
   React.useEffect(() => {
     if (!open) {
       return;
     }
     const onDocClick = (event: MouseEvent) => {
-      if (ref.current && !ref.current.contains(event.target as Node)) {
+      const target = event.target as Node;
+      const insideTrigger = ref.current && ref.current.contains(target);
+      const insidePanel = panelRef.current && panelRef.current.contains(target);
+      if (!insideTrigger && !insidePanel) {
         setOpen(false);
       }
     };
@@ -95,7 +125,21 @@ export function FilterPopover() {
       </button>
 
       {open ? (
-        <div className="absolute right-auto left-0 top-[calc(100%+6px)] w-80 rounded-lg border border-border bg-card shadow-soft z-50 overflow-hidden">
+        <div
+          ref={panelRef}
+          className={`rounded-lg border border-border bg-card shadow-soft z-50 overflow-hidden ${
+            anchorRect ? 'fixed' : 'absolute right-auto left-0 top-[calc(100%+6px)] w-80'
+          }`}
+          style={
+            anchorRect
+              ? {
+                  top: anchorRect.bottom + 6,
+                  left: anchorRect.left + 4,
+                  width: anchorRect.width - 8,
+                }
+              : undefined
+          }
+        >
           <div className="flex items-center justify-between px-3 py-2 border-b border-border/70">
             <div className="text-[12.5px] font-semibold text-foreground">Filter by category</div>
             <button
@@ -153,26 +197,31 @@ export function FilterPopover() {
             )}
           </div>
 
-          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-border/70">
-            <p className="text-[11.5px] text-muted-foreground">
-              {selected.size === 0 ? (
-                'No filters selected'
+          <div className="flex items-center justify-between gap-2 px-3 py-2 border-t border-border/70 bg-muted/30">
+            <button
+              type="button"
+              onClick={clear}
+              disabled={selected.size === 0}
+              className="h-8 px-2.5 rounded-md text-[12px] font-medium text-rose-700 hover:bg-rose-50 transition-colors disabled:text-muted-foreground/50 disabled:hover:bg-transparent disabled:cursor-not-allowed"
+            >
+              Clear filters
+            </button>
+            <button
+              type="button"
+              onClick={() => setOpen(false)}
+              className="h-8 px-3 rounded-md text-[12.5px] font-semibold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors inline-flex items-center gap-1.5"
+            >
+              {selected.size > 0 ? (
+                <>
+                  Apply
+                  <span className="tabular-nums text-[11px] px-1.5 py-px rounded bg-white/20">
+                    {selected.size}
+                  </span>
+                </>
               ) : (
-                <span>
-                  <span className="font-semibold text-foreground tabular-nums">{selected.size}</span>{' '}
-                  selected
-                </span>
+                'Done'
               )}
-            </p>
-            {selected.size > 0 ? (
-              <button
-                type="button"
-                onClick={clear}
-                className="h-7 px-2.5 rounded-md text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors"
-              >
-                Clear filters
-              </button>
-            ) : null}
+            </button>
           </div>
         </div>
       ) : null}
