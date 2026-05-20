@@ -1,3 +1,9 @@
 /.DS_Store
 cmp-autobot/node_modules
 retina/node_modules
+
+# Playwright MCP browser session artifacts (auto-created by the MCP browser tool)
+.playwright-mcp/
+
+# Ad-hoc debugging screenshots
+cdh-*.png
