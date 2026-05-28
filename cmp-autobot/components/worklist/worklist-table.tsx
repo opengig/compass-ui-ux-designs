@@ -1,6 +1,7 @@
 "use client";
 
 import { Fragment, useMemo, useState, useEffect } from "react";
+import { useSearchParams } from "next/navigation";
 import {
   Search,
   ChevronRight,
@@ -16,6 +17,8 @@ import {
   AlertTriangle,
   ArrowUp,
   ArrowDown,
+  Link2Off,
+  BookCheck,
 } from "lucide-react";
 import { useMockStore } from "@/lib/mock-store";
 import type { APL, MOG, MappingDecision, Queue } from "@/lib/types";
@@ -45,6 +48,7 @@ import { RowDetailDrawer } from "@/components/worklist/row-detail-drawer";
 import { DanglingRow } from "@/components/worklist/dangling-row";
 import { HierarchyBreadcrumb } from "@/components/worklist/hierarchy-breadcrumb";
 import { cn, aplCode, formatRelativeDays, SECONDARY_BUTTON } from "@/lib/utils";
+import { QUEUES } from "@/lib/queue-config";
 
 /* ─────────────────────────────────────────────────────────────────────────
  * WorklistTable — single spreadsheet-style view for the Worklist screen.
@@ -93,7 +97,7 @@ const STATUS_LABEL: Record<Queue, string> = {
   amber: "Likely Matches",
   red: "No Match",
   green: "Matches",
-  blue: "Retiring",
+  blue: "Retired",
 };
 
 /** Status pill palette keyed by queue. The amber row matches the
@@ -136,10 +140,10 @@ const STATUS_CHIP: Record<
  *  as STATUS_CHIP entries so the renderer can swap one for the
  *  other without a code branch. */
 const MAPPED_CHIP = {
-  bg: "bg-green-100",
-  text: "text-green-800",
-  border: "border-green-200",
-  dot: "bg-green-500",
+  bg: "bg-purple-100",
+  text: "text-purple-800",
+  border: "border-purple-200",
+  dot: "bg-purple-500",
 };
 
 /* True when a decision has at least one candidate APL that
@@ -180,6 +184,7 @@ export function WorklistTable() {
   const rejectAplMatch = useMockStore((s) => s.rejectAplMatch);
   const addAplToDecision = useMockStore((s) => s.addAplToDecision);
   const toggleDecisionDefault = useMockStore((s) => s.toggleDecisionDefault);
+  const markCookbookEntered = useMockStore((s) => s.markCookbookEntered);
   // Tab-badge counts. Derived locally (not from the
   // pendingDecisionCounts selector) so they go through the same
   // effectiveQueue mapping as the filter — guarantees the badge
@@ -193,7 +198,19 @@ export function WorklistTable() {
     return out;
   }, [decisions]);
 
-  const [tab, setTab] = useState<StatusTab>("all");
+  const searchParams = useSearchParams();
+  const VALID_TABS = new Set<StatusTab>(["all", "green", "amber", "red", "blue", "mapped", "unmapped", "dangling"]);
+  const VALID_QUEUES = new Set<Queue>(["amber", "red", "green", "blue"]);
+  const queueParam = searchParams.get("queue") as StatusTab | null;
+  const statusParam = searchParams.get("status") as Queue | null;
+  // ?status= forces the All tab with a pre-applied Status filter.
+  // ?queue= activates that queue's own tab directly.
+  const initialTab: StatusTab = statusParam
+    ? "all"
+    : queueParam && VALID_TABS.has(queueParam)
+    ? queueParam
+    : "all";
+  const [tab, setTab] = useState<StatusTab>(initialTab);
   // Auto-show Status column on "All" tab (useful for mixed-queue scanning),
   // auto-hide on focused tabs where status is redundant (all rows share one queue).
   // User can still override manually via the column picker after tab switch.
@@ -261,6 +278,18 @@ export function WorklistTable() {
   const [filterCategory, setFilterCategory] = useState<string>("all");
   const [filterDateFrom, setFilterDateFrom] = useState<string>("");
   const [filterDateTo, setFilterDateTo] = useState<string>("");
+  // Status multi-select filter — empty set = no restriction (show all).
+  // Seeded from ?status= URL param when landing from a dashboard card.
+  const [filterStatus, setFilterStatus] = useState<Set<Queue>>(
+    () => statusParam && VALID_QUEUES.has(statusParam) ? new Set([statusParam]) : new Set()
+  );
+  const toggleFilterStatus = (q: Queue) =>
+    setFilterStatus((prev) => {
+      const next = new Set(prev);
+      if (next.has(q)) next.delete(q);
+      else next.add(q);
+      return next;
+    });
   // Bulk-confirm preview dialog — surfaced when the user clicks
   // "Confirm Mapping" in the selection bar so they can scan the
   // full list of MOG → APL pairings before committing. Final
@@ -337,6 +366,12 @@ export function WorklistTable() {
   // decision. Lifted here so any Dialog renders outside the <table> DOM.
   const [parentActions, setParentActions] = useState<Map<string, "confirmed" | "rejected">>(new Map());
   const [parentRejectTarget, setParentRejectTarget] = useState<string | null>(null);
+  // Unlink CookBook confirmation — tracks which decision's retired APL is
+  // pending the destructive confirmation. Null = dialog closed.
+  const [unlinkConfirmDecisionId, setUnlinkConfirmDecisionId] = useState<string | null>(null);
+  // Link CookBook confirmation — tracks which mapped decision is being
+  // linked to CookBook. Null = dialog closed.
+  const [linkCookbookDecisionId, setLinkCookbookDecisionId] = useState<string | null>(null);
   const [parentRejectReason, setParentRejectReason] = useState("");
   const [parentRejectNote, setParentRejectNote] = useState("");
   const [parentRejectError, setParentRejectError] = useState(false);
@@ -394,7 +429,7 @@ export function WorklistTable() {
     return decisions
       .filter((d) => d.status === "pending" || d.status === "confirmed")
       .filter((d) => {
-        if (tab === "all") return !isMappedView(d) && (d.candidateAplIds?.length ?? 0) > 0;
+        if (tab === "all") return (d.candidateAplIds?.length ?? 0) > 0;
         if (tab === "mapped") return isMappedView(d) && (d.candidateAplIds?.length ?? 0) > 0;
         if (tab === "unmapped") return effectiveQueue(d) === "red" && d.status === "pending";
         // "Likely Matches" tab absorbs blue (Retiring) rows too
@@ -402,6 +437,17 @@ export function WorklistTable() {
         return effectiveQueue(d) === tab && d.status === "pending";
       })
       .filter((d) => siteFilter === "all" || d.siteId === siteFilter)
+      .filter((d) => {
+        if (filterStatus.size === 0) return true;
+        // Mapped decisions shown in "All" tab — treat as their own
+        // category. If the user is filtering by queue statuses only,
+        // mapped rows are excluded (they have no queue to match).
+        if (isMappedView(d) && !d.retiredAplId) return false;
+        // Decisions with a retiring APL always surface under "Retired"
+        // regardless of their queue field — mirrors the parent-row chip.
+        const displayQueue: Queue = d.retiredAplId ? "blue" : effectiveQueue(d);
+        return filterStatus.has(displayQueue);
+      })
       .filter((d) => {
         if (filterCategory === "all") return true;
         const mog = mogs.find((m) => m.id === d.mogId);
@@ -469,6 +515,7 @@ export function WorklistTable() {
     filterCategory,
     filterDateFrom,
     filterDateTo,
+    filterStatus,
     sortKey,
     sortDir,
   ]);
@@ -493,7 +540,11 @@ export function WorklistTable() {
           // so any pending-procurement leftovers from older
           // escalations are filtered out — the user shouldn't
           // see a status they can't act on.
-          e.status !== "pending-procurement"
+          e.status !== "pending-procurement" &&
+          // Only show exceptions whose APL is resolvable in the
+          // store — unresolvable ones would display "Unmapped Article"
+          // as a fallback name, which provides no actionable context.
+          apls.some((a) => a.id === e.aplId)
       )
       .filter((e) => siteFilter === "all" || e.siteId === siteFilter)
       .filter((e) => {
@@ -525,9 +576,10 @@ export function WorklistTable() {
           e.type === "mam-b" &&
           e.status !== "linked" &&
           e.status !== "resolved" &&
-          (siteFilter === "all" || e.siteId === siteFilter)
+          (siteFilter === "all" || e.siteId === siteFilter) &&
+          apls.some((a) => a.id === e.aplId)
       ).length,
-    [exceptions, siteFilter]
+    [exceptions, siteFilter, apls]
   );
 
   /* Map of articleId → decisionId for bulk-action lookups. Built
@@ -1059,7 +1111,8 @@ export function WorklistTable() {
                   counts.red +
                   counts.green +
                   counts.blue +
-                  danglingCount
+                  danglingCount +
+                  mappedCount
                 : t.key === "mapped"
                 ? mappedCount
                 : t.key === "unmapped"
@@ -1075,7 +1128,7 @@ export function WorklistTable() {
               blue: "bg-[#F8B80C]",
               dangling: "bg-red-500",
               unmapped: "bg-red-500",
-              mapped: "bg-teal-500",
+              mapped: "bg-purple-500",
             };
             const dot = dotClass[t.key];
             return (
@@ -1233,28 +1286,57 @@ export function WorklistTable() {
                 Filter
                 {(filterCategory !== "all" ||
                   filterDateFrom ||
-                  filterDateTo) && (
+                  filterDateTo ||
+                  filterStatus.size > 0) && (
                   <span className="ml-1 inline-flex h-4 min-w-4 items-center justify-center rounded-full bg-blue-600 px-1 text-[10px] font-semibold text-white">
                     {(filterCategory !== "all" ? 1 : 0) +
-                      (filterDateFrom || filterDateTo ? 1 : 0)}
+                      (filterDateFrom || filterDateTo ? 1 : 0) +
+                      (filterStatus.size > 0 ? 1 : 0)}
                   </span>
                 )}
               </button>
             </PopoverTrigger>
-            {/* Status filter intentionally omitted — the tab strip
-                above the table is the canonical surface for status
-                filtering. Keeping it here too would duplicate the
-                control and risk the two getting out of sync.
-                align="end" + sideOffset=8 anchors the popover's
-                right edge to the Filter button's right edge with a
-                clear gap below the button. collisionPadding keeps
-                it off the viewport edge on narrow screens. */}
             <PopoverContent
               align="end"
               sideOffset={8}
               collisionPadding={12}
               className="w-[280px] p-3 space-y-3"
             >
+              {/* Status multi-select — complements the tab strip for
+                  cross-tab searches (e.g. "show only amber + red across
+                  all sites"). Empty = no restriction. */}
+              <div className="space-y-1.5">
+                <div className="text-[10.5px] uppercase tracking-wider text-muted-foreground">
+                  Status
+                </div>
+                <div className="flex flex-col gap-1">
+                  {(["green", "amber", "red", "blue"] as Queue[]).map((q) => {
+                    const cfg = QUEUES[q];
+                    const Icon = cfg.icon;
+                    const checked = filterStatus.has(q);
+                    return (
+                      <label
+                        key={q}
+                        className={cn(
+                          "flex items-center gap-2 rounded-md px-2 py-1.5 cursor-pointer select-none transition-colors",
+                          checked ? cfg.bgSoftClass : "hover:bg-accent/50"
+                        )}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={checked}
+                          onChange={() => toggleFilterStatus(q)}
+                          className="h-3.5 w-3.5 rounded accent-current cursor-pointer shrink-0"
+                        />
+                        <Icon className={cn("h-3 w-3 shrink-0", cfg.textClass)} />
+                        <span className={cn("text-[12px] font-medium", checked ? cfg.textClass : "text-foreground/80")}>
+                          {STATUS_LABEL[q]}
+                        </span>
+                      </label>
+                    );
+                  })}
+                </div>
+              </div>
               <div className="space-y-1.5">
                 <div className="text-[10.5px] uppercase tracking-wider text-muted-foreground">
                   Category
@@ -1298,6 +1380,7 @@ export function WorklistTable() {
                   setFilterCategory("all");
                   setFilterDateFrom("");
                   setFilterDateTo("");
+                  setFilterStatus(new Set());
                 }}
                 className="block w-full h-8 rounded-md border border-border bg-background text-[12px] font-medium text-muted-foreground hover:bg-accent transition-colors"
               >
@@ -1421,7 +1504,7 @@ export function WorklistTable() {
                 <th className="px-3 py-2 font-medium w-[260px] border-r border-r-black/[0.03]">
                   <SortHeader label="MOG" sortKey="mog" active={sortKey} dir={sortDir} onSort={toggleSort} />
                 </th>
-                <th className="px-3 py-2 font-medium border-r border-r-black/[0.03]">
+                <th className="px-3 py-2 font-medium w-[280px] max-w-[280px] border-r border-r-black/[0.03]">
                   <SortHeader label="Articles" sortKey="articles" active={sortKey} dir={sortDir} onSort={toggleSort} />
                 </th>
                 {columnVisibility.categoryPath && (
@@ -1442,9 +1525,8 @@ export function WorklistTable() {
                     <SortHeader label="Last updated" sortKey="lastUpdated" active={sortKey} dir={sortDir} onSort={toggleSort} />
                   </th>
                 )}
-                {/* Sized for Confirm + Reject + Add Article triplet
-                    (h-7 buttons + gap-1.5) without padding waste. */}
-                <th className="px-3 py-2 font-medium w-[240px] text-right">Actions</th>
+                {/* Sized for Link CookBook + Reject + Link APL triplet. */}
+                <th className="px-3 py-2 font-medium w-[280px] text-right">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -1517,6 +1599,8 @@ export function WorklistTable() {
                   onParentConfirm={(name) => handleParentConfirm(merged.id, name)}
                   onParentReject={() => openParentRejectModal(merged.id)}
                   onParentUndo={() => handleParentUndo(merged.id)}
+                  onUnlinkCookbook={() => setUnlinkConfirmDecisionId(merged.id)}
+                  onLinkCookbook={() => setLinkCookbookDecisionId(merged.id)}
                 />
               ))}
 
@@ -1736,6 +1820,145 @@ export function WorklistTable() {
           setDetailMogId(null);
         }}
       />
+
+      {/* ── Unlink CookBook confirmation ─────────────────────────────────
+          Lifted outside the table DOM so it avoids invalid HTML nesting.
+          Triggered from the "Unlink CookBook" button on retired-APL rows. */}
+      {(() => {
+        const unlinkDecision = unlinkConfirmDecisionId
+          ? decisions.find((d) => d.id === unlinkConfirmDecisionId)
+          : null;
+        const retiredApl = unlinkDecision?.retiredAplId
+          ? apls.find((a) => a.id === unlinkDecision.retiredAplId)
+          : null;
+        return (
+          <Dialog
+            open={unlinkConfirmDecisionId !== null}
+            onOpenChange={(open) => {
+              if (!open) setUnlinkConfirmDecisionId(null);
+            }}
+          >
+            <DialogContent className="max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Unlink from CookBook</DialogTitle>
+                <DialogDescription>
+                  This will remove the link between the retired APL and the
+                  ingredient in CookBook. The ingredient will move to Needs
+                  Mapping for re-assignment.
+                </DialogDescription>
+              </DialogHeader>
+              {retiredApl && (
+                <div className="rounded-md border border-red-200 bg-red-50/60 px-3 py-2.5 text-[13px]">
+                  <div className="font-medium text-foreground/90">
+                    {retiredApl.brand && retiredApl.brand !== "UB"
+                      ? `${retiredApl.brand} ${retiredApl.genericName}`
+                      : retiredApl.genericName}
+                  </div>
+                  <div className="mt-0.5 text-[12px] text-muted-foreground numeric-tabular tabular-nums">
+                    {aplCode(retiredApl)} · Inactive
+                  </div>
+                </div>
+              )}
+              <DialogFooter>
+                <button
+                  type="button"
+                  onClick={() => setUnlinkConfirmDecisionId(null)}
+                  className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-[13px] font-medium text-foreground/80 hover:bg-accent transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setUnlinkConfirmDecisionId(null);
+                    // Prototype stub — backend wiring deferred.
+                    // When the store exposes a delinkRetiredApl action,
+                    // call it here with unlinkConfirmDecisionId.
+                  }}
+                  className="inline-flex h-9 items-center gap-1.5 justify-center rounded-md bg-red-600 px-4 text-[13px] font-medium text-white hover:bg-red-700 transition-colors"
+                >
+                  <Link2Off className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  Unlink
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
+
+      {/* ── Link CookBook confirmation ───────────────────────────────────
+          Triggered from the "Link CookBook" button on mapped rows.
+          Confirms before marking the decision as entered in CookBook. */}
+      {(() => {
+        const linkDecision = linkCookbookDecisionId
+          ? decisions.find((d) => d.id === linkCookbookDecisionId)
+          : null;
+        const linkMog = linkDecision
+          ? mogs.find((m) => m.id === linkDecision.mogId)
+          : null;
+        const mappedAplList = (linkDecision?.mappedAplIds ?? linkDecision?.candidateAplIds ?? [])
+          .map((id) => apls.find((a) => a.id === id))
+          .filter((a): a is APL => Boolean(a));
+        return (
+          <Dialog
+            open={linkCookbookDecisionId !== null}
+            onOpenChange={(open) => {
+              if (!open) setLinkCookbookDecisionId(null);
+            }}
+          >
+            <DialogContent className="max-w-[400px]">
+              <DialogHeader>
+                <DialogTitle>Link to CookBook</DialogTitle>
+                <DialogDescription>
+                  This will mark the ingredient as entered in CookBook,
+                  confirming the APL mapping is live.
+                </DialogDescription>
+              </DialogHeader>
+              {linkMog && (
+                <div className="rounded-md border border-green-200 bg-green-50/60 px-3 py-2.5 text-[13px]">
+                  <div className="font-medium text-foreground/90">{linkMog.name}</div>
+                  {mappedAplList.length > 0 && (
+                    <div className="mt-1 space-y-0.5">
+                      {mappedAplList.slice(0, 3).map((a) => (
+                        <div key={a.id} className="text-[12px] text-muted-foreground numeric-tabular tabular-nums">
+                          {aplCode(a)} · {[a.characteristic, a.packSize].filter(Boolean).join(" · ") || a.genericName}
+                        </div>
+                      ))}
+                      {mappedAplList.length > 3 && (
+                        <div className="text-[11px] text-muted-foreground">
+                          +{mappedAplList.length - 3} more
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+              )}
+              <DialogFooter>
+                <button
+                  type="button"
+                  onClick={() => setLinkCookbookDecisionId(null)}
+                  className="inline-flex h-9 items-center justify-center rounded-md border border-border bg-background px-4 text-[13px] font-medium text-foreground/80 hover:bg-accent transition-colors"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (linkCookbookDecisionId) {
+                      markCookbookEntered(linkCookbookDecisionId);
+                    }
+                    setLinkCookbookDecisionId(null);
+                  }}
+                  className="inline-flex h-9 items-center gap-1.5 justify-center rounded-md bg-[#1F7A4D] px-4 text-[13px] font-medium text-white hover:bg-[#185f3c] transition-colors"
+                >
+                  <BookCheck className="h-3.5 w-3.5" strokeWidth={2.25} />
+                  Link CookBook
+                </button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        );
+      })()}
 
       {/* ── Bulk-confirm preview ─────────────────────────────────────────
           Opens before committing a multi-select mapping confirm. Lists
@@ -2301,6 +2524,8 @@ function RowGroup({
   onParentConfirm,
   onParentReject,
   onParentUndo,
+  onUnlinkCookbook,
+  onLinkCookbook,
 }: {
   decision: MappingDecision;
   apls: APL[];
@@ -2385,6 +2610,13 @@ function RowGroup({
   onParentConfirm: (articleName: string) => void;
   onParentReject: () => void;
   onParentUndo: () => void;
+  /** Fires when the user clicks "Unlink CookBook" on a retired-APL row.
+   *  Lifts the confirmation dialog to WorklistTable so it renders
+   *  outside the table DOM (avoids invalid nesting). */
+  onUnlinkCookbook: () => void;
+  /** Fires when the user clicks "Link CookBook" on a mapped (non-retired)
+   *  row. Lifts the confirmation dialog to WorklistTable. */
+  onLinkCookbook: () => void;
 }) {
   const mog = mogs.find((m) => m.id === decision.mogId);
   const rejected = new Set(decision.rejectedAplIds ?? []);
@@ -2499,13 +2731,15 @@ function RowGroup({
   // "Needs Review" amber chip from its underlying queue field.
   const decisionQueue = effectiveQueue(decision);
   const isRetiredTransition = decisionQueue === "blue" && Boolean(decision.retiredAplId);
-  const statusChip = isDecisionMapped
+  const statusChip = isRetiredTransition
+    ? STATUS_CHIP["blue"]
+    : isDecisionMapped
     ? MAPPED_CHIP
     : STATUS_CHIP[decisionQueue];
-  const statusLabel = isDecisionMapped
-    ? "Mapped"
-    : isRetiredTransition
+  const statusLabel = isRetiredTransition
     ? "Retired"
+    : isDecisionMapped
+    ? "Mapped"
     : STATUS_LABEL[decisionQueue];
 
   // Real-time per-ingredient progress derived directly from store
@@ -2645,6 +2879,12 @@ function RowGroup({
                 mog?.name ?? "this ingredient"
               }`}
             />
+          ) : isRetiredTransition ? (
+            <Checkbox
+              checked={false}
+              disabled
+              aria-label="Selection not available for retired articles"
+            />
           ) : (
             <span className="inline-block h-4 w-4" aria-hidden="true" />
           )}
@@ -2694,7 +2934,7 @@ function RowGroup({
             retired APL. The replacement renders as a separate <tr>
             directly below, always visible — same pattern as
             green/amber expansion rows. */}
-        <td className="px-3 py-1.5 align-middle border-r border-r-black/[0.03]">
+        <td className="px-3 py-1.5 align-middle border-r border-r-black/[0.03] max-w-0 overflow-hidden">
           <div className="min-w-0">
             {decisionQueue === "blue" && decision.retiredAplId ? (
               (() => {
@@ -2711,12 +2951,18 @@ function RowGroup({
                 return (
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 min-w-0">
-                      <span
-                        className="text-[13px] font-[500] text-foreground/90 truncate min-w-0"
-                        title={currentApl ? (desc(currentApl) || fmt(currentApl)) : "Current article unavailable"}
+                      <button
+                        type="button"
+                        onClick={() => decision.retiredAplId && onOpenArticleDetail(decision.retiredAplId)}
+                        className="group/article flex items-center gap-2 min-w-0 text-left rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring cursor-pointer"
                       >
-                        {currentApl ? (desc(currentApl) || fmt(currentApl)) : "Current article"}
-                      </span>
+                        <span
+                          className="text-[13px] font-[500] text-foreground/90 truncate min-w-0 group-hover/article:underline decoration-border"
+                          title={currentApl ? (desc(currentApl) || fmt(currentApl)) : "Current article unavailable"}
+                        >
+                          {currentApl ? (desc(currentApl) || fmt(currentApl)) : "Current article"}
+                        </span>
+                      </button>
                       {currentApl && (
                         <span className="shrink-0 numeric-tabular text-[10.5px] text-muted-foreground/45">
                           {aplCode(currentApl)}
@@ -2848,7 +3094,7 @@ function RowGroup({
               (Mapped / Needs Review etc.) reads at the level the
               user actions on. The aggregate parent stays clean —
               its left stripe still carries the queue colour. */}
-          {isDecisionMapped
+          {isDecisionMapped && !isRetiredTransition
             ? null
             : isEscalated
             ? (
@@ -2922,36 +3168,43 @@ function RowGroup({
                                   without expanding */}
         <td className="px-3 py-1.5 align-middle text-right">
           {isDecisionMapped ? (
-            // Mapped — Resolve disabled if APL is retired; Reject enabled; Link APL disabled.
             <div className="inline-flex items-center justify-end gap-1.5 w-full">
-              <button
-                type="button"
-                disabled={isRetiredTransition}
-                onClick={() => !isRetiredTransition && onParentConfirm(def ? fullAplName(def) : "this article")}
-                className={cn(
-                  "inline-flex h-6 items-center whitespace-nowrap rounded-md border px-2.5 text-[11px] font-medium transition-colors",
-                  isRetiredTransition
-                    ? "bg-green-50/40 text-green-600/40 border-green-200/40 cursor-not-allowed"
-                    : "bg-green-50/70 text-green-600 border-green-200/60 hover:bg-green-100/80"
-                )}
-              >
-                Resolve
-              </button>
-              <button
-                type="button"
-                onClick={onParentReject}
-                className="inline-flex h-6 items-center whitespace-nowrap rounded-md border px-2.5 text-[11px] font-medium bg-red-50/70 text-red-500 border-red-200/60 hover:bg-red-100/80 transition-colors"
-              >
-                Reject
-              </button>
-              <button
-                type="button"
-                disabled
-                className={cn(SECONDARY_BUTTON, "opacity-35 cursor-not-allowed")}
-              >
-                <Plus className="h-3 w-3" strokeWidth={2.5} />
-                Link APL
-              </button>
+              {isRetiredTransition ? (
+                <button
+                  type="button"
+                  onClick={onUnlinkCookbook}
+                  className="inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-md border px-2.5 text-[11px] font-medium bg-[#FDECEC] text-[#B42318] border-[#F5C2C0] hover:bg-[#F8DCDC] transition-colors"
+                >
+                  <Link2Off className="h-3 w-3" strokeWidth={2.25} />
+                  Unlink CookBook
+                </button>
+              ) : (
+                // Mapped (non-retired) — Link CookBook + Reject + Link APL.
+                <>
+                  <button
+                    type="button"
+                    onClick={onLinkCookbook}
+                    className="inline-flex h-6 items-center gap-1 whitespace-nowrap rounded-md border px-2.5 text-[11px] font-medium bg-green-50/70 text-green-600 border-green-200/60 hover:bg-green-100/80 transition-colors"
+                  >
+                    Link CookBook
+                  </button>
+                  <button
+                    type="button"
+                    onClick={onParentReject}
+                    className="inline-flex h-6 items-center whitespace-nowrap rounded-md border px-2.5 text-[11px] font-medium bg-red-50/70 text-red-500 border-red-200/60 hover:bg-red-100/80 transition-colors"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    type="button"
+                    disabled
+                    className={cn(SECONDARY_BUTTON, "opacity-35 cursor-not-allowed")}
+                  >
+                    <Plus className="h-3 w-3" strokeWidth={2.5} />
+                    Link APL
+                  </button>
+                </>
+              )}
             </div>
           ) : isEmpty ? (
             // Case 0 — Needs Mapping. Disabled Confirm + Reject + Link APL.
@@ -3004,7 +3257,11 @@ function RowGroup({
           pattern (bg-white + ::before ribbon) as green/amber.
           Rendered for both pending and mapped blue decisions. */}
       {decisionQueue === "blue" && decision.retiredAplId && (() => {
-        const plannedApl = def;
+        // Replacement must be a different APL from the retiring one.
+        // If the only candidate IS the retiring APL (no replacement
+        // chosen yet), don't render the row at all — avoids blank whitespace.
+        const plannedApl = candidates.find((a) => a.id !== decision.retiredAplId);
+        if (!plannedApl) return null;
         const fmt = (a: APL) =>
           `${a.brand && a.brand !== "UB" ? `${a.brand} ` : ""}${a.genericName}`;
         const desc = (a: APL) =>
@@ -3083,9 +3340,9 @@ function RowGroup({
               {plannedApl && (
                 <InlineActions
                   onConfirm={() => onConfirmOne(plannedApl.id)}
-                  onReject={() => onRejectOne(plannedApl.id)}
+                  onReject={() => onOpenArticleDetail(plannedApl.id)}
                   confirmDisabled={mappedSet.has(plannedApl.id) || locallyConfirmedIds.has(plannedApl.id)}
-                  rejectDisabled={locallyRejectedIds.has(plannedApl.id)}
+                  rejectDisabled={false}
                 />
               )}
             </td>
@@ -3275,17 +3532,17 @@ function RowGroup({
                     Rejected
                   </span>
                 ) : isConfirmed ? (
-                  <span className="inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-[11px] font-medium bg-green-50 text-green-700 border-green-200">
+                  <span className="inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-[11px] font-medium bg-purple-50 text-purple-700 border-purple-200">
                     <span
                       aria-hidden="true"
-                      className="h-1.5 w-1.5 rounded-full shrink-0 bg-green-500"
+                      className="h-1.5 w-1.5 rounded-full shrink-0 bg-purple-500"
                     />
                     Mapped
                     {newlyMappedIds.has(a.id) && (
                       <span className="opacity-70 font-normal">• New</span>
                     )}
                   </span>
-                ) : (
+                ) : statusLabel !== "Retired" ? (
                   <span
                     className={cn(
                       "inline-flex h-6 items-center gap-1.5 whitespace-nowrap rounded-full border px-2 text-[11px] font-medium",
@@ -3303,7 +3560,7 @@ function RowGroup({
                     />
                     {statusLabel}
                   </span>
-                )}
+                ) : null}
               </td>
               )}
               {/* col 7 — Last updated (parent only). Empty on
@@ -3319,6 +3576,7 @@ function RowGroup({
                 <InlineActions
                   onConfirm={() => onConfirmOne(a.id)}
                   onReject={() => onRejectOne(a.id)}
+                  onAddNew={onAddArticle}
                   confirmDisabled={!isLocallyRejected && isConfirmed}
                   rejectDisabled={isLocallyRejected}
                 />

@@ -1666,7 +1666,7 @@ function RetiringAplCard({ apl }: { apl: APL }) {
   return (
     <div className="border-b border-border bg-muted/20 px-4 py-3 flex items-start gap-3">
       <div className="shrink-0 inline-flex items-center rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-        Retiring
+        Retired
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2 min-w-0">

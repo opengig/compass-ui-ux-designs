@@ -1,8 +1,17 @@
 "use client";
 
+import { useState } from "react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { AlertTriangle, Check, Flag, Link2Off, Sparkles, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
 import { useMockStore } from "@/lib/mock-store";
 import { aplCode, cn, formatCurrencyINR } from "@/lib/utils";
 import type { APL, MOG, MappingDecision, Queue } from "@/lib/types";
@@ -57,7 +66,7 @@ const QUEUE_PILL: Record<
     bg: "bg-blue-100",
     text: "text-blue-800",
     border: "border-blue-200",
-    label: "Retiring",
+    label: "Retired",
   },
 };
 
@@ -130,6 +139,7 @@ export function RowDetailDrawer({
   focusedAplId,
 }: RowDetailDrawerProps) {
   const sites = useMockStore((s) => s.sites);
+  const [unlinkConfirmOpen, setUnlinkConfirmOpen] = useState(false);
 
   if (!decision || !mog) return null;
 
@@ -415,6 +425,7 @@ export function RowDetailDrawer({
   }
 
   return (
+    <>
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         {/* Overlay — soft scrim instead of a full blackout so the
@@ -799,21 +810,13 @@ export function RowDetailDrawer({
                 </button>
               </div>
             ) : isTransitionRequired ? (
-              // Needs Transition — single primary CTA: cut
-              // the link to the retiring APL so the ingredient
-              // graduates back to Needs Review (or Needs Mapping
-              // if no replacement) for re-mapping. Light-red
-              // pill — destructive intent without the heavier
-              // solid red treatment of "Raise Procurement
-              // Exception" since this is a routine maintenance
-              // step rather than a procurement escalation.
               <button
                 type="button"
-                onClick={onDelinkRetired}
+                onClick={() => setUnlinkConfirmOpen(true)}
                 className="inline-flex h-9 w-full items-center justify-center gap-1.5 whitespace-nowrap rounded-md border bg-[#FDECEC] text-[#B42318] border-[#F5C2C0] hover:bg-[#F8DCDC] text-[13px] font-medium transition-colors"
               >
                 <Link2Off className="h-3.5 w-3.5" strokeWidth={2.25} />
-                Delink Retired APL
+                Unlink from CookBook
               </button>
             ) : (
               <>
@@ -849,6 +852,54 @@ export function RowDetailDrawer({
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>
+
+    {/* Unlink confirmation dialog — rendered as a sibling so it
+        layers above the drawer without Radix nesting issues. */}
+    <Dialog open={unlinkConfirmOpen} onOpenChange={setUnlinkConfirmOpen}>
+      <DialogContent className="max-w-[400px]" aria-describedby="unlink-confirm-desc">
+        <DialogHeader>
+          <DialogTitle>Unlink from CookBook</DialogTitle>
+          <DialogDescription id="unlink-confirm-desc">
+            This will remove the link between the retired APL and the
+            ingredient in CookBook. The ingredient will move to Needs
+            Mapping for re-assignment.
+          </DialogDescription>
+        </DialogHeader>
+
+        {focusedApl && (
+          <div className="rounded-md border border-red-200 bg-red-50/60 px-3 py-2.5 text-[13px]">
+            <div className="font-medium text-foreground/90">
+              {focusedApl.brand && focusedApl.brand !== "UB"
+                ? `${focusedApl.brand} ${focusedApl.genericName}`
+                : focusedApl.genericName}
+            </div>
+            <div className="mt-0.5 text-[12px] text-muted-foreground numeric-tabular tabular-nums">
+              {aplCode(focusedApl)} · Inactive
+            </div>
+          </div>
+        )}
+
+        <DialogFooter>
+          <Button
+            variant="outline"
+            onClick={() => setUnlinkConfirmOpen(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            variant="destructive"
+            onClick={() => {
+              setUnlinkConfirmOpen(false);
+              onDelinkRetired?.();
+            }}
+          >
+            <Link2Off className="h-3.5 w-3.5 mr-1.5" strokeWidth={2.25} />
+            Unlink
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  </>
   );
 }
 

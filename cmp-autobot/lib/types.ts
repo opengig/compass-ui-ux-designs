@@ -20,6 +20,19 @@ export interface Site {
   name: string;
   city: string;
   region: string;
+  status: "active" | "inactive";
+}
+
+export type UserRole = "admin" | "mapper";
+
+export interface AppUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  /** IDs of sites this user can access. Empty array = no site restriction (admin). */
+  siteIds: string[];
+  isActive: boolean;
 }
 
 export interface APL {
@@ -182,6 +195,7 @@ export interface ProgressTarget {
 
 export interface MockState {
   sites: Site[];
+  users: AppUser[];
   mogs: MOG[];
   apls: APL[];
   decisions: MappingDecision[];

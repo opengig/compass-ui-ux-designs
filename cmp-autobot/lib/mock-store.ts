@@ -3,6 +3,7 @@
 import { create } from "zustand";
 import { INITIAL_STATE } from "@/data/seed";
 import type {
+  AppUser,
   AuditAction,
   AuditEntry,
   DecisionStatus,
@@ -114,6 +115,12 @@ interface MockStoreActions {
   clearSiteTargetDate: (siteId: string) => void;
   setSiteFilter: (siteId: string) => void;
   simulateOdsRefresh: () => void;
+  // ── User management ───────────────────────────────────────────────────────
+  addUser: (user: Omit<AppUser, "id">) => void;
+  removeUser: (userId: string) => void;
+  updateUser: (userId: string, patch: Partial<Omit<AppUser, "id">>) => void;
+  // ── Site management ───────────────────────────────────────────────────────
+  toggleSiteStatus: (siteId: string) => void;
 }
 
 type Store = MockState & MockStoreActions;
@@ -920,5 +927,36 @@ export const useMockStore = create<Store>((set, get) => ({
       });
       return next;
     });
+  },
+
+  // ── User management ─────────────────────────────────────────────────────
+  addUser: (user) => {
+    set((s) => {
+      const id = `user-${Date.now()}`;
+      return { ...s, users: [...s.users, { ...user, id }] };
+    });
+  },
+
+  removeUser: (userId) => {
+    set((s) => ({ ...s, users: s.users.filter((u) => u.id !== userId) }));
+  },
+
+  updateUser: (userId, patch) => {
+    set((s) => ({
+      ...s,
+      users: s.users.map((u) => (u.id === userId ? { ...u, ...patch } : u)),
+    }));
+  },
+
+  // ── Site management ──────────────────────────────────────────────────────
+  toggleSiteStatus: (siteId) => {
+    set((s) => ({
+      ...s,
+      sites: s.sites.map((site) =>
+        site.id === siteId
+          ? { ...site, status: site.status === "active" ? "inactive" : "active" }
+          : site
+      ),
+    }));
   },
 }));

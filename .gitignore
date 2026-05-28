@@ -8,6 +8,9 @@
 # Next.js build output
 cmp-autobot/.next/
 
+# Claude local files
+cmp-autobot/.claude/*
+
 # Local working copy — superseded by retina/
 retina May 27/
 

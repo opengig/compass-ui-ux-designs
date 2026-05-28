@@ -1,13 +1,16 @@
 import type { MockState } from "@/lib/types";
 import { SITES } from "./sites";
+import { USERS } from "./users";
 import { MOGS } from "./mogs";
 import { APLS } from "./apls";
-import { DECISIONS, HISTORICAL_CONFIRMED, SYNTHETIC_APLS } from "./decisions";
+import { DECISIONS, HISTORICAL_CONFIRMED } from "./decisions";
+import { SYNTHETIC_APLS } from "./apls";
 import { EXCEPTIONS } from "./exceptions";
 import { SEED_AUDIT } from "./audit";
 
 export const INITIAL_STATE: MockState = {
   sites: SITES,
+  users: USERS,
   mogs: MOGS,
   apls: [...APLS, ...SYNTHETIC_APLS],
   decisions: [...DECISIONS, ...HISTORICAL_CONFIRMED],
@@ -19,7 +22,7 @@ export const INITIAL_STATE: MockState = {
     // Two illustrative per-site overrides so the demo shows the override behaviour out of the box.
     // Mumbai BKC has an aggressive cutover; Bangalore Whitefield has a longer runway.
     siteTargetDates: {
-      "site-hyd-hi":   "2026-05-20",
+      "site-hyd-hi":   "2026-05-31",
       "site-blr-wf":   "2026-06-15",
     },
   },

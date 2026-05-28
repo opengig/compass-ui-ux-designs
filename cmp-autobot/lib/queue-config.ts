@@ -81,7 +81,7 @@ export const QUEUES: Record<Queue, QueueConfig> = {
     key: "blue",
     label: "Blue — Transition Watch",
     shortLabel: "Blue",
-    tabCaption: "Retiring",
+    tabCaption: "Retired",
     tabSubtext: "Article retiring",
     description: "Mapping is still valid. Article retired in SAP — plan the transition.",
     textClass: "text-blue-queue",

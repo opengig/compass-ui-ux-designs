@@ -1,0 +1,10 @@
+node_modules
+.next
+.env*.local
+*.tsbuildinfo
+.DS_Store
+
+# Local design reference screenshots (not part of the build)
+images/
+.vercel
+scripts/generate-data.mjs
