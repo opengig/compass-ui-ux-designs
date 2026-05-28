@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { Outlet, useLocation } from "react-router-dom";
-import { Check } from "lucide-react";
+import { Check, AlertCircle } from "lucide-react";
 import { NUTRITIONIST_ROUTES } from "../../router/routes";
 import { NutritionistProvider, useNutritionist } from "./NutritionistContext";
 import { SideNav } from "./components/SideNav";
@@ -15,7 +15,11 @@ export function NutritionistShell() {
 
 function ShellChrome() {
   const location = useLocation();
-  const { toast } = useNutritionist();
+  const { toast, showToast: _showToast } = useNutritionist();
+  void _showToast;
+  // Normalize toast to { msg, action? } for rendering. Legacy string toasts
+  // are wrapped on read so we can render an Undo button when provided.
+  const t = toast ? (typeof toast === "string" ? { msg: toast } : toast) : null;
   const showSideNav = !location.pathname.startsWith("/nutritionist/login");
 
   return (
@@ -25,10 +29,34 @@ function ShellChrome() {
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <Outlet />
       </div>
-      {toast && (
-        <div className="fixed bottom-5 right-5 z-[300] flex items-center gap-2 rounded-lg px-4 py-2.5 bg-foreground text-background text-[13px] font-semibold shadow-lg">
-          <Check size={14} className="text-emerald-400" />
-          {toast}
+      {t && (
+        <div
+          className="fixed bottom-5 right-5 z-[300] flex items-center gap-3 rounded-lg pl-4 pr-2.5 py-2.5 text-[13px] font-semibold shadow-lg"
+          style={{
+            animation:"toastIn 0.18s cubic-bezier(0.34,1.56,0.64,1)",
+            backgroundColor: t.kind === "warn" ? "#7A5310" : "#1F1611",
+            color: "#fff",
+          }}>
+          {t.kind === "warn" ? (
+            <AlertCircle size={14} className="text-amber-300 flex-shrink-0" />
+          ) : (
+            <Check size={14} className="text-emerald-400 flex-shrink-0" />
+          )}
+          <span>{t.msg}</span>
+          {t.action && (
+            <button
+              onClick={t.action.onClick}
+              className="ml-1 inline-flex items-center gap-1 rounded-md px-2.5 py-1 text-[12px] font-bold uppercase tracking-wide transition-colors"
+              style={{
+                backgroundColor:"rgba(255,255,255,0.12)",
+                color:"#fff",
+                letterSpacing:"0.06em",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.backgroundColor="rgba(255,255,255,0.22)"}
+              onMouseLeave={e=>e.currentTarget.style.backgroundColor="rgba(255,255,255,0.12)"}>
+              {t.action.label}
+            </button>
+          )}
         </div>
       )}
     </div>

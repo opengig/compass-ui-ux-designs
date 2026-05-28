@@ -109,16 +109,17 @@ export function FilterPopover({ anchorRef }: FilterPopoverProps = {}) {
       <button
         type="button"
         onClick={() => setOpen((prev) => !prev)}
-        className={`inline-flex items-center gap-1.5 h-8 px-3 rounded-md border text-[12.5px] font-medium transition-colors ${
+        aria-label="Filter"
+        title="Filter by category"
+        className={`relative inline-flex items-center justify-center w-9 h-9 rounded-md border transition-colors shrink-0 ${
           selected.size > 0
-            ? 'border-primary/40 bg-primary/10 text-foreground'
-            : 'border-border bg-muted/60 text-foreground hover:bg-muted hover:border-foreground/20'
+            ? 'border-primary/40 bg-primary/10 text-primary'
+            : 'border-border bg-card text-muted-foreground hover:text-foreground hover:bg-muted/40'
         }`}
       >
         <ListFilter className="w-3.5 h-3.5" />
-        Filter
         {selected.size > 0 ? (
-          <span className="tabular-nums text-[10.5px] px-1.5 py-px rounded bg-primary text-primary-foreground">
+          <span className="absolute -top-1 -right-1 min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] font-semibold flex items-center justify-center tabular-nums">
             {selected.size}
           </span>
         ) : null}

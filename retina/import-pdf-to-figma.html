@@ -1,0 +1,498 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Turn the design system PDF into an editable Figma file</title>
+<style>
+  :root {
+    --primary: #C68A1E;
+    --primary-bg: #FBF3E0;
+    --primary-border: #F4E4BC;
+    --brand-ink: #7A5310;
+    --ink: #2B2A26;
+    --ink-2: #44403C;
+    --ink-muted: #9C9B94;
+    --ink-faint: #C5C4BC;
+    --cream: #FBF8F0;
+    --cream-2: #F1ECDD;
+    --success: #5A8C1A;
+    --success-bg: #EAF3DE;
+    --warn-bg: #FFF4E6;
+    --warn-border: #FFD79B;
+    --warn-ink: #8A4B00;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 28px 80px; }
+
+  header {
+    display: flex; gap: 14px; align-items: center; margin-bottom: 32px;
+  }
+  .logo {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(122,83,16,0.18);
+  }
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.2px; }
+  .brand .light { color: var(--ink-faint); }
+  .brand .sub {
+    display: block; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--primary); font-weight: 600;
+  }
+  h1 {
+    font-size: 40px; line-height: 1.1; margin: 6px 0 14px;
+    letter-spacing: -1px; font-weight: 700;
+  }
+  h1 em { font-style: normal; color: var(--primary); }
+  p.lede {
+    font-size: 17px; color: var(--ink-2); max-width: 620px;
+    margin: 0 0 32px;
+  }
+
+  h2 {
+    font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.3px;
+    border-bottom: 1px solid var(--cream-2); padding-bottom: 8px;
+  }
+
+  /* Explainer */
+  .explainer {
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 30px;
+  }
+  .explainer h3 {
+    margin: 0 0 8px; font-size: 16px; color: var(--brand-ink);
+  }
+  .explainer p {
+    margin: 0 0 10px; color: var(--ink-2); font-size: 15px;
+  }
+  .explainer p:last-child { margin-bottom: 0; }
+
+  /* Honesty box */
+  .heads-up {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: var(--warn-ink);
+    margin: 0 0 36px;
+    font-size: 15px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .heads-up .icon {
+    font-size: 22px; line-height: 1; flex-shrink: 0;
+  }
+  .heads-up b { display: block; margin-bottom: 4px; font-size: 15px; }
+  .heads-up p { margin: 4px 0 0; }
+
+  /* Before you start */
+  .checklist {
+    background: var(--success-bg);
+    border: 1px solid #CFE2A8;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 36px;
+  }
+  .checklist h3 {
+    margin: 0 0 10px; font-size: 15px; color: #3F6510;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .checklist ul { padding: 0; margin: 0; list-style: none; }
+  .checklist li {
+    padding-left: 26px; position: relative; margin-bottom: 8px;
+    color: var(--ink-2); font-size: 15px;
+  }
+  .checklist li:last-child { margin-bottom: 0; }
+  .checklist li::before {
+    content: ""; position: absolute; left: 0; top: 6px;
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 2px solid var(--success); background: #fff;
+  }
+
+  /* Steps */
+  ol.steps {
+    list-style: none; padding: 0; margin: 0 0 40px;
+    counter-reset: step;
+  }
+  ol.steps > li {
+    counter-increment: step;
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 14px;
+    padding: 24px 26px 24px 92px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute; top: 24px; left: 26px;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--primary-bg); border: 1px solid var(--primary-border);
+    color: var(--brand-ink); font-weight: 700; font-size: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  ol.steps h3 {
+    margin: 0 0 8px; font-size: 18px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.2px;
+  }
+  ol.steps p {
+    margin: 0 0 10px; color: var(--ink-2); font-size: 15px;
+  }
+  ol.steps p:last-child { margin-bottom: 0; }
+  ol.steps .tip {
+    margin-top: 10px; padding: 10px 14px;
+    background: var(--cream); border-left: 3px solid var(--primary);
+    border-radius: 4px; font-size: 14px; color: var(--ink-2);
+  }
+  ol.steps .tip b { color: var(--brand-ink); }
+  ol.steps code {
+    background: var(--primary-bg); border: 1px solid var(--primary-border);
+    color: var(--brand-ink); padding: 1px 7px; border-radius: 6px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13.5px;
+    word-break: break-all;
+  }
+  .pill {
+    background: #fff; border: 1px solid var(--ink-faint);
+    border-bottom-width: 2px; border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 14px; color: var(--ink); font-weight: 500;
+    display: inline-block;
+  }
+
+  /* File path */
+  .path-card {
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 10px 0 0;
+  }
+  .path-card .label {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 600; margin-bottom: 8px;
+  }
+  .path-card .path {
+    background: #1F1611; color: #FBF8F0;
+    border-radius: 8px; padding: 12px 16px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.6;
+    word-break: break-all;
+  }
+  .path-card .path .muted { color: #9C9B94; }
+  .path-card .path .file { color: #F4E4BC; font-weight: 600; }
+
+  /* Troubleshooting */
+  details {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 14px 20px; margin-bottom: 10px;
+  }
+  details summary {
+    cursor: pointer; font-weight: 600; font-size: 15px; color: var(--ink);
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "+"; display: inline-block; width: 22px;
+    color: var(--primary); font-weight: 700;
+  }
+  details[open] summary::before { content: "−"; }
+  details p { margin: 10px 0 0; color: var(--ink-2); font-size: 14.5px; }
+
+  /* Fallback box */
+  .alt {
+    background: var(--success-bg);
+    border: 1px solid #CFE2A8;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin: 36px 0;
+  }
+  .alt h3 {
+    margin: 0 0 8px; font-size: 16px; color: #3F6510;
+  }
+  .alt p {
+    margin: 0 0 8px; color: var(--ink-2); font-size: 14.5px;
+  }
+  .alt p:last-child { margin-bottom: 0; }
+
+  footer {
+    margin-top: 48px; padding-top: 16px;
+    border-top: 1px solid var(--cream-2);
+    font-size: 12px; color: var(--ink-muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 44 44" aria-hidden="true">
+        <line x1="10" y1="34" x2="34" y2="10" stroke="#F1ECDD" stroke-width="1.6" stroke-linecap="round"/>
+        <polygon points="34,10 29,14 32,17" fill="#F1ECDD"/>
+        <polygon points="10,34 15,30 12,27" fill="#9C9B94"/>
+        <circle cx="22" cy="22" r="2.2" fill="#F1ECDD"/>
+      </svg>
+    </div>
+    <div class="brand">
+      RETINA <span class="light">AI</span>
+      <span class="sub">PDF → Editable Figma</span>
+    </div>
+  </header>
+
+  <div class="eyebrow">Design System Document</div>
+  <h1>Turn the PDF into an <em>editable</em> Figma file.</h1>
+  <p class="lede">
+    A free, ready-made Figma plugin called <b>"PDF to Figma"</b> does this for you.
+    Two clicks to install, one click to run, and the whole document becomes editable
+    Figma content — text you can retype, shapes you can recolor, everything.
+  </p>
+
+  <div class="explainer">
+    <h3>What's happening here, in plain English</h3>
+    <p>
+      A "plugin" in Figma is just a little tool other people have made and shared
+      for free. The one we're using takes a PDF and rebuilds it inside Figma as
+      proper editable layers — text becomes typeable text, shapes become real
+      shapes, and so on.
+    </p>
+    <p>
+      You don't install anything on your Mac. The plugin lives inside Figma. You
+      add it to your account once, and it's there forever.
+    </p>
+  </div>
+
+  <div class="heads-up">
+    <div class="icon">💡</div>
+    <div>
+      <b>Honest expectations</b>
+      <p>
+        These free converters work well — usually 80–90% of things come in
+        clean and editable. A few things sometimes need tidying (a title might
+        be slightly off-position, a font might fall back). It's normal — just
+        nudge things into place after. If too much is broken, scroll to the
+        "Plan B" section at the bottom.
+      </p>
+    </div>
+  </div>
+
+  <div class="checklist">
+    <h3>Before you start</h3>
+    <ul>
+      <li>A free Figma account (works on the website or desktop app — either is fine)</li>
+      <li>About 5 minutes</li>
+      <li>The PDF (you already have it — path is in Step 3 below)</li>
+    </ul>
+  </div>
+
+  <h2>The 5 steps</h2>
+
+  <ol class="steps">
+
+    <li>
+      <h3>Open Figma and start a new file</h3>
+      <p>
+        Go to <b>figma.com</b> in your browser <i>or</i> open the Figma desktop app —
+        both work this time. On the home screen, click <b>"New design file"</b>.
+        A blank canvas opens.
+      </p>
+    </li>
+
+    <li>
+      <h3>Open the plugin search bar</h3>
+      <p>
+        Look at the top-middle of the Figma window. You'll see a search bar that
+        says something like <b>"Actions"</b> or has a small magnifying glass icon.
+        Click on it (or press <span class="pill">/</span> on your keyboard — that's
+        the forward slash key).
+      </p>
+      <p>Type these exact words into the search:</p>
+      <p><code>PDF to Figma</code></p>
+      <div class="tip">
+        <b>Alternate path if you can't find the search bar:</b>
+        click the Figma icon in the very top-left → <b>Plugins</b> → <b>Manage plugins…</b>.
+        A window opens where you can search the same way.
+      </div>
+    </li>
+
+    <li>
+      <h3>Pick the plugin and click "Run"</h3>
+      <p>
+        You'll see one or two results. Pick the one named simply <b>"PDF to Figma"</b>
+        (by Sasha Larionov is the most popular — it'll have a yellow PDF icon).
+        Click on it.
+      </p>
+      <p>
+        If Figma asks you to <b>"Install"</b> first, click that — then click <b>"Run"</b>.
+        A small panel pops up on your canvas.
+      </p>
+      <div class="tip">
+        <b>If you don't see that exact one:</b> any plugin called something like
+        "PDF to Figma," "Import PDF," or "PDF Import" will work similarly. Pick
+        whichever has the most users (Figma shows a number).
+      </div>
+    </li>
+
+    <li>
+      <h3>Upload the PDF into the plugin</h3>
+      <p>
+        The plugin panel will have a button like <b>"Upload PDF"</b>, <b>"Choose file"</b>,
+        or a drag-and-drop area. Click the button.
+      </p>
+      <p>A file picker opens. The PDF lives here:</p>
+
+      <div class="path-card">
+        <div class="label">Location on your Mac</div>
+        <div class="path">
+          <span class="muted">/Users/saimyothu/claude-workspace/Retina AI/<br/>compass-ui-ux-designs/retina/</span><br/>
+          └── <span class="file">store-manager-design-system.pdf</span>
+        </div>
+      </div>
+
+      <div class="tip">
+        <b>Quick way to get there in the file picker:</b> press <b>Cmd + Shift + G</b>
+        on your keyboard. A little box appears — paste in the folder path above
+        (the part with the slashes), hit Enter, and you'll jump straight to the
+        folder. Double-click the PDF.
+      </div>
+    </li>
+
+    <li>
+      <h3>Wait, then watch it appear</h3>
+      <p>
+        The plugin processes the PDF — could take 30 seconds to a few minutes
+        depending on length. You'll see a progress bar or spinner. <b>Don't close
+        the panel</b> while it's working.
+      </p>
+      <p>
+        When it finishes, the editable Figma version of every page appears on
+        your canvas. Press <span class="pill">Shift + 1</span> on your keyboard
+        to zoom out and see everything.
+      </p>
+    </li>
+
+  </ol>
+
+  <h2>Now edit it like any Figma file</h2>
+  <ol class="steps">
+    <li>
+      <h3>Rename the file</h3>
+      <p>
+        Click "Untitled" at the top of Figma and rename it to
+        <b>"Store Manager — Design System"</b> so it's easy to find later.
+      </p>
+    </li>
+    <li>
+      <h3>Double-click anything to edit it</h3>
+      <p>
+        Double-click text to retype. Click any shape and change its color from
+        the panel on the right side. Drag things around freely. If something
+        comes in slightly off-position, just select it and move it.
+      </p>
+    </li>
+    <li>
+      <h3>Share when ready</h3>
+      <p>
+        Click the blue <b>"Share"</b> button in the top-right of Figma to invite
+        someone by email or copy a link. Figma saves automatically.
+      </p>
+    </li>
+  </ol>
+
+  <div class="alt">
+    <h3>Plan B — if the plugin output is too messy</h3>
+    <p>
+      If you find that too much came in as un-editable images, or the layout is
+      a mess, the free plugins do have limits — they're best with simple PDFs.
+    </p>
+    <p>
+      In that case, tell me <b>"the plugin didn't work well"</b> and I'll build
+      you a custom Figma helper that recreates the exact document content
+      page-by-page as native editable Figma elements. Takes me an hour or so —
+      result is 100% clean and editable.
+    </p>
+  </div>
+
+  <h2>Something not working?</h2>
+
+  <details>
+    <summary>I can't find the search bar at the top of Figma</summary>
+    <p>
+      Different Figma versions have it in slightly different spots. Try pressing
+      <b>/</b> (the forward slash key) on your keyboard — that always opens it.
+      Or click the Figma icon in the top-left corner → <b>Plugins</b> → <b>Manage plugins…</b>
+      and search from there.
+    </p>
+  </details>
+
+  <details>
+    <summary>The plugin says I need to install it first</summary>
+    <p>
+      That's normal — just click the <b>"Install"</b> button. It's free, no
+      account upgrade needed. After install, click <b>"Run"</b> on the same screen.
+    </p>
+  </details>
+
+  <details>
+    <summary>The plugin panel is blank or won't load</summary>
+    <p>
+      Close the plugin (click the X), refresh Figma (Cmd + R), and try again.
+      If you're on the desktop app and it keeps failing, try the same steps in
+      the browser version at figma.com — sometimes one works when the other doesn't.
+    </p>
+  </details>
+
+  <details>
+    <summary>The fonts look wrong after import</summary>
+    <p>
+      The PDF uses <b>Inter</b> and <b>JetBrains Mono</b>. If you don't have them on
+      your Mac, Figma swaps in a substitute and you'll see a small warning icon.
+      Install both for free from <a href="https://fonts.google.com" target="_blank" rel="noopener">fonts.google.com</a>
+      (search the names), then reopen the file.
+    </p>
+  </details>
+
+  <details>
+    <summary>Only some pages imported</summary>
+    <p>
+      Free plugins sometimes cap how many pages they convert at once. Try running
+      the plugin a second time on the same PDF — or split the PDF into smaller
+      chunks first. If this is annoying, let me know and we'll go with Plan B
+      above instead.
+    </p>
+  </details>
+
+  <details>
+    <summary>Everything looks like a giant blurry image</summary>
+    <p>
+      That means the converter fell back to "image mode" instead of doing a real
+      conversion — usually happens with complex PDFs. This is the Plan B trigger:
+      tell me and I'll build the custom helper that produces clean editable output.
+    </p>
+  </details>
+
+  <footer>
+    <span>Retina AI · Store Manager Design System</span>
+    <span>Last updated 27 May 2026</span>
+  </footer>
+</div>
+</body>
+</html>

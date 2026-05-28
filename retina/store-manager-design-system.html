@@ -1,0 +1,1609 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Style Guide For Store Manager Prototype</title>
+<style>
+  :root {
+    --primary: #C68A1E;
+    --primary-hover: #A8741A;
+    --primary-bg: #FBF3E0;
+    --primary-border: #F4E4BC;
+    --primary-hover-bg: #F6E8C7;
+    --primary-soft: #F9F4EA;
+    --brand-ink: #7A5310;
+    --ink: #1A1A1A;
+    --ink-2: #44403C;
+    --ink-3: #8A8275;
+    --ink-4: #B8B0A1;
+    --ink-muted: #9C9B94;
+    --ink-faint: #C5C4BC;
+    --cream: #FBF8F0;
+    --cream-2: #F1ECDD;
+    --warm-bg: #FEF3E0;
+    --page-bg: #FBF9F5;
+    --surface: #FFFFFF;
+    --surface-hover: #F5F3EE;
+    --surface-active: #F0EDE6;
+    --bg: #F5F5F4;
+    --line-1: #ECE6DA;
+    --line-2: #E2DBCB;
+    --line-3: #B8AC90;
+    --success: #5A8C1A;
+    --success-2: #7DBD3B;
+    --success-ink: #3B6D11;
+    --success-bg: #EAF3DE;
+    --success-border: #A8D9BC;
+    --scan: #97C459;
+    --error: #A32D2D;
+    --error-2: #E24B4A;
+    --error-bg: #FDE7E7;
+    --error-border: #EFA0A0;
+    --warning: #C68A1E;
+    --warning-bg: #FFF3DE;
+    --warning-border: #EEC86D;
+    --info: #0067B8;
+    --info-bg: #E8F0F9;
+    --accent: #ECE6DA;
+    --accent-bg: #E2DBCB;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--page-bg);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ====== Page wrap ====== */
+  .wrap {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 56px 56px 96px;
+  }
+
+  /* ====== Top brand bar ====== */
+  .top-bar {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 56px;
+  }
+  .top-bar .brand-mark {
+    display: flex; align-items: center; gap: 12px;
+  }
+  .top-bar .logo {
+    width: 44px; height: 44px; border-radius: 11px; background: var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 14px rgba(122,83,16,0.18);
+  }
+  .top-bar .brand {
+    font-weight: 700; font-size: 13pt; letter-spacing: -0.2px; color: var(--ink);
+  }
+  .top-bar .brand .light { color: var(--ink-faint); }
+  .top-bar .brand .sub {
+    display: block; font-size: 8pt; font-weight: 500;
+    letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 2px;
+    text-transform: uppercase;
+  }
+  .title {
+    font-style: italic;
+    font-size: 26pt; font-weight: 700; letter-spacing: -0.6px;
+    color: var(--ink);
+    margin: 0;
+  }
+  .title em {
+    font-style: italic; color: var(--primary);
+  }
+
+  /* ====== Big numbered sections ====== */
+  .section {
+    background: var(--cream);
+    border-radius: 24px;
+    padding: 44px 44px 52px;
+    margin-bottom: 32px;
+    position: relative;
+    overflow: hidden;
+  }
+  .section .head {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 36px;
+    position: relative;
+  }
+  .section .head .numeral {
+    font-size: 64pt; font-weight: 800; letter-spacing: -3px;
+    color: rgba(122, 83, 16, 0.12);
+    line-height: 0.9;
+    font-feature-settings: "tnum";
+  }
+  .section .head .title-wrap {
+    text-align: right;
+  }
+  .section .head .name {
+    font-size: 28pt; font-weight: 700; letter-spacing: -0.6px;
+    color: var(--ink);
+    margin: 0;
+    padding-bottom: 6px;
+    border-bottom: 3px solid var(--primary);
+    display: inline-block;
+  }
+
+  /* ====== Sub-section labels (centered, underlined) ====== */
+  .sub-label {
+    text-align: center;
+    margin: 28px 0 16px;
+    position: relative;
+  }
+  .sub-label span {
+    display: inline-block;
+    font-size: 10pt; font-weight: 600; color: var(--ink);
+    letter-spacing: 0.04em;
+    padding-bottom: 4px;
+    border-bottom: 2px solid var(--primary);
+  }
+
+  /* ====== Color swatch grid ====== */
+  .color-row {
+    display: grid;
+    gap: 12px;
+  }
+  .color-row.cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .color-row.cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .color-row.cols-4 { grid-template-columns: repeat(4, 1fr); }
+  .color-row.cols-5 { grid-template-columns: repeat(5, 1fr); }
+  .color-row.cols-6 { grid-template-columns: repeat(6, 1fr); }
+  .color-row.cols-8 { grid-template-columns: repeat(8, 1fr); }
+
+  .swatch {
+    border-radius: 10px;
+    padding: 16px 14px;
+    min-height: 86px;
+    display: flex; flex-direction: column; justify-content: space-between;
+    color: #fff;
+    box-shadow: inset 0 0 0 1px rgba(0,0,0,0.04);
+  }
+  .swatch .label { font-size: 9.5pt; font-weight: 600; letter-spacing: -0.1px; }
+  .swatch .hex { font-family: 'JetBrains Mono', monospace; font-size: 8pt; opacity: 0.92; }
+  .swatch.lg { min-height: 132px; padding: 22px 20px; }
+  .swatch.dark-text { color: var(--ink); }
+  .swatch.dark-text .hex { color: var(--ink-2); opacity: 0.7; }
+
+  /* ====== Typeface display ====== */
+  .typeface-grid { display: grid; grid-template-columns: 1fr 2fr; gap: 14px; align-items: stretch; }
+  .typeface-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 22px 26px;
+    border: 1px solid var(--cream-2);
+    display: flex; flex-direction: column; justify-content: center;
+    min-height: 150px;
+  }
+  .typeface-card .aa {
+    font-size: 64pt; font-weight: 700; letter-spacing: -2px; line-height: 1;
+    color: var(--ink); margin: 0;
+  }
+  .typeface-card .aa-light {
+    font-weight: 200; color: var(--primary);
+  }
+  .typeface-card.info { background: #fff; }
+  .typeface-card.info h4 {
+    margin: 0 0 6px; font-size: 16pt; font-weight: 700; color: var(--ink);
+  }
+  .typeface-card.info .desc { font-size: 9.5pt; color: var(--ink-muted); margin: 0 0 12px; }
+  .typeface-card.info .weights { font-size: 9pt; color: var(--ink-2); }
+  .typeface-card.info .weights b { color: var(--ink); }
+
+  /* ====== Tables ====== */
+  table.spec {
+    width: 100%; border-collapse: collapse; font-size: 9.5pt;
+    background: #fff; border-radius: 10px; overflow: hidden;
+    border: 1px solid var(--cream-2);
+  }
+  table.spec th, table.spec td {
+    text-align: left; padding: 11px 16px;
+    border-bottom: 1px solid var(--cream-2);
+    vertical-align: middle;
+  }
+  table.spec tr:last-child td { border-bottom: none; }
+  table.spec th {
+    font-weight: 600; color: var(--ink-2); background: var(--cream);
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  table.spec td.mono { font-family: 'JetBrains Mono', monospace; color: var(--ink-2); }
+  table.spec td.sample { color: var(--ink); }
+
+  /* ====== Spacing dots ====== */
+  .spacing-row {
+    display: flex; align-items: flex-end; justify-content: space-between;
+    gap: 8px; padding: 28px 18px;
+    background: #fff; border: 1px solid var(--cream-2); border-radius: 10px;
+  }
+  .spacing-dot {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+  }
+  .spacing-dot .dot {
+    background: var(--primary);
+    border-radius: 4px;
+    flex-shrink: 0;
+  }
+  .spacing-dot .lbl {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 8pt; color: var(--ink-muted);
+  }
+  .grid-tag {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--primary-bg); color: var(--brand-ink);
+    border: 1px solid var(--primary-border);
+    padding: 6px 12px; border-radius: 8px;
+    font-size: 9.5pt; font-weight: 600;
+  }
+
+  /* ====== Radius cards ====== */
+  .radius-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .radius-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 10px; padding: 16px;
+    text-align: center;
+  }
+  .radius-card .shape {
+    width: 72px; height: 56px; background: var(--primary);
+    margin: 0 auto 10px;
+  }
+  .radius-card .value {
+    font-weight: 600; font-size: 11pt; color: var(--ink);
+  }
+  .radius-card .usage {
+    font-size: 8pt; color: var(--ink-muted); margin-top: 4px;
+    line-height: 1.4;
+  }
+
+  /* ====== Shadow card ====== */
+  .shadow-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 10px; padding: 22px;
+    text-align: center;
+  }
+  .shadow-demo {
+    width: 88px; height: 88px; background: #fff;
+    border-radius: 12px;
+    box-shadow: 4px 4px 20px rgba(0,0,0,0.10);
+    margin: 0 auto 16px;
+  }
+  .shadow-card .specs {
+    font-family: 'JetBrains Mono', monospace; font-size: 8.5pt;
+    color: var(--ink-muted); line-height: 1.6;
+  }
+
+  /* ====== Icon section ====== */
+  .icon-grid-display {
+    display: grid; grid-template-columns: 200px 1fr 220px; gap: 18px;
+    align-items: center;
+  }
+  .icon-grid-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 10px; padding: 24px;
+    text-align: center;
+  }
+  .icon-grid-card .grid-svg { margin: 0 auto; display: block; }
+  .icon-grid-card .caption {
+    margin-top: 10px; font-size: 9pt; color: var(--ink-muted);
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .stroke-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 10px; padding: 18px; text-align: center;
+  }
+  .stroke-card .val {
+    font-family: 'JetBrains Mono', monospace; font-size: 10pt;
+    color: var(--ink); font-weight: 600; margin-top: 8px;
+  }
+  .stroke-card .lbl { font-size: 8.5pt; color: var(--ink-muted); }
+
+  .icon-strip {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 10px; padding: 18px 22px;
+    margin-top: 16px;
+    display: flex; flex-wrap: wrap; gap: 18px 22px; align-items: center;
+  }
+  .icon-strip svg { color: var(--ink); display: block; }
+  .icon-strip .lucide-label {
+    font-size: 9pt; color: var(--brand-ink); font-weight: 600;
+    margin-right: 14px; letter-spacing: 0.04em;
+  }
+
+  /* ====== Buttons matrix ====== */
+  .matrix {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 18px;
+    overflow-x: auto;
+  }
+  .matrix table { width: 100%; border-collapse: separate; border-spacing: 8px 12px; }
+  .matrix th {
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.06em;
+    color: var(--ink-muted); font-weight: 600;
+    text-align: center; padding: 4px 8px;
+  }
+  .matrix th.row-label { text-align: left; min-width: 80px; }
+  .matrix td {
+    text-align: center; padding: 0;
+  }
+  .matrix td.row-label {
+    text-align: left; font-size: 9pt; color: var(--ink-2); font-weight: 600;
+  }
+  .matrix .variant-header {
+    background: var(--cream-2); color: var(--ink); font-size: 9pt;
+    padding: 6px 10px; border-radius: 6px; font-weight: 600;
+    text-transform: none; letter-spacing: 0;
+  }
+
+  /* Button samples */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 8px 14px; border-radius: 8px; font-weight: 500; font-size: 9.5pt;
+    border: 1px solid transparent; min-height: 36px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .btn-primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn-primary-hover { background: var(--primary-hover); color: #fff; border-color: var(--primary-hover); }
+  .btn-primary-pressed { background: var(--brand-ink); color: #fff; border-color: var(--brand-ink); }
+  .btn-primary-disabled { background: var(--primary); color: #fff; border-color: var(--primary); opacity: 0.45; }
+
+  .btn-primary-2 { background: var(--primary-bg); color: var(--brand-ink); border-color: var(--primary-border); }
+  .btn-primary-2-hover { background: var(--primary-hover-bg); color: var(--brand-ink); border-color: var(--primary-border); }
+  .btn-primary-2-pressed { background: var(--primary-border); color: var(--brand-ink); border-color: var(--primary-border); }
+  .btn-primary-2-disabled { background: var(--primary-bg); color: var(--brand-ink); border-color: var(--primary-border); opacity: 0.45; }
+
+  .btn-secondary { background: #fff; color: var(--ink); border-color: var(--ink-faint); }
+  .btn-secondary-hover { background: var(--surface-hover); color: var(--ink); border-color: var(--ink-faint); }
+  .btn-secondary-pressed { background: var(--surface-active); color: var(--ink); border-color: var(--ink-3); }
+  .btn-secondary-disabled { background: #fff; color: var(--ink-muted); border-color: var(--ink-faint); opacity: 0.55; }
+
+  .btn-secondary-2 { background: transparent; color: var(--ink); border-color: transparent; }
+  .btn-secondary-2-hover { background: var(--surface-hover); color: var(--ink); border-color: transparent; }
+  .btn-secondary-2-pressed { background: var(--surface-active); color: var(--ink); border-color: transparent; }
+  .btn-secondary-2-disabled { background: transparent; color: var(--ink-faint); border-color: transparent; }
+
+  .btn-icon {
+    width: 36px; height: 36px; padding: 0; border-radius: 999px;
+    background: transparent; border-color: var(--cream-2);
+    color: var(--ink-2);
+  }
+  .btn-icon-hover { background: var(--surface-hover); border-color: var(--ink-faint); }
+  .btn-icon-pressed { background: var(--primary-soft); border-color: var(--primary-border); }
+  .btn-icon-disabled { background: transparent; border-color: var(--cream-2); color: var(--ink-faint); opacity: 0.55; }
+
+  /* ====== Components row ====== */
+  .components-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+  }
+  .component-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 16px;
+  }
+  .component-card h4 {
+    margin: 0 0 12px; font-size: 9.5pt; color: var(--ink); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+
+  /* Step pills */
+  .pill {
+    font-size: 9pt; padding: 5px 12px; border-radius: 4px;
+    border: 1px solid var(--ink-faint); background: #fff; color: var(--ink-muted);
+    display: inline-block; margin: 0 4px 4px 0;
+  }
+  .pill.on { background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 500; }
+
+  /* Filter chips */
+  .fchip {
+    font-size: 9pt; color: var(--brand-ink); background: var(--primary-bg);
+    border: 1px solid var(--primary-border); padding: 4px 11px; border-radius: 99px;
+    font-weight: 500; display: inline-block; margin: 0 4px 4px 0;
+  }
+  .fchip.more {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+    padding: 4px 10px; font-weight: 600;
+  }
+
+  /* Allergen chips (matching Style Guide-2 terminology) */
+  .allergen-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    font-size: 9.5pt; padding: 6px 12px; border-radius: 99px;
+    font-weight: 500; margin: 0 6px 6px 0;
+  }
+  .allergen-chip.def { background: var(--error-bg); color: var(--error); border: 1px solid var(--error-border); }
+  .allergen-chip.prob { background: var(--warning-bg); color: var(--brand-ink); border: 1px solid var(--warning-border); }
+  .allergen-chip.named { background: var(--success-bg); color: var(--success-ink); border: 1px solid var(--success-border); }
+  .allergen-chip .x { font-weight: 700; opacity: 0.6; cursor: pointer; }
+
+  /* Confidence bars */
+  .conf-row {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 8px;
+  }
+  .conf-row .lbl { width: 110px; font-size: 9pt; color: var(--ink-2); }
+  .conf-row .bar {
+    flex: 1; height: 6px; background: var(--cream-2); border-radius: 99px; overflow: hidden;
+  }
+  .conf-row .bar .fill { height: 100%; border-radius: 99px; }
+  .conf-row .pct { width: 56px; font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--ink-2); text-align: right; }
+
+  /* Badges */
+  .badge {
+    font-size: 8.5pt; padding: 3px 9px; border-radius: 5px; font-weight: 500;
+    display: inline-block; margin-right: 6px;
+  }
+  .badge-status { background: var(--success-bg); color: var(--success-ink); }
+  .badge-error { background: var(--error-bg); color: var(--error); }
+  .badge-counter { background: var(--bg); color: var(--ink-muted); }
+  .badge-count {
+    background: var(--primary); color: #fff; padding: 1px 6px; border-radius: 99px;
+    font-size: 8pt; font-weight: 600;
+  }
+
+  /* Input field + checkbox */
+  .input-field {
+    width: 100%; padding: 9px 12px;
+    border: 1px solid var(--ink-faint); border-radius: 8px;
+    font-family: inherit; font-size: 9.5pt;
+    background: #fff; color: var(--ink);
+  }
+  .input-field:focus { outline: none; border-color: var(--primary); }
+  .input-label {
+    display: block; font-size: 9pt; font-weight: 600; color: var(--ink-2); margin-bottom: 4px;
+  }
+  .input-helper {
+    font-size: 8.5pt; color: var(--ink-muted); margin-top: 4px;
+  }
+
+  .checkbox-row {
+    display: flex; align-items: center; gap: 8px; margin-bottom: 8px;
+    font-size: 9.5pt; color: var(--ink-2);
+  }
+  .cbx {
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 1.5px solid var(--ink-faint); background: #fff;
+    display: inline-flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+  }
+  .cbx.checked { background: var(--primary); border-color: var(--primary); color: #fff; }
+  .cbx.hover { border-color: var(--primary); }
+  .cbx.disabled { background: var(--cream-2); border-color: var(--ink-faint); opacity: 0.6; }
+
+  /* Toast */
+  .toast {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--primary); color: #fff; font-size: 9.5pt;
+    padding: 10px 16px; border-radius: 10px;
+    box-shadow: 4px 4px 20px rgba(0,0,0,0.10);
+    font-weight: 500;
+  }
+  .toast.error { background: #fff; color: var(--error); border: 1px solid var(--error-border); }
+  .toast.error .dot { background: var(--error); }
+  .toast .dot {
+    width: 10px; height: 10px; border-radius: 999px; background: var(--scan);
+    box-shadow: 0 0 6px rgba(151,196,89,0.6);
+  }
+  .toast .meta {
+    font-size: 8pt; opacity: 0.85; font-weight: 400;
+    display: block; line-height: 1.3;
+  }
+
+  /* Toggle */
+  .toggle {
+    width: 38px; height: 22px; border-radius: 99px;
+    background: var(--ink-faint); position: relative;
+    transition: background 150ms ease;
+  }
+  .toggle::after {
+    content: ""; position: absolute; top: 3px; left: 3px;
+    width: 16px; height: 16px; border-radius: 50%; background: #fff;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.15);
+    transition: left 150ms ease;
+  }
+  .toggle.on { background: var(--primary); }
+  .toggle.on::after { left: 19px; }
+
+  /* KPI cards */
+  .kpi-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px;
+  }
+  .kpi {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 16px 18px;
+  }
+  .kpi .label {
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.08em;
+    color: var(--ink-muted); font-weight: 600;
+  }
+  .kpi .value {
+    font-size: 22pt; font-weight: 700; color: var(--ink);
+    margin-top: 6px; letter-spacing: -0.5px;
+    font-feature-settings: "tnum";
+  }
+  .kpi .delta {
+    font-size: 8.5pt; color: var(--success-ink); margin-top: 2px;
+  }
+  .kpi.warn .value { color: var(--brand-ink); }
+  .kpi.danger .value { color: var(--error); }
+  .kpi.success .value { color: var(--success-ink); }
+
+  /* Chart */
+  .chart-card {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 20px 22px;
+  }
+  .chart-card h4 {
+    margin: 0 0 16px; font-size: 11pt; color: var(--ink); font-weight: 600;
+  }
+  .chart {
+    display: grid; grid-template-columns: 26px repeat(7, 1fr); gap: 8px;
+    align-items: end; height: 160px;
+  }
+  .chart .y { display: flex; flex-direction: column; justify-content: space-between; height: 100%; padding-bottom: 22px;
+    font-family: 'JetBrains Mono', monospace; font-size: 7.5pt; color: var(--ink-muted);
+  }
+  .chart .col {
+    display: flex; flex-direction: column; align-items: center; gap: 8px;
+    height: 100%; justify-content: flex-end;
+  }
+  .chart .bar {
+    width: 100%; max-width: 28px;
+    background: linear-gradient(180deg, var(--primary) 0%, var(--primary-hover) 100%);
+    border-radius: 4px 4px 0 0;
+    position: relative;
+  }
+  .chart .bar.highlight { background: linear-gradient(180deg, var(--success-2) 0%, var(--success) 100%); }
+  .chart .col .day { font-size: 8.5pt; color: var(--ink-muted); }
+  .chart .label-meta {
+    font-size: 8.5pt; color: var(--ink-muted); margin-top: 10px;
+    display: flex; justify-content: space-between;
+  }
+  .chart .label-meta b { color: var(--ink); }
+
+  /* Quick action cards */
+  .qa-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .qa {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 14px 16px;
+    border-left: 3px solid var(--primary);
+    font-size: 9.5pt; color: var(--ink-2); line-height: 1.5;
+  }
+  .qa.warn { border-left-color: var(--warning-border); }
+  .qa.info { border-left-color: var(--info); }
+
+  /* Modal dialog */
+  .modal-shell {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 14px; padding: 20px 22px;
+    box-shadow: 4px 4px 20px rgba(0,0,0,0.06);
+    max-width: 420px;
+  }
+  .modal-shell h4 {
+    margin: 0 0 4px; font-size: 13pt; font-weight: 700; color: var(--ink); letter-spacing: -0.2px;
+  }
+  .modal-shell .sub {
+    font-size: 9pt; color: var(--ink-muted); margin-bottom: 14px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+  .modal-shell .body { font-size: 9.5pt; color: var(--ink-2); margin-bottom: 16px; }
+  .modal-shell .actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+  /* Phone mockup */
+  .phone {
+    background: #1F1B16;
+    border-radius: 32px;
+    padding: 8px;
+    max-width: 220px;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.10);
+  }
+  .phone .screen {
+    background: var(--cream);
+    border-radius: 26px;
+    overflow: hidden;
+    padding: 14px;
+    min-height: 360px;
+    display: flex; flex-direction: column;
+  }
+  .phone-grid {
+    display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px;
+  }
+  .phone .screen .h-title { font-size: 11pt; font-weight: 700; margin: 0 0 2px; }
+  .phone .screen .h-sub { font-size: 8pt; color: var(--ink-muted); margin: 0 0 12px; }
+  .phone-mini-btn {
+    background: var(--primary); color: #fff;
+    padding: 10px; border-radius: 8px; text-align: center;
+    font-size: 8.5pt; font-weight: 500; margin-top: auto;
+  }
+  .phone-label {
+    font-size: 8.5pt; color: var(--ink-muted); text-align: center; margin-top: 8px;
+    font-weight: 600;
+  }
+
+  /* Scan stage */
+  .scan {
+    background: #080808; border-radius: 12px; padding: 24px 18px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; min-height: 130px;
+  }
+  .scan .frame { position: relative; width: 170px; height: 80px; }
+  .scan .corner { position: absolute; width: 14px; height: 14px; }
+  .scan .corner.tl { top: 0; left: 0; border-top: 2px solid var(--scan); border-left: 2px solid var(--scan); border-radius: 3px 0 0 0; }
+  .scan .corner.tr { top: 0; right: 0; border-top: 2px solid var(--scan); border-right: 2px solid var(--scan); border-radius: 0 3px 0 0; }
+  .scan .corner.bl { bottom: 0; left: 0; border-bottom: 2px solid var(--scan); border-left: 2px solid var(--scan); border-radius: 0 0 0 3px; }
+  .scan .corner.br { bottom: 0; right: 0; border-bottom: 2px solid var(--scan); border-right: 2px solid var(--scan); border-radius: 0 0 3px 0; }
+  .scan .line {
+    position: absolute; left: 4px; right: 4px; top: 45%; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--scan) 50%, transparent);
+    box-shadow: 0 0 6px rgba(151,196,89,0.7);
+    border-radius: 1px;
+  }
+  .scan .label-hint {
+    width: 140px; height: 90px;
+    border: 2px dashed rgba(255,255,255,0.35); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    color: rgba(255,255,255,0.5); font-size: 8.5pt;
+  }
+
+  /* Thumbnail row */
+  .thumb-row { display: flex; gap: 8px; }
+  .thumb {
+    width: 56px; height: 56px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 7.5pt; color: var(--ink-muted);
+    background: var(--bg); border: 1px solid var(--cream-2);
+    text-align: center; gap: 3px;
+  }
+  .thumb.active { border: 2px solid var(--primary); }
+  .thumb.done { background: var(--success-bg); color: var(--success-ink); border: 1px solid var(--success-2); }
+  .thumb.more { border: 1px dashed var(--cream-2); position: relative; }
+  .thumb svg { display: block; }
+
+  /* Quality bar */
+  .qbar { background: var(--cream-2); height: 4px; border-radius: 2px; overflow: hidden; }
+  .qbar .fill { background: var(--success); height: 100%; }
+
+  /* Tabs */
+  .tabs {
+    display: flex; align-items: center; gap: 4px;
+    background: var(--surface-hover); border-radius: 10px; padding: 4px;
+    overflow-x: auto;
+  }
+  .tab {
+    padding: 6px 12px; border-radius: 7px;
+    font-size: 8.5pt; color: var(--ink-2); white-space: nowrap;
+    display: inline-flex; align-items: center; gap: 6px; cursor: pointer;
+  }
+  .tab.active { background: #fff; color: var(--ink); font-weight: 600; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+  .tab .count {
+    background: var(--cream-2); color: var(--ink-muted);
+    padding: 0 6px; border-radius: 99px; font-size: 7.5pt; font-weight: 600;
+  }
+  .tab.active .count { background: var(--primary-bg); color: var(--brand-ink); }
+
+  /* Footer */
+  .doc-footer {
+    margin-top: 56px; padding-top: 18px;
+    border-top: 1px solid var(--cream-2);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+    font-size: 8.5pt; color: var(--ink-muted);
+  }
+  .doc-footer .mono { font-family: 'JetBrains Mono', monospace; }
+
+  /* Two-column row */
+  .row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; }
+  .row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; align-items: start; }
+
+  @media (max-width: 900px) {
+    .wrap { padding: 32px 20px 64px; }
+    .section { padding: 28px 22px 36px; }
+    .section .head .numeral { font-size: 44pt; }
+    .section .head .name { font-size: 20pt; }
+    .color-row.cols-8 { grid-template-columns: repeat(4, 1fr); }
+    .color-row.cols-6 { grid-template-columns: repeat(3, 1fr); }
+    .color-row.cols-5 { grid-template-columns: repeat(2, 1fr); }
+    .color-row.cols-4 { grid-template-columns: repeat(2, 1fr); }
+    .kpi-grid { grid-template-columns: repeat(2, 1fr); }
+    .qa-grid, .components-grid, .row-3, .row-2 { grid-template-columns: 1fr; }
+    .phone-grid { grid-template-columns: repeat(2, 1fr); }
+    .radius-grid { grid-template-columns: repeat(2, 1fr); }
+    .typeface-grid, .icon-grid-display { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ====== TOP BAR ====== -->
+  <div class="top-bar">
+    <h1 class="title">Style Guide For <em>Store Manager Prototype</em></h1>
+    <div class="brand-mark">
+      <div class="logo">
+        <svg width="28" height="28" viewBox="0 0 44 44" aria-hidden="true">
+          <line x1="10" y1="34" x2="34" y2="10" stroke="#F1ECDD" stroke-width="1.6" stroke-linecap="round"/>
+          <polygon points="34,10 29,14 32,17" fill="#F1ECDD"/>
+          <polygon points="10,34 15,30 12,27" fill="#9C9B94"/>
+          <circle cx="22" cy="22" r="2.2" fill="#F1ECDD"/>
+        </svg>
+      </div>
+      <div class="brand">
+        RETINA <span class="light">AI</span>
+        <span class="sub">by Compass Group</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================================
+       01 · COLOR
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">01</div>
+      <div class="title-wrap"><h2 class="name">Color</h2></div>
+    </div>
+
+    <!-- Brand Colors -->
+    <div class="sub-label"><span>Brand Colors</span></div>
+    <div class="color-row cols-2" style="margin-bottom: 18px;">
+      <div class="swatch lg" style="background:#C68A1E">
+        <div class="label">Brand Primary</div>
+        <div class="hex">HEX #C68A1E</div>
+      </div>
+      <div class="color-row cols-2">
+        <div class="swatch" style="background:#A8741A">
+          <div class="label">Brand Hover</div>
+          <div class="hex">HEX #A8741A</div>
+        </div>
+        <div class="swatch" style="background:#7A5310">
+          <div class="label">Brand Ink</div>
+          <div class="hex">HEX #7A5310</div>
+        </div>
+        <div class="swatch dark-text" style="background:#F4E4BC">
+          <div class="label">Brand Border</div>
+          <div class="hex">HEX #F4E4BC</div>
+        </div>
+        <div class="swatch dark-text" style="background:#FBF3E0">
+          <div class="label">Brand BG</div>
+          <div class="hex">HEX #FBF3E0</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Surfaces -->
+    <div class="sub-label"><span>Surfaces</span></div>
+    <div class="color-row cols-6">
+      <div class="swatch dark-text" style="background:#FBF8F0">
+        <div class="label">Canvas Cream</div>
+        <div class="hex">HEX #FBF8F0</div>
+      </div>
+      <div class="swatch dark-text" style="background:#FBF9F5">
+        <div class="label">Page BG</div>
+        <div class="hex">HEX #FBF9F5</div>
+      </div>
+      <div class="swatch dark-text" style="background:#FEF3E0">
+        <div class="label">Warm BG</div>
+        <div class="hex">HEX #FEF3E0</div>
+      </div>
+      <div class="swatch dark-text" style="background:#FFFFFF; box-shadow: inset 0 0 0 1px var(--cream-2);">
+        <div class="label">Card / Panel</div>
+        <div class="hex">HEX #FFFFFF</div>
+      </div>
+      <div class="swatch dark-text" style="background:#F5F3EE">
+        <div class="label">Surface Hover</div>
+        <div class="hex">HEX #F5F3EE</div>
+      </div>
+      <div class="swatch dark-text" style="background:#F0EDE6">
+        <div class="label">Surface Active</div>
+        <div class="hex">HEX #F0EDE6</div>
+      </div>
+    </div>
+
+    <!-- Text / Ink -->
+    <div class="sub-label"><span>Text · Ink</span></div>
+    <div class="color-row cols-4">
+      <div class="swatch" style="background:#1A1A1A">
+        <div class="label">Ink 1</div>
+        <div class="hex">HEX #1A1A1A</div>
+      </div>
+      <div class="swatch" style="background:#44403C">
+        <div class="label">Ink 2</div>
+        <div class="hex">HEX #44403C</div>
+      </div>
+      <div class="swatch" style="background:#8A8275">
+        <div class="label">Ink 3</div>
+        <div class="hex">HEX #8A8275</div>
+      </div>
+      <div class="swatch dark-text" style="background:#B8B0A1">
+        <div class="label">Ink 4</div>
+        <div class="hex">HEX #B8B0A1</div>
+      </div>
+    </div>
+
+    <!-- Borders -->
+    <div class="sub-label"><span>Borders</span></div>
+    <div class="color-row cols-3">
+      <div class="swatch dark-text" style="background:#ECE6DA">
+        <div class="label">Line 1</div>
+        <div class="hex">HEX #ECE6DA</div>
+      </div>
+      <div class="swatch dark-text" style="background:#E2DBCB">
+        <div class="label">Line 2</div>
+        <div class="hex">HEX #E2DBCB</div>
+      </div>
+      <div class="swatch dark-text" style="background:#B8AC90">
+        <div class="label">Line 3</div>
+        <div class="hex">HEX #B8AC90</div>
+      </div>
+    </div>
+
+    <!-- State Colors -->
+    <div class="sub-label"><span>State Colors</span></div>
+    <div class="color-row cols-3" style="margin-bottom: 10px;">
+      <div class="swatch lg" style="background:#A32D2D">
+        <div>
+          <div class="label">Error</div>
+          <div class="hex">HEX #A32D2D</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:1;background:#FDE7E7;border-radius:4px;padding:4px 8px;color:var(--error);font-size:7.5pt;font-weight:600;">BG #FDE7E7</div>
+          <div style="flex:1;background:#EFA0A0;border-radius:4px;padding:4px 8px;color:#6B1A1A;font-size:7.5pt;font-weight:600;">BD #EFA0A0</div>
+        </div>
+      </div>
+      <div class="swatch lg" style="background:#5A8C1A">
+        <div>
+          <div class="label">Success</div>
+          <div class="hex">HEX #5A8C1A</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:1;background:#EAF3DE;border-radius:4px;padding:4px 8px;color:var(--success-ink);font-size:7.5pt;font-weight:600;">BG #EAF3DE</div>
+          <div style="flex:1;background:#A8D9BC;border-radius:4px;padding:4px 8px;color:#1F4A0A;font-size:7.5pt;font-weight:600;">BD #A8D9BC</div>
+        </div>
+      </div>
+      <div class="swatch lg" style="background:#C68A1E">
+        <div>
+          <div class="label">Warning</div>
+          <div class="hex">HEX #C68A1E</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <div style="flex:1;background:#FFF3DE;border-radius:4px;padding:4px 8px;color:var(--brand-ink);font-size:7.5pt;font-weight:600;">BG #FFF3DE</div>
+          <div style="flex:1;background:#EEC86D;border-radius:4px;padding:4px 8px;color:var(--brand-ink);font-size:7.5pt;font-weight:600;">BD #EEC86D</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Accent Colors -->
+    <div class="sub-label"><span>Accent Colors</span></div>
+    <div class="color-row cols-4">
+      <div class="swatch" style="background:#0067B8">
+        <div class="label">Info / SSO</div>
+        <div class="hex">HEX #0067B8</div>
+      </div>
+      <div class="swatch dark-text" style="background:#E8F0F9">
+        <div class="label">Info BG</div>
+        <div class="hex">HEX #E8F0F9</div>
+      </div>
+      <div class="swatch dark-text" style="background:#97C459">
+        <div class="label">Scan Accent</div>
+        <div class="hex">HEX #97C459</div>
+      </div>
+      <div class="swatch dark-text" style="background:#7DBD3B">
+        <div class="label">Success Accent</div>
+        <div class="hex">HEX #7DBD3B</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       02 · TYPOGRAPHY
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">02</div>
+      <div class="title-wrap"><h2 class="name">Typography</h2></div>
+    </div>
+
+    <div class="sub-label"><span>Typefaces</span></div>
+    <div class="typeface-grid">
+      <div class="typeface-card">
+        <span class="aa"><span class="aa-light">A</span>a</span>
+      </div>
+      <div class="typeface-card info">
+        <h4>Inter</h4>
+        <p class="desc">Google font · Variable</p>
+        <p class="weights"><b>Weights:</b> Extra Light 200 · Regular 400 · Medium 500 · Semibold 600 · <b>Bold 700</b></p>
+        <p class="weights" style="margin-top:8px;color:var(--ink-muted);">Used across every text role. Feature settings <code style="font-family:'JetBrains Mono',monospace;font-size:8.5pt;">cv11, ss01, ss03</code>.</p>
+      </div>
+    </div>
+
+    <div class="typeface-grid" style="margin-top:14px;">
+      <div class="typeface-card">
+        <span class="aa mono" style="font-weight:500;">Aa</span>
+      </div>
+      <div class="typeface-card info">
+        <h4>JetBrains Mono</h4>
+        <p class="desc">Google font · Variable</p>
+        <p class="weights"><b>Weights:</b> Regular 400 · Medium 500</p>
+        <p class="weights" style="margin-top:8px;color:var(--ink-muted);">Reserved for GTINs, codes, percentages, and any tabular numerics where alignment matters. Never used for body copy.</p>
+      </div>
+    </div>
+
+    <div class="sub-label"><span>Text Hierarchy</span></div>
+    <table class="spec">
+      <thead>
+        <tr><th>Name</th><th>Font Weight</th><th>Font Size</th><th>Line Height</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="sample" style="font-size:14pt;font-weight:700;">Display</td><td>700</td><td class="mono">36 px</td><td class="mono">1.1 × font size</td></tr>
+        <tr><td class="sample" style="font-size:13pt;font-weight:600;">Header H1</td><td>600</td><td class="mono">26 px</td><td class="mono">1.2 × font size</td></tr>
+        <tr><td class="sample" style="font-size:12pt;font-weight:600;">Header H2</td><td>600</td><td class="mono">18 px</td><td class="mono">1.3 × font size</td></tr>
+        <tr><td class="sample" style="font-size:11pt;font-weight:600;">Header H3</td><td>600</td><td class="mono">14 px</td><td class="mono">1.4 × font size</td></tr>
+        <tr><td class="sample" style="font-size:10pt;font-weight:400;">Body</td><td>400</td><td class="mono">13 px</td><td class="mono">1.55 × font size</td></tr>
+        <tr><td class="sample" style="font-size:9pt;font-weight:400;">Body Small</td><td>400</td><td class="mono">12 px</td><td class="mono">1.5 × font size</td></tr>
+        <tr><td class="sample" style="font-size:8.5pt;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;">Label / Badge</td><td>600</td><td class="mono">11 px</td><td class="mono">1.4 × font size</td></tr>
+        <tr><td class="sample mono" style="font-size:9pt;font-weight:500;">Mono</td><td>500</td><td class="mono">11 px</td><td class="mono">1.5 × font size</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub-label"><span>Text Details &amp; Use Cases</span></div>
+    <table class="spec">
+      <thead>
+        <tr><th>Token</th><th>Size</th><th>Weight</th><th>Tracking</th><th>Usage</th></tr>
+      </thead>
+      <tbody>
+        <tr><td class="sample">Display</td><td class="mono">36 px</td><td class="mono">600</td><td class="mono">−0.02 em</td><td>KPI Dashboard Values</td></tr>
+        <tr><td class="sample">H1</td><td class="mono">26 px</td><td class="mono">600</td><td class="mono">−0.015 em</td><td>Page titles</td></tr>
+        <tr><td class="sample">H2</td><td class="mono">18 px</td><td class="mono">600</td><td class="mono">−0.01 em</td><td>Card Titles, Dialog Headers</td></tr>
+        <tr><td class="sample">H3</td><td class="mono">14 px</td><td class="mono">600</td><td class="mono">−0.005 em</td><td>Table column headers</td></tr>
+        <tr><td class="sample">Body</td><td class="mono">13 px</td><td class="mono">400</td><td class="mono">0</td><td>Default Content Text</td></tr>
+        <tr><td class="sample">Small / Helper</td><td class="mono">12 px</td><td class="mono">400</td><td class="mono">0</td><td>Timestamps, Subtitles</td></tr>
+        <tr><td class="sample">Label / Badge</td><td class="mono">11 px</td><td class="mono">600</td><td class="mono">0.1 em</td><td>All-Caps labels, Badge Text</td></tr>
+        <tr><td class="sample mono">Mono</td><td class="mono">11 px</td><td class="mono">500</td><td class="mono">0</td><td>Barcodes, GTINs, Timestamps</td></tr>
+        <tr><td class="sample">Button Default</td><td class="mono">13 px</td><td class="mono">500</td><td class="mono">0</td><td>Primary, Secondary Button Text</td></tr>
+        <tr><td class="sample">Button Small</td><td class="mono">12 px</td><td class="mono">500</td><td class="mono">0</td><td>Confirm, Reject, Cancel Text</td></tr>
+        <tr><td class="sample">Navigation Items</td><td class="mono">13 px</td><td class="mono">400</td><td class="mono">0</td><td>Sidebar Nav Labels</td></tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- ============================================================
+       03 · SPACING & MEASUREMENTS
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">03</div>
+      <div class="title-wrap"><h2 class="name">Spacing &amp; Measurements</h2></div>
+    </div>
+
+    <div class="sub-label"><span>Spacing System</span></div>
+    <div style="display:flex; gap:14px; align-items:stretch; margin-bottom: 18px;">
+      <div class="spacing-row" style="flex:1;">
+        <div class="spacing-dot"><div class="dot" style="width:4px;height:4px;"></div><div class="lbl">4 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:8px;height:8px;"></div><div class="lbl">8 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:12px;height:12px;"></div><div class="lbl">12 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:16px;height:16px;"></div><div class="lbl">16 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:20px;height:20px;"></div><div class="lbl">20 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:24px;height:24px;"></div><div class="lbl">24 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:32px;height:32px;"></div><div class="lbl">32 px</div></div>
+        <div class="spacing-dot"><div class="dot" style="width:48px;height:48px;"></div><div class="lbl">48 px</div></div>
+      </div>
+      <div class="spacing-row" style="width:160px; flex-direction:column; justify-content:center; align-items:center; gap:6px;">
+        <div class="grid-tag">4 Grid</div>
+        <div style="font-size:8.5pt;color:var(--ink-muted);text-align:center;">Spacing System</div>
+      </div>
+    </div>
+
+    <table class="spec">
+      <thead><tr><th>Spacing</th><th>Usage</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">4 px</td><td>Micro gap · Icon + Text</td></tr>
+        <tr><td class="mono">8 px</td><td>Inner padding · Icon gaps</td></tr>
+        <tr><td class="mono">12 px</td><td>Compact card padding</td></tr>
+        <tr><td class="mono">16 px</td><td>Standard padding · List gaps</td></tr>
+        <tr><td class="mono">20 px</td><td>Card horizontal</td></tr>
+        <tr><td class="mono">24 px</td><td>Between page sections</td></tr>
+        <tr><td class="mono">32 px</td><td>Section vertical rhythm</td></tr>
+        <tr><td class="mono">48 px</td><td>Top bar height</td></tr>
+      </tbody>
+    </table>
+
+    <div class="sub-label"><span>Border Radius</span></div>
+    <div class="radius-grid">
+      <div class="radius-card">
+        <div class="shape" style="border-radius:4px;"></div>
+        <div class="value">4 px</div>
+        <div class="usage">Tags · Tables · Small Buttons · Inputs</div>
+      </div>
+      <div class="radius-card">
+        <div class="shape" style="border-radius:8px;"></div>
+        <div class="value">8 px</div>
+        <div class="usage">Cards · Primary Buttons · Modals</div>
+      </div>
+      <div class="radius-card">
+        <div class="shape" style="border-radius:10px;"></div>
+        <div class="value">10 px</div>
+        <div class="usage">Toast · Toggle Pill · Status Badge Pills</div>
+      </div>
+      <div class="radius-card">
+        <div class="shape" style="border-radius:12px;"></div>
+        <div class="value">12 px</div>
+        <div class="usage">Status Badge Pills · Checkbox · Scan Frame</div>
+      </div>
+    </div>
+
+    <div class="sub-label"><span>Drop Shadow</span></div>
+    <div class="shadow-card">
+      <div class="shadow-demo"></div>
+      <div class="specs">
+        X = 4 &nbsp; · &nbsp; Y = 4 &nbsp; · &nbsp; Blur = 20<br/>
+        Color = #000000 (10%)
+      </div>
+      <p style="font-size:9pt;color:var(--ink-muted);margin-top:14px;">
+        Reserved for transient, focus-stealing UI — toasts, sheets, the SSO modal. Cards, tiles, chips and pills sit flat on cream.
+      </p>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       04 · ICONOGRAPHY
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">04</div>
+      <div class="title-wrap"><h2 class="name">Iconography</h2></div>
+    </div>
+
+    <div class="sub-label"><span>Grid · Sizes · Stroke</span></div>
+
+    <div class="icon-grid-display">
+      <!-- Grid Icon -->
+      <div class="icon-grid-card">
+        <svg class="grid-svg" width="120" height="120" viewBox="0 0 120 120">
+          <rect x="6" y="6" width="108" height="108" rx="12" fill="#FBF3E0" stroke="#F4E4BC" stroke-width="1"/>
+          <rect x="18" y="18" width="84" height="84" rx="8" fill="none" stroke="#C68A1E" stroke-width="1.5"/>
+          <line x1="18" y1="60" x2="102" y2="60" stroke="#C68A1E" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.5"/>
+          <line x1="60" y1="18" x2="60" y2="102" stroke="#C68A1E" stroke-width="0.8" stroke-dasharray="2 3" opacity="0.5"/>
+          <text x="60" y="65" text-anchor="middle" font-family="JetBrains Mono, monospace" font-size="10" fill="#7A5310" font-weight="600">20 px</text>
+        </svg>
+        <div class="caption">2 px outer · 20 px grid</div>
+      </div>
+
+      <!-- Sizes table -->
+      <table class="spec">
+        <thead><tr><th>Size</th><th>Pixels</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td>Micro Icons</td><td class="mono">12 px</td><td>Status dots · Inline decorative</td></tr>
+          <tr><td>Small Icons</td><td class="mono">14 px</td><td>Button icons · Toolbar · Sidebar</td></tr>
+          <tr><td>Default Icons</td><td class="mono">20 px</td><td>Normal icons</td></tr>
+          <tr><td>Large Icons</td><td class="mono">28 px</td><td>Capture frame · Empty states</td></tr>
+        </tbody>
+      </table>
+
+      <!-- Stroke -->
+      <div class="stroke-card">
+        <svg width="80" height="80" viewBox="0 0 24 24" fill="none" stroke="#1A1A1A" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+        </svg>
+        <div class="val">1.5 px</div>
+        <div class="lbl">Stroke Width</div>
+      </div>
+    </div>
+
+    <div class="sub-label" style="margin-top: 28px;"><span>Lucide Icon Set</span></div>
+    <div class="icon-strip">
+      <!-- Barcode -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h2v12H3z M7 6h1v12H7z M10 6h2v12h-2z M14 6h1v12h-1z M17 6h2v12h-2z M21 6v12"/></svg>
+      <!-- Camera -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <!-- ScanLine -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M3 12h18"/></svg>
+      <!-- Check -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <!-- Plus -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg>
+      <!-- Arrow Left -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5 M12 19l-7-7 7-7"/></svg>
+      <!-- Arrow Right -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14 M12 5l7 7-7 7"/></svg>
+      <!-- Square -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      <!-- Alert -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4 M12 16h.01"/></svg>
+      <!-- Search -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <!-- User -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <!-- Settings -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <!-- Trash -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18 M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6 M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      <!-- Filter -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+      <!-- Eye -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>
+      <!-- Download -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4 M7 10l5 5 5-5 M12 15V3"/></svg>
+      <!-- Refresh -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8 M21 3v5h-5 M21 12a9 9 0 0 1-15 6.7L3 16 M3 21v-5h5"/></svg>
+      <!-- Chevron Down -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+      <!-- Menu -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      <!-- X -->
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      <span class="lucide-label">Lucide Icon Set</span>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       05 · BUTTON & LINK
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">05</div>
+      <div class="title-wrap"><h2 class="name">Button &amp; Link</h2></div>
+    </div>
+
+    <div class="sub-label"><span>Variants</span></div>
+    <div class="matrix">
+      <table>
+        <thead>
+          <tr>
+            <th class="row-label"></th>
+            <th><span class="variant-header">Primary 01</span></th>
+            <th><span class="variant-header">Primary 02</span></th>
+            <th><span class="variant-header">Secondary 01</span></th>
+            <th><span class="variant-header">Secondary 02</span></th>
+            <th><span class="variant-header">Icon Button</span></th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td class="row-label">Default</td>
+            <td><button class="btn btn-primary">Button</button></td>
+            <td><button class="btn btn-primary-2">Button</button></td>
+            <td><button class="btn btn-secondary">Button</button></td>
+            <td><button class="btn btn-secondary-2">Button</button></td>
+            <td><button class="btn btn-icon"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg></button></td>
+          </tr>
+          <tr>
+            <td class="row-label">Hover</td>
+            <td><button class="btn btn-primary-hover">Button</button></td>
+            <td><button class="btn btn-primary-2-hover">Button</button></td>
+            <td><button class="btn btn-secondary-hover">Button</button></td>
+            <td><button class="btn btn-secondary-2-hover">Button</button></td>
+            <td><button class="btn btn-icon btn-icon-hover"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg></button></td>
+          </tr>
+          <tr>
+            <td class="row-label">Pressed</td>
+            <td><button class="btn btn-primary-pressed">Button</button></td>
+            <td><button class="btn btn-primary-2-pressed">Button</button></td>
+            <td><button class="btn btn-secondary-pressed">Button</button></td>
+            <td><button class="btn btn-secondary-2-pressed">Button</button></td>
+            <td><button class="btn btn-icon btn-icon-pressed"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg></button></td>
+          </tr>
+          <tr>
+            <td class="row-label">Disable</td>
+            <td><button class="btn btn-primary-disabled">Button</button></td>
+            <td><button class="btn btn-primary-2-disabled">Button</button></td>
+            <td><button class="btn btn-secondary-disabled">Button</button></td>
+            <td><button class="btn btn-secondary-2-disabled">Button</button></td>
+            <td><button class="btn btn-icon btn-icon-disabled"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg></button></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="sub-label"><span>Components</span></div>
+    <div class="components-grid">
+      <!-- Step Pills -->
+      <div class="component-card">
+        <h4>Step Pills</h4>
+        <div style="margin-bottom: 10px;">
+          <span class="pill on">Barcode</span>
+          <span class="pill">Front</span>
+          <span class="pill">Back</span>
+          <span class="pill">More</span>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin:0;">
+          Used to scrub between capture steps. 4 px radius — pills, not chips.
+        </p>
+      </div>
+
+      <!-- Filter Chips -->
+      <div class="component-card">
+        <h4>Filter Chips</h4>
+        <div style="margin-bottom: 10px;">
+          <span class="fchip">Beverages</span>
+          <span class="fchip">Snacks</span>
+          <span class="fchip">Dairy</span>
+          <span class="fchip more">+4</span>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin:0;">
+          Pill-shaped (99 px), amber-on-cream. +N chip flips fill for contained CTA.
+        </p>
+      </div>
+
+      <!-- Status & Counter Badges -->
+      <div class="component-card">
+        <h4>Status &amp; Counter Badges</h4>
+        <div style="margin-bottom: 10px;">
+          <span class="badge badge-status">3 / 4 captured</span>
+          <span class="badge badge-counter">3 / 4</span>
+          <span class="badge badge-error">Retry needed</span>
+          <span class="badge-count">+3</span>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin:0;">
+          Always paired with a remedy verb on error states.
+        </p>
+      </div>
+
+      <!-- Confidence Score -->
+      <div class="component-card">
+        <h4>Confidence Score</h4>
+        <div class="conf-row">
+          <span class="lbl">High Confidence</span>
+          <div class="bar"><div class="fill" style="width:91%;background:var(--success);"></div></div>
+          <span class="pct">91%</span>
+        </div>
+        <div class="conf-row">
+          <span class="lbl">Medium</span>
+          <div class="bar"><div class="fill" style="width:63%;background:var(--primary);"></div></div>
+          <span class="pct">63%</span>
+        </div>
+        <div class="conf-row">
+          <span class="lbl">Low Confidence</span>
+          <div class="bar"><div class="fill" style="width:19%;background:var(--error);"></div></div>
+          <span class="pct">19%</span>
+        </div>
+      </div>
+
+      <!-- Allergen / Item Chips -->
+      <div class="component-card">
+        <h4>Allergen Chips</h4>
+        <div style="margin-bottom: 10px;">
+          <span class="allergen-chip def">Definitely Allergen <span class="x">×</span></span>
+          <span class="allergen-chip prob">Probable Allergen <span class="x">×</span></span>
+        </div>
+        <div>
+          <span class="allergen-chip named">Milk <span class="x">×</span></span>
+          <span class="allergen-chip named">Wheat <span class="x">×</span></span>
+        </div>
+      </div>
+
+      <!-- Adding Allergen Input -->
+      <div class="component-card">
+        <h4>Adding Allergen</h4>
+        <label class="input-label">Add Allergen</label>
+        <div style="display:flex; gap:6px;">
+          <input type="text" class="input-field" placeholder="Type allergen..." />
+          <button class="btn btn-primary" style="padding:8px 14px;">Add</button>
+        </div>
+        <p class="input-helper">Suggested from label OCR</p>
+      </div>
+    </div>
+
+    <div class="sub-label" style="margin-top: 28px;"><span>Tabs · With Article Counts</span></div>
+    <div class="tabs">
+      <div class="tab active">All Articles <span class="count">71</span></div>
+      <div class="tab">High Confidence <span class="count">48</span></div>
+      <div class="tab">Medium Confidence <span class="count">17</span></div>
+      <div class="tab">Low Confidence <span class="count">6</span></div>
+      <div class="tab">SME Updated <span class="count">5</span></div>
+    </div>
+  </section>
+
+  <!-- ============================================================
+       06 · TEMPLATE LEVEL COMPONENTS
+       ============================================================ -->
+  <section class="section">
+    <div class="head">
+      <div class="numeral">06</div>
+      <div class="title-wrap"><h2 class="name">Template Level Components</h2></div>
+    </div>
+
+    <!-- KPI Cards -->
+    <div class="sub-label"><span>KPI Metric Cards</span></div>
+    <div class="kpi-grid">
+      <div class="kpi">
+        <div class="label">Total Articles</div>
+        <div class="value">236,000</div>
+        <div class="delta">+12 today</div>
+      </div>
+      <div class="kpi warn">
+        <div class="label">Pending Review</div>
+        <div class="value">71</div>
+        <div class="delta" style="color:var(--brand-ink);">Needs SME attention</div>
+      </div>
+      <div class="kpi success">
+        <div class="label">Approved</div>
+        <div class="value">230,420</div>
+        <div class="delta">+48 today</div>
+      </div>
+      <div class="kpi danger">
+        <div class="label">Rejected</div>
+        <div class="value">5,509</div>
+        <div class="delta" style="color:var(--error);">+6 today</div>
+      </div>
+    </div>
+
+    <!-- Chart -->
+    <div class="sub-label"><span>Chart · Articles Reviewed This Week</span></div>
+    <div class="chart-card">
+      <h4>Articles Reviewed This Week</h4>
+      <div class="chart">
+        <div class="y"><span>14</span><span>12</span><span>10</span><span>8</span><span>6</span><span>4</span><span>2</span><span>0</span></div>
+        <div class="col"><div class="bar" style="height: 32%;"></div><div class="day">Mon</div></div>
+        <div class="col"><div class="bar" style="height: 48%;"></div><div class="day">Tue</div></div>
+        <div class="col"><div class="bar highlight" style="height: 86%;"></div><div class="day">Wed</div></div>
+        <div class="col"><div class="bar" style="height: 56%;"></div><div class="day">Thu</div></div>
+        <div class="col"><div class="bar" style="height: 68%;"></div><div class="day">Fri</div></div>
+        <div class="col"><div class="bar" style="height: 24%;"></div><div class="day">Sat</div></div>
+        <div class="col"><div class="bar" style="height: 18%;"></div><div class="day">Sun</div></div>
+      </div>
+      <div class="label-meta">
+        <span>Week 22 · <b>Total 72 Articles</b></span>
+        <span><b>Wed</b> · 13 Articles</span>
+      </div>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="sub-label"><span>Quick Actions</span></div>
+    <div class="qa-grid">
+      <div class="qa">Quickly review the <b>5 high-confidence</b> articles.</div>
+      <div class="qa warn">26 medium confidence articles need a careful review.</div>
+      <div class="qa info">3 news articles added for store manager on 16 May.</div>
+    </div>
+
+    <!-- Toast + Toggle Row -->
+    <div class="sub-label"><span>Toast Notifications · Toggle Switch</span></div>
+    <div class="row-2">
+      <div class="component-card">
+        <h4>Toast Notifications</h4>
+        <div style="display:flex; flex-direction:column; gap:12px; align-items:flex-start;">
+          <div class="toast">
+            <span class="dot"></span>
+            <div>
+              <div>Article Approved</div>
+              <span class="meta">Pushed to Cookbook API</span>
+            </div>
+          </div>
+          <div class="toast error">
+            <span class="dot"></span>
+            <div>
+              <div>Rejection Failed</div>
+              <span class="meta">Please try again rejecting.</span>
+            </div>
+          </div>
+          <div class="toast">
+            <span class="dot"></span>
+            <span>Barcode captured</span>
+          </div>
+        </div>
+      </div>
+      <div class="component-card">
+        <h4>Toggle Switch</h4>
+        <div style="display:flex; align-items:center; gap:14px; margin-bottom:18px;">
+          <div class="toggle"></div>
+          <span style="font-size:9.5pt;color:var(--ink-2);">Off State</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:14px;">
+          <div class="toggle on"></div>
+          <span style="font-size:9.5pt;color:var(--ink-2);">On State</span>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin-top:18px;">
+          150 ms ease. Off: <code style="font-family:'JetBrains Mono',monospace;">#C5C4BC</code> track. On: <code style="font-family:'JetBrains Mono',monospace;">#C68A1E</code> track.
+        </p>
+      </div>
+    </div>
+
+    <!-- Inputs + Modal Row -->
+    <div class="sub-label"><span>Input &amp; Checkbox · Modal Dialog</span></div>
+    <div class="row-2">
+      <div class="component-card">
+        <h4>Input &amp; Checkbox</h4>
+        <label class="input-label">Label</label>
+        <input type="text" class="input-field" placeholder="Select" />
+        <p class="input-helper">Helper text</p>
+
+        <div style="margin-top:18px; display:grid; grid-template-columns: 1fr 1fr; gap:8px 14px;">
+          <div class="checkbox-row"><span class="cbx"></span> Unchecked</div>
+          <div class="checkbox-row"><span class="cbx checked"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Checked</div>
+          <div class="checkbox-row"><span class="cbx hover"></span> Unchecked · Hover</div>
+          <div class="checkbox-row"><span class="cbx checked hover"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Checked · Hover</div>
+          <div class="checkbox-row"><span class="cbx disabled"></span> Unchecked · Disabled</div>
+          <div class="checkbox-row"><span class="cbx checked disabled"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></span> Checked · Disabled</div>
+        </div>
+      </div>
+
+      <div class="component-card">
+        <h4>Modal Dialog</h4>
+        <div class="modal-shell">
+          <h4 style="margin-bottom:2px;">Saffola Gold Oil 1L</h4>
+          <div class="sub">APL-00831</div>
+          <div class="body">Enter description here…</div>
+          <textarea class="input-field" style="min-height:60px;resize:vertical;" placeholder="Description..."></textarea>
+          <div class="actions" style="margin-top:14px;">
+            <button class="btn btn-secondary">Cancel</button>
+            <button class="btn btn-primary">Save</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Capture surfaces -->
+    <div class="sub-label"><span>Capture Surfaces · Camera Stage</span></div>
+    <div class="row-2">
+      <div class="component-card">
+        <h4>Barcode Framing</h4>
+        <div class="scan">
+          <div class="frame">
+            <span class="corner tl"></span><span class="corner tr"></span>
+            <span class="corner bl"></span><span class="corner br"></span>
+            <span class="line"></span>
+          </div>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin-top:10px;">
+          230 × 118 frame on <code style="font-family:'JetBrains Mono',monospace;">#080808</code> stage. Scan-green corner markers (2.5 px) + travelling scanline.
+        </p>
+      </div>
+      <div class="component-card">
+        <h4>Label Framing</h4>
+        <div class="scan">
+          <div class="label-hint">Point at front label</div>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin-top:10px;">
+          180 × 220 dashed frame in 35% white. Hint text 45% white. No scanline.
+        </p>
+      </div>
+    </div>
+
+    <!-- Thumbnails + Quality bar -->
+    <div class="sub-label"><span>Thumbnail Row · Quality Bar</span></div>
+    <div class="row-2">
+      <div class="component-card">
+        <h4>Thumbnail Row</h4>
+        <div class="thumb-row">
+          <div class="thumb done">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            Barcode
+          </div>
+          <div class="thumb active">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Front
+          </div>
+          <div class="thumb">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            Back
+          </div>
+          <div class="thumb more">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C5C4BC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg>
+            More
+            <span class="badge-count" style="position:absolute;top:-4px;right:-4px;font-size:7pt;padding:1px 5px;">+2</span>
+          </div>
+        </div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin-top:10px;">
+          56 × 56 squares · 8 px radius. Three states: Idle · Active (2 px amber) · Done (success bg + ink).
+        </p>
+      </div>
+      <div class="component-card">
+        <h4>Quality Bar</h4>
+        <div style="display:flex; justify-content:space-between; font-size:8.5pt; color:var(--ink-muted); margin-bottom:4px;">
+          <span>Quality</span>
+          <span style="color:var(--success);font-weight:600;">Good</span>
+        </div>
+        <div class="qbar"><div class="fill" style="width:78%;"></div></div>
+        <p style="font-size:8.5pt;color:var(--ink-muted);margin-top:14px;">
+          4 px track in <code style="font-family:'JetBrains Mono',monospace;">#F1ECDD</code>, fill in success green. Labels: Low · Fair · Good.
+        </p>
+      </div>
+    </div>
+
+    <!-- Screen patterns -->
+    <div class="sub-label"><span>Phone Screen Patterns</span></div>
+    <div class="phone-grid">
+      <!-- Pattern A: Hero + CTA -->
+      <div>
+        <div class="phone">
+          <div class="screen" style="align-items:center; justify-content:space-between;">
+            <div style="flex:1; display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px;">
+              <div style="width:42px; height:42px; border-radius:10px; background:var(--primary);"></div>
+              <div style="font-weight:700; letter-spacing:-0.3px; font-size:10pt;">RETINA <span style="color:var(--ink-faint);">AI</span></div>
+              <div style="font-size:8pt; color:var(--ink-muted);">Sign in to continue</div>
+            </div>
+            <div class="phone-mini-btn">Sign in with SSO</div>
+          </div>
+        </div>
+        <div class="phone-label">A · Hero + Bottom CTA</div>
+      </div>
+
+      <!-- Pattern B: Capture flow -->
+      <div>
+        <div class="phone">
+          <div class="screen" style="padding:10px;">
+            <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5 M12 19l-7-7 7-7"/></svg>
+              <div style="font-size:8pt; font-weight:600;">Capture flow</div>
+              <span style="width:14px;"></span>
+            </div>
+            <div style="display:flex; gap:3px; margin-bottom:8px;">
+              <span class="pill on" style="font-size:7pt;padding:3px 7px;">Barcode</span>
+              <span class="pill" style="font-size:7pt;padding:3px 7px;">Front</span>
+              <span class="pill" style="font-size:7pt;padding:3px 7px;">Back</span>
+            </div>
+            <div class="scan" style="min-height:90px; padding:14px 10px;">
+              <div class="frame" style="width:110px;height:50px;">
+                <span class="corner tl"></span><span class="corner tr"></span>
+                <span class="corner bl"></span><span class="corner br"></span>
+                <span class="line"></span>
+              </div>
+            </div>
+            <div style="margin-top:8px;">
+              <div style="display:flex;justify-content:space-between;font-size:7pt;color:var(--ink-muted);margin-bottom:3px;"><span>Quality</span><span style="color:var(--success);font-weight:600;">Good</span></div>
+              <div class="qbar"><div class="fill" style="width:78%;"></div></div>
+            </div>
+            <div class="phone-mini-btn" style="margin-top:auto;">Capture</div>
+          </div>
+        </div>
+        <div class="phone-label">B · Capture flow</div>
+      </div>
+
+      <!-- Pattern C: List/Articles -->
+      <div>
+        <div class="phone">
+          <div class="screen" style="padding:10px;">
+            <div style="font-size:11pt; font-weight:700; margin-bottom:8px;">Articles</div>
+            <div style="display:flex; gap:3px; margin-bottom:10px;">
+              <span class="fchip" style="font-size:7pt;padding:2px 6px;">Beverages</span>
+              <span class="fchip" style="font-size:7pt;padding:2px 6px;">Snacks</span>
+              <span class="fchip more" style="font-size:7pt;padding:2px 6px;">+4</span>
+            </div>
+            <div style="display:flex; flex-direction:column; gap:6px;">
+              <div style="background:#fff;border:1px solid var(--cream-2);border-radius:8px;padding:8px;font-size:8pt;">
+                <div style="font-weight:600;">Saffola Gold Oil 1L</div>
+                <div style="color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:7pt;">APL-00831</div>
+              </div>
+              <div style="background:#fff;border:1px solid var(--cream-2);border-radius:8px;padding:8px;font-size:8pt;">
+                <div style="font-weight:600;">Amul Cheese 200g</div>
+                <div style="color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:7pt;">APL-00832</div>
+              </div>
+              <div style="background:#fff;border:1px solid var(--cream-2);border-radius:8px;padding:8px;font-size:8pt;">
+                <div style="font-weight:600;">Britannia Bread</div>
+                <div style="color:var(--ink-muted);font-family:'JetBrains Mono',monospace;font-size:7pt;">APL-00833</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="phone-label">C · Articles list</div>
+      </div>
+
+      <!-- Pattern D: Done state -->
+      <div>
+        <div class="phone">
+          <div class="screen" style="align-items:center; justify-content:center;">
+            <div style="width:54px; height:54px; border-radius:50%; background:var(--success-bg); border:2px solid var(--success-2); display:flex; align-items:center; justify-content:center; margin-bottom:12px;">
+              <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+            </div>
+            <div style="font-size:11pt; font-weight:700; text-align:center;">Item submitted</div>
+            <div style="font-size:8pt; color:var(--ink-muted); text-align:center; margin-top:4px;">4 of 4 captured</div>
+            <div class="phone-mini-btn" style="margin-top:auto;">Add another</div>
+          </div>
+        </div>
+        <div class="phone-label">D · Done · Success</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== Footer ====== -->
+  <div class="doc-footer">
+    <span>Retina AI · Store Manager Prototype · Design System</span>
+    <span class="mono">v1.1 · Restructured 27 May 2026</span>
+  </div>
+
+</div>
+</body>
+</html>

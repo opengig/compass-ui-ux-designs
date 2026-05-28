@@ -21,10 +21,10 @@ function parseTab(value: string | null): QueueTab {
   return 'all';
 }
 
-export function useQueueFilter(articles: ArticleData[]) {
+export function useQueueFilter(articles: ArticleData[], forcedTab?: QueueTab) {
   const { isSubmitted } = useReviewStore();
   const [searchParams, setSearchParams] = useSearchParams();
-  const queueTab = parseTab(searchParams.get('tab'));
+  const queueTab = forcedTab ?? parseTab(searchParams.get('tab'));
   const searchQuery = searchParams.get('q') ?? '';
 
   const setQueueTab = (tab: QueueTab) => {

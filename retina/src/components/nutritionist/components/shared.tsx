@@ -8,13 +8,14 @@ import { computeDisplayNuts } from "../data/nutrients";
  */
 
 export function StatusBadge({ status, className="" }) {
+  // Status colors avoid red/green pair (veg/non-veg connotation per 26 May review).
   const cfg = {
-    green:  { cls: "bg-emerald-50 text-emerald-700 border-emerald-200", dot: "bg-emerald-500", label: "MATCHED" },
-    amber:  { cls: "bg-amber-50 text-amber-700 border-amber-200",       dot: "bg-amber-500",   label: "LIKELY MATCH" },
-    red:    { cls: "bg-rose-50 text-rose-700 border-rose-200",          dot: "bg-rose-500",    label: "NO MATCH" },
-    blue:   { cls: "bg-sky-50 text-sky-700 border-sky-200",             dot: "bg-sky-500",     label: "FROM SME" },
+    green:  { cls: "bg-teal-50 text-teal-700 border-teal-200",          dot: "bg-teal-500",    label: "READY TO COOKBOOK" },
+    amber:  { cls: "bg-slate-100 text-slate-700 border-slate-200",      dot: "bg-slate-500",   label: "TO REVIEW" },
+    red:    { cls: "bg-gray-100 text-gray-600 border-gray-200",         dot: "bg-gray-400",    label: "TO FIX" },
+    blue:   { cls: "bg-indigo-50 text-indigo-700 border-indigo-200",    dot: "bg-indigo-500",  label: "FROM SME" },
     gray:   { cls: "bg-muted text-muted-foreground border-border",      dot: "bg-muted-foreground", label: "UNKNOWN" },
-    purple: { cls: "bg-violet-50 text-violet-700 border-violet-200",    dot: "bg-violet-500",  label: "SKIPPED" },
+    purple: { cls: "bg-fuchsia-50 text-fuchsia-700 border-fuchsia-200", dot: "bg-fuchsia-500", label: "SKIPPED" },
   }
   const s = cfg[status] || cfg.gray
   return (
@@ -61,12 +62,12 @@ export function NutBadge({ c }) {
   )
 }
 
-export function PageHeader({ title, subtitle }) {
+export function PageHeader({ title, subtitle, divider=true, dense=false }) {
   const now = new Date()
   const stamp = now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:false})
     + " IST · " + now.toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"})
   return (
-    <div className="flex-shrink-0 flex items-center justify-between h-12 px-6 bg-card border-b border-border z-[100]">
+    <div className={`flex-shrink-0 flex items-center justify-between ${dense ? "h-9" : "h-12"} px-6 bg-card z-[100] ${divider ? "border-b border-border" : ""}`}>
       <div className="flex items-center gap-3">
         <h1 className="m-0 text-[15px] font-semibold text-foreground">{title}</h1>
         {subtitle && <span className="text-[12px] text-muted-foreground">{subtitle}</span>}

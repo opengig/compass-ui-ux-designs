@@ -114,3 +114,29 @@
 .retina-thin-scroll::-webkit-scrollbar-thumb:hover {
   background-color: rgba(139, 115, 85, 0.6);
 }
+
+/* ── Nutritionist queue: drag-and-drop bucket affordances ── */
+@keyframes bucketPulse {
+  0%   { transform: scale(1);    box-shadow: 0 0 0 0   rgba(198,138,30,0.18); }
+  50%  { transform: scale(1.015);box-shadow: 0 0 0 6px rgba(198,138,30,0); }
+  100% { transform: scale(1);    box-shadow: 0 0 0 0   rgba(198,138,30,0); }
+}
+
+/* Brief amber glow used to highlight newly-arrived articles. */
+@keyframes artGlow {
+  0%   { background-color: rgba(198,138,30,0.22); }
+  60%  { background-color: rgba(198,138,30,0.10); }
+  100% { background-color: transparent; }
+}
+
+/* Toast entrance animation — slides up and fades in. */
+@keyframes toastIn {
+  0%   { transform: translateY(10px) scale(0.97); opacity: 0; }
+  100% { transform: translateY(0)     scale(1);    opacity: 1; }
+}
+
+/* Card-style drag ghost preview lift. */
+@keyframes dragGhostLift {
+  0%   { transform: scale(0.96) rotate(-2deg); opacity: 0; }
+  100% { transform: scale(1)    rotate(-2deg); opacity: 1; }
+}

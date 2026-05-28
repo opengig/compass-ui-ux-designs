@@ -1,6 +1,15 @@
-/.DS_Store
-cmp-autobot/node_modules
-retina/node_modules
+# OS files
+.DS_Store
+**/.DS_Store
+
+# Dependencies
+**/node_modules
+
+# Next.js build output
+cmp-autobot/.next/
+
+# Local working copy — superseded by retina/
+retina May 27/
 
 # Playwright MCP browser session artifacts (auto-created by the MCP browser tool)
 .playwright-mcp/

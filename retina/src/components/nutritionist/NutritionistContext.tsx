@@ -10,7 +10,7 @@ import { ALL_SITES } from "./data/sites";
  * live above the Outlet so route changes don't reset it.
  *
  * Shape:
- *   - selectedSites:    multi-site filter shared by Dashboard/Queue/Approved/Audit
+ *   - selectedSites:    multi-site filter shared by Dashboard/Queue/Approved
  *   - queueTab:         which status tab the queue should open on
  *   - highlightArtIds:  temporary glow targets when navigating Queue from Dashboard cards
  *   - navIds:           prev/next list for the DetailScreen arrows
@@ -27,10 +27,21 @@ export function NutritionistProvider({ children }: { children: ReactNode }) {
   const [navIds, setNavIds] = useState([]);
   const [toast, setToast] = useState(null);
   const [isAuthed, setIsAuthed] = useState(false);
+  // Articles removed entirely from the platform (retired APLs). Filtered out everywhere.
+  const [removedIds, setRemovedIds] = useState([]);
 
-  const showToast = useCallback((msg) => {
-    setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+  // showToast accepts either a string ("Saved") or an object
+  // { msg, action: {label, onClick}, duration? } when an action button (e.g. Undo)
+  // is needed alongside the message.
+  const showToast = useCallback((msgOrConfig) => {
+    const t = typeof msgOrConfig === "string" ? { msg: msgOrConfig } : msgOrConfig;
+    setToast(t);
+    const ms = t.duration ?? 3000;
+    setTimeout(() => setToast(curr => (curr === t ? null : curr)), ms);
+  }, []);
+
+  const removeArticle = useCallback((id) => {
+    setRemovedIds(prev => prev.includes(id) ? prev : [...prev, id]);
   }, []);
 
   const value = {
@@ -40,6 +51,7 @@ export function NutritionistProvider({ children }: { children: ReactNode }) {
     navIds, setNavIds,
     toast, showToast,
     isAuthed, setIsAuthed,
+    removedIds, removeArticle,
   };
 
   return <NutritionistCtx.Provider value={value}>{children}</NutritionistCtx.Provider>;

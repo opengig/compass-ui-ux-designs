@@ -27,7 +27,6 @@ export const NUTRITIONIST_ROUTES = {
   queueArticle: '/nutritionist/queue/:articleId',
   article: '/nutritionist/article/:articleId',
   approved: '/nutritionist/approved',
-  audit: '/nutritionist/audit',
   notifications: '/nutritionist/notifications',
   // legacy entry point — App.tsx redirects this to /dashboard for back-compat
   home: '/nutritionist/home',

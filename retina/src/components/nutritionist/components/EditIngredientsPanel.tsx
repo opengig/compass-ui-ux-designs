@@ -1,72 +1,62 @@
 // @ts-nocheck
-import { useState, useRef } from "react";
-import { Lock, Check, X, ChevronUp, ChevronDown, Plus, Copy } from "lucide-react";
+import { useState, useRef, useEffect } from "react";
+import { Lock, Check, X, ChevronUp, ChevronDown, Plus, Copy, Trash2, RefreshCw } from "lucide-react";
 import { C } from "../data/tokens";
 import { NNAMES, computeDisplayNuts } from "../data/nutrients";
 import { useOFFImages } from "../hooks/useOFFImages";
+import { useNutritionist } from "../NutritionistContext";
 
 /**
  * Side-by-side article edit panel used by Queue (editable) and Approved (view-only).
  */
 
-export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
+export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=false }) {
+  // Retired APLs are always read-only: no edits, no action buttons.
+  const retired = !!art?.retired
+  const viewOnly = viewOnlyProp || retired
+  const { removeArticle, showToast } = useNutritionist()
   const displayNuts = computeDisplayNuts(art)
   const [nutVals, setNutVals]     = useState(Object.fromEntries(Object.entries(displayNuts).map(([k,v])=>[k,v.v])))
   const [nutEdited, setNutEdited] = useState({})
-  // ── Allergen table — rows fixed from Ingredients section; users only manage allergens per row
-  const ALL_ALLERGEN_OPTIONS = ["Gluten","Dairy","Soy","Peanuts","Tree Nuts","Eggs","Fish","Shellfish","Sesame","Mustard","Sulphites","Celery","Lupin","Molluscs"]
-  const INGREDIENT_LIST = ["Whole Wheat Flour (Atta)","Sugar","Refined Palm Oil","Invert Syrup","Leavening Agents","Salt","Skimmed Milk Powder","Soy Lecithin (Emulsifier)","Natural Flavours"]
-  const ALLERGEN_HINTS = {
-    "Gluten":    ["wheat","atta","flour","maida","barley","oat","rye"],
-    "Dairy":     ["milk","cream","butter","ghee","whey","lactose","casein","cheese","skimmed"],
-    "Soy":       ["soy","soya","lecithin"],
-    "Peanuts":   ["peanut","groundnut"],
-    "Tree Nuts": ["cashew","almond","walnut","pistachio","hazel","pecan","nut"],
-    "Eggs":      ["egg","albumin"],
-    "Fish":      ["fish","anchovy","tuna","salmon"],
-    "Shellfish": ["shrimp","prawn","crab","lobster"],
-    "Sesame":    ["sesame","til","gingelly"],
-    "Mustard":   ["mustard"],
-    "Sulphites": ["sulphite","sulfite","sulphur"],
-    "Celery":    ["celery"],
-    "Lupin":     ["lupin"],
-    "Molluscs":  ["mollusc","squid","oyster","mussel"],
-  }
+  // ── Allergens: simple flat lists (no per-ingredient mapping)
+  // Per feedback (26 May): nutritionist manages allergens at the global level,
+  // not per-ingredient. The packet ingredients (often chemicals/sources) cannot
+  // reliably be mapped to the compass-master ingredient list, and per-ingredient
+  // allergen mapping is rarely useful in practice.
   const AL_NORM = {"Milk":"Dairy","Wheat":"Gluten","Gluten":"Gluten","Soy":"Soy","Soy (trace)":"Soy","Tree Nuts":"Tree Nuts","Tree Nuts (trace)":"Tree Nuts","Sesame (trace)":"Sesame"}
-  const seedRows = () => {
-    const defSet = (art?.def_al||[]).map(a=>({label:AL_NORM[a]||a,type:"definitive"}))
-    const probSet = (art?.prob_al||[]).map(a=>({label:AL_NORM[a]||a,type:"probable"}))
-    const allAl = [...defSet,...probSet]
-    return INGREDIENT_LIST.map(ing => {
-      const ingL = ing.toLowerCase()
-      const seen = new Set()
-      const allergens = allAl.filter(al=>{
-        if(seen.has(al.label)) return false
-        const hits = ALLERGEN_HINTS[al.label]||[]
-        if(hits.some(h=>ingL.includes(h))){ seen.add(al.label); return true }
-        return false
-      })
-      return {id:ing, ingredient:ing, allergens}
-    })
-  }
-  const [alRows, setAlRows] = useState(seedRows)
-  const [addState, setAddState] = useState(null)  // null | {rowId, step:"type"|"input", type:"definitive"|"probable"|null}
-  const [addText, setAddText] = useState("")
+  const seedDef  = () => (art?.def_al||[]).map(a => AL_NORM[a]||a)
+  const seedProb = () => (art?.prob_al||[]).map(a => AL_NORM[a]||a)
+  const [defAl,  setDefAl]  = useState(seedDef)
+  const [probAl, setProbAl] = useState(seedProb)
+  const [addingDef,  setAddingDef]  = useState(false)
+  const [addingProb, setAddingProb] = useState(false)
+  const [newDef,  setNewDef]  = useState("")
+  const [newProb, setNewProb] = useState("")
   const [gtinCopied, setGtinCopied] = useState(false)
   const gtin = `8901${art.apl.replace("APL-","").padStart(9,"0")}`
-  const [sec, setSec]             = useState({allergens:true, nutrients:false, reasons:false, ingredients:false})
-  const allExpanded = sec.allergens && sec.nutrients && sec.reasons && sec.ingredients
+  // Section order: Allergens → May Contain → Nutrients → Ingredients (Ingredients last; FYI only)
+  const [sec, setSec]             = useState({allergens:true, mayContain:true, nutrients:false, reasons:false, ingredients:false})
+  const allExpanded = sec.allergens && sec.mayContain && sec.nutrients && sec.reasons && sec.ingredients
   const toggleAllSections = () => {
     const next = !allExpanded
-    setSec({allergens:next, nutrients:next, reasons:next, ingredients:next})
+    setSec({allergens:next, mayContain:next, nutrients:next, reasons:next, ingredients:next})
   }
   const [activeImg, setActiveImg] = useState(0)
-  const [zoom, setZoom]           = useState(false)
-  const [zoomPos, setZoomPos]     = useState({x:50, y:50})
+  // In-place magnifier (Amazon photo-modal style): click toggles zoom; while zoomed, moving the cursor pans.
+  const [imgZoomed, setImgZoomed] = useState(false)
+  const [imgPan, setImgPan]       = useState({x:0, y:0})
+  const ZOOM = 2.5
   const [photoCollapsed, setPhotoCollapsed] = useState(false)
   const [editImgSlot, setEditImgSlot] = useState(null)
   const [artImgOverrides, setArtImgOverrides] = useState({})
+  // Re-scan / Approve confirmation modals + a shared top-right toast.
+  const [rescanOpen, setRescanOpen]   = useState(false)
+  const [rescanRemark, setRescanRemark] = useState("")
+  const [approveOpen, setApproveOpen] = useState(false)
+  const [topToast, setTopToast]       = useState(null) // message string | null
+  const showTopToast = (msg) => { setTopToast(msg); setTimeout(()=>setTopToast(null), 3500) }
   const imgContainerRef           = useRef(null)
+  const rafRef                    = useRef(0)
 
   // ── Open Food Facts real images ──
   const { offImgs, offLink } = useOFFImages(art)
@@ -77,13 +67,34 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
     return offImgs?.[slot] || null
   }
 
-  const handleMouseMove = (e) => {
+  // Map cursor position within the photo to a clamped pan offset (magnified region follows cursor).
+  const panFromXY = (clientX, clientY) => {
     const rect = imgContainerRef.current?.getBoundingClientRect()
-    if (!rect) return
-    const x = ((e.clientX - rect.left) / rect.width)  * 100
-    const y = ((e.clientY - rect.top)  / rect.height) * 100
-    setZoomPos({x, y})
+    if (!rect) return {x:0, y:0}
+    const fracX = (clientX - rect.left) / rect.width
+    const fracY = (clientY - rect.top)  / rect.height
+    const maxX = (rect.width  * (ZOOM - 1)) / 2
+    const maxY = (rect.height * (ZOOM - 1)) / 2
+    return {
+      x: Math.max(-maxX, Math.min(maxX, maxX * (1 - 2 * fracX))),
+      y: Math.max(-maxY, Math.min(maxY, maxY * (1 - 2 * fracY))),
+    }
   }
+  // Click toggles zoom in/out; while zoomed, moving the cursor pans (no drag needed).
+  const onImgClick = (e) => {
+    if (!resolvedImgs(activeImg)) return
+    if (imgZoomed) { setImgZoomed(false); setImgPan({x:0, y:0}) }
+    else { setImgZoomed(true); setImgPan(panFromXY(e.clientX, e.clientY)) }
+  }
+  // Throttle pan to one update per animation frame → smooth, crisp tracking (no transition lag/ghosting).
+  const onImgMove = (e) => {
+    if (!imgZoomed) return
+    const cx = e.clientX, cy = e.clientY
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    rafRef.current = requestAnimationFrame(() => setImgPan(panFromXY(cx, cy)))
+  }
+  // Reset zoom when the displayed image or article changes.
+  useEffect(() => { setImgZoomed(false); setImgPan({x:0, y:0}) }, [activeImg, art?.id])
 
   const toggleSec = (k) => setSec(p=>({...p,[k]:!p[k]}))
 
@@ -108,23 +119,26 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
 
   /* ── Status badge ── */
   const stCfg = {
-    green:{bg:C.grBg,color:C.gr,border:C.grBdr,label:"High confidence"},
-    amber:{bg:C.amBg,color:C.am,border:C.amBdr,label:"Need review"},
-    red:  {bg:C.rdBg,color:C.rd,border:C.rdBdr,label:"Low confidence"},
+    green:{bg:C.grBg,color:C.gr,border:C.grBdr,label:"Ready To Cookbook"},
+    amber:{bg:C.amBg,color:C.am,border:C.amBdr,label:"To Review"},
+    red:  {bg:C.rdBg,color:C.rd,border:C.rdBdr,label:"To Fix"},
   }
   const sc = stCfg[art.status]||stCfg.amber
 
   /* ── Section header ── */
-  const SectionHdr = ({k, label}) => (
+  const SectionHdr = ({k, label, badge}) => (
     <button className="w-full flex items-center justify-between px-5 transition-colors"
-      style={{height:40, backgroundColor:sec[k]?"#fff":C.page, borderBottom:`1px solid ${C.border}`}}
+      style={{height:52, backgroundColor:"transparent", borderBottom: sec[k] ? `1px solid ${C.border}` : "none"}}
       onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.muted}
-      onMouseLeave={e=>e.currentTarget.style.backgroundColor=sec[k]?"#fff":C.page}
+      onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}
       onClick={()=>toggleSec(k)}>
-      <span style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.07em",color:C.fg}}>{label}</span>
+      <span className="flex items-center gap-2 min-w-0">
+        <span style={{fontSize:13,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.07em",color:C.fg}}>{label}</span>
+        {badge}
+      </span>
       {sec[k]
-        ? <ChevronUp   size={13} style={{color:C.mutedFg,flexShrink:0}}/>
-        : <ChevronDown size={13} style={{color:C.mutedFg,flexShrink:0}}/>}
+        ? <ChevronUp   size={14} style={{color:C.mutedFg,flexShrink:0}}/>
+        : <ChevronDown size={14} style={{color:C.mutedFg,flexShrink:0}}/>}
     </button>
   )
 
@@ -136,11 +150,22 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
         <div className="flex-shrink-0 px-5 pt-4 pb-3 flex items-start gap-3"
           style={{borderBottom:`1px solid ${C.border}`, backgroundColor:"#fff"}}>
           <div className="flex-1 min-w-0">
-            {/* Article name row with expand/collapse all button on opposite side */}
-            <div className="flex items-center justify-between gap-2 mb-2">
-              <div className="flex items-center gap-2 flex-wrap min-w-0">
-                <span style={{fontSize:15,fontWeight:700,color:C.fg,letterSpacing:"-0.01em",lineHeight:1.2}}>{art.name}</span>
-                {/* Confidence score chip */}
+            {/* Article name + confidence + barcode + scan/update meta, divided subtly */}
+            <div className="flex items-center gap-2 flex-wrap min-w-0 mb-2">
+              <span style={{fontSize:15,fontWeight:700,color:C.fg,letterSpacing:"-0.01em",lineHeight:1.2}}>{art.name}</span>
+              {/* Confidence score chip — replaced by APL Retired chip for retired APLs */}
+              {retired ? (
+                <span className="inline-flex items-center gap-1 flex-shrink-0"
+                  style={{
+                    fontSize:11, fontWeight:700,
+                    color:"#78716c", backgroundColor:"#e7e5e4",
+                    border:"1px solid #d6d3d1",
+                    borderRadius:6, padding:"2px 8px",
+                    textTransform:"uppercase", letterSpacing:"0.04em",
+                  }}>
+                  <Lock size={10}/> APL Retired
+                </span>
+              ) : (
                 <span className="inline-flex items-center gap-1 flex-shrink-0"
                   style={{
                     fontSize:11, fontWeight:600,
@@ -153,15 +178,19 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                   }}>
                   {art.conf}% confidence
                 </span>
-                {viewOnly && (
-                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border flex-shrink-0"
-                    style={{fontSize:10,fontWeight:600,backgroundColor:C.muted,color:C.mutedFg,borderColor:C.border}}>
-                    <Lock size={9}/> Read-only
-                  </span>
-                )}
-              </div>
-              {/* Barcode number + copy button */}
-              <div className="flex items-center gap-1.5 flex-shrink-0">
+              )}
+              {viewOnly && !retired && (
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full border flex-shrink-0"
+                  style={{fontSize:10,fontWeight:600,backgroundColor:C.muted,color:C.mutedFg,borderColor:C.border}}>
+                  <Lock size={9}/> Read-only
+                </span>
+              )}
+
+              {/* divider */}
+              <span style={{width:1,height:12,backgroundColor:C.border,flexShrink:0}}/>
+
+              {/* Barcode + copy */}
+              <span className="inline-flex items-center gap-1 flex-shrink-0">
                 <span style={{fontSize:11,fontWeight:500,color:C.mutedFg,fontFeatureSettings:'"tnum"',letterSpacing:"0.04em"}}>
                   Barcode: {gtin}
                 </span>
@@ -170,7 +199,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                   title="Copy barcode"
                   style={{
                     display:"inline-flex", alignItems:"center", justifyContent:"center",
-                    width:22, height:22, border:"none", borderRadius:4,
+                    width:20, height:20, border:"none", borderRadius:4,
                     backgroundColor: gtinCopied ? C.grBg : "transparent",
                     color: gtinCopied ? C.gr : C.mutedFg,
                     cursor:"pointer", flexShrink:0, transition:"all 0.15s",
@@ -179,8 +208,23 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                   onMouseLeave={e=>{ if(!gtinCopied){ e.currentTarget.style.backgroundColor="transparent"; e.currentTarget.style.color=C.mutedFg }}}>
                   {gtinCopied ? <Check size={11} strokeWidth={2.5}/> : <Copy size={11} strokeWidth={1.8}/>}
                 </button>
-              </div>
+              </span>
 
+              {/* divider */}
+              <span style={{width:1,height:12,backgroundColor:C.border,flexShrink:0}}/>
+
+              {/* Scanned at */}
+              <span style={{fontSize:11,fontWeight:500,color:C.mutedFg,whiteSpace:"nowrap"}}>
+                Scanned {art.at}
+              </span>
+
+              {/* divider */}
+              <span style={{width:1,height:12,backgroundColor:C.border,flexShrink:0}}/>
+
+              {/* Updated at — falls back to "Not updated yet" when no edit has been made */}
+              <span style={{fontSize:11,fontWeight:500,color:C.mutedFg,whiteSpace:"nowrap"}}>
+                Updated: {art.updatedAt || "Not updated yet"}
+              </span>
             </div>
 
           </div>
@@ -193,13 +237,15 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
           <div className="flex-shrink-0 flex flex-col overflow-hidden"
             style={{width: photoCollapsed ? 0 : "50%", borderLeft: photoCollapsed ? "none" : `1px solid ${C.border}`, backgroundColor:"#fff", transition:"width 0.25s ease"}}>
 
-                  {/* Main image — zoom-on-hover disabled in nutritionist flow */}
+                  {/* Main image — click to zoom in/out (lens +/- cursor), drag to pan when zoomed */}
                   <div
                     ref={imgContainerRef}
+                    onClick={onImgClick}
+                    onMouseMove={onImgMove}
                     style={{
                       flex:1, position:"relative",
                       backgroundColor:C.muted, overflow:"hidden",
-                      cursor:"default",
+                      cursor: !resolvedImgs(activeImg) ? "default" : imgZoomed ? "zoom-out" : "zoom-in",
                     }}>
                     {(() => {
                       const imgSrc = resolvedImgs(activeImg)
@@ -208,9 +254,16 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                         key={imgSrc}
                         src={imgSrc}
                         alt={["Front","Back","Side","Barcode"][activeImg]}
+                        draggable={false}
                         style={{
                           width:"100%", height:"100%",
                           objectFit:"cover", display:"block",
+                          userSelect:"none",
+                          transform:`translate3d(${imgPan.x}px, ${imgPan.y}px, 0) scale(${imgZoomed ? ZOOM : 1})`,
+                          transformOrigin:"center center",
+                          transition: imgZoomed ? "none" : "transform 0.18s ease-out",
+                          willChange: imgZoomed ? "transform" : "auto",
+                          backfaceVisibility:"hidden",
                         }}
                       />
                     ) : (
@@ -220,7 +273,9 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
 
                     {/* Collapse button — vertically centered, flush to left edge */}
                     <button
-                      onClick={()=>setPhotoCollapsed(true)}
+                      onMouseDown={e=>e.stopPropagation()}
+                      onMouseUp={e=>e.stopPropagation()}
+                      onClick={(e)=>{ e.stopPropagation(); setPhotoCollapsed(true) }}
                       title="Hide photos"
                       style={{
                         position:"absolute", top:"50%", left:0,
@@ -252,7 +307,10 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                       borderRadius:999,
                     }}>
                       {[0,1,2,3].map(i=>(
-                        <button key={i} onClick={()=>setActiveImg(i)}
+                        <button key={i}
+                          onMouseDown={e=>e.stopPropagation()}
+                          onMouseUp={e=>e.stopPropagation()}
+                          onClick={(e)=>{ e.stopPropagation(); setActiveImg(i) }}
                           style={{
                             width: i===activeImg ? 18 : 6,
                             height:6,
@@ -308,7 +366,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                 </div>{/* end RIGHT PHOTO PANEL */}
 
           {/* LEFT: DETAILS PANEL */}
-          <div className="flex-1 overflow-y-auto" style={{backgroundColor:C.page, position:"relative"}}>
+          <div className="flex-1 overflow-y-auto" style={{backgroundColor:C.page, position:"relative", paddingTop:18}}>
 
             {/* Camera expand tag -- fixed to right edge, vertically centered on screen */}
             {photoCollapsed && (
@@ -340,316 +398,306 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                 Photos
               </button>
             )}
-            <div style={{borderBottom:`1px solid ${C.border}`}}>
-              <SectionHdr k="allergens" label="Allergens"/>
+            {/* ══════ ALLERGENS (Contains) — own section ══════ */}
+            <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
+              <SectionHdr k="allergens" label="Allergens (Contains)"/>
               {sec.allergens && (
                 <div className="px-5 py-3" style={{backgroundColor:"#fff"}}>
+                  <p style={{fontSize:11, color:C.mutedFg, marginBottom:10, lineHeight:1.5}}>
+                    Allergens definitely present on the packet label.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {defAl.length ? defAl.map((a,i)=>(
+                      <span key={a+i}
+                        className="inline-flex items-center gap-1"
+                        style={{
+                          padding:"3px 8px 3px 10px", borderRadius:6,
+                          fontSize:12, fontWeight:700, letterSpacing:"0.02em",
+                          backgroundColor:"transparent",
+                          border:`1.5px solid ${C.rd}`, color:C.rd, whiteSpace:"nowrap",
+                        }}>
+                        {a}
+                        {!viewOnly && (
+                          <button
+                            onClick={()=>setDefAl(prev=>prev.filter((_,j)=>j!==i))}
+                            style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
+                                    width:14,height:14,border:"none",background:"transparent",
+                                    cursor:"pointer",padding:0,color:C.rd,opacity:0.55,flexShrink:0}}
+                            onMouseEnter={e=>e.currentTarget.style.opacity="1"}
+                            onMouseLeave={e=>e.currentTarget.style.opacity="0.55"}>
+                            <X size={10} strokeWidth={3}/>
+                          </button>
+                        )}
+                      </span>
+                    )) : (
+                      <span style={{fontSize:12, fontStyle:"italic", color:C.mutedFg}}>None declared</span>
+                    )}
+                    {!viewOnly && addingDef && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={()=>{
+                          if(newDef.trim()) setDefAl(p=>[...p,newDef.trim()])
+                          setNewDef(""); setAddingDef(false)
+                        }}/>
+                        <span className="relative z-40 inline-flex items-center gap-1"
+                          style={{padding:"3px 8px 3px 10px",borderRadius:6,
+                                  border:`1.5px solid ${C.rd}`,color:C.rd,
+                                  backgroundColor:"transparent"}}>
+                          <input
+                            autoFocus
+                            value={newDef}
+                            onChange={e=>setNewDef(e.target.value)}
+                            onKeyDown={e=>{
+                              if(e.key==="Enter" && newDef.trim()){ setDefAl(p=>[...p,newDef.trim()]); setNewDef(""); setAddingDef(false) }
+                              if(e.key==="Escape"){ setNewDef(""); setAddingDef(false) }
+                            }}
+                            placeholder="Allergen name…"
+                            style={{border:"none",outline:"none",background:"transparent",
+                                    fontSize:12,fontWeight:700,color:C.rd,
+                                    width:Math.max(110,newDef.length*7.5),minWidth:110,maxWidth:180,padding:0}}/>
+                          <button
+                            onClick={()=>{ if(newDef.trim()) setDefAl(p=>[...p,newDef.trim()]); setNewDef(""); setAddingDef(false) }}
+                            aria-label="Save allergen"
+                            style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:16,height:16,border:"none",background:"transparent",cursor:"pointer",padding:0,color:C.rd,flexShrink:0}}>
+                            <Check size={12} strokeWidth={3}/>
+                          </button>
+                        </span>
+                      </>
+                    )}
+                    {!viewOnly && !addingDef && (
+                      <button onClick={()=>setAddingDef(true)}
+                        style={{display:"inline-flex",alignItems:"center",gap:4,
+                                padding:"3px 10px",borderRadius:6,fontSize:12,fontWeight:600,
+                                backgroundColor:"transparent",color:C.mutedFg,
+                                border:`1.5px dashed ${C.border2}`,cursor:"pointer"}}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor=C.rd;e.currentTarget.style.color=C.rd}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border2;e.currentTarget.style.color=C.mutedFg}}>
+                        <Plus size={10} strokeWidth={2.5}/> Add allergen
+                      </button>
+                    )}
+                  </div>
 
-                  {/* ── ALLERGENS TABLE ── */}
-                  <div className="rounded-lg overflow-hidden" style={{border:`1px solid ${C.border}`}}>
+                </div>
+              )}
+            </div>
 
-                    {/* Table header */}
-                    <div className="flex" style={{backgroundColor:C.muted, borderBottom:`1px solid ${C.border2}`}}>
-                      <div className="px-3 py-2" style={{width:190,flexShrink:0,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg}}>Ingredient Name</div>
-                      <div className="px-3 py-2 flex-1" style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg,borderLeft:`1px solid ${C.border2}`}}>Allergen</div>
+            {/* ══════ MAY CONTAIN — own section ══════ */}
+            <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
+              <SectionHdr k="mayContain" label="May Contain"/>
+              {sec.mayContain && (
+                <div className="px-5 py-3" style={{backgroundColor:"#fff"}}>
+                  <p style={{fontSize:11, color:C.mutedFg, marginBottom:10, lineHeight:1.5}}>
+                    Probable allergens — trace contamination from the same factory line.
+                  </p>
+                  <div className="flex flex-wrap items-center gap-2">
+                    {probAl.length ? probAl.map((a,i)=>(
+                      <span key={a+i}
+                        className="inline-flex items-center gap-1"
+                        style={{
+                          padding:"3px 8px 3px 10px", borderRadius:6,
+                          fontSize:12, fontWeight:700, letterSpacing:"0.02em",
+                          backgroundColor:"transparent",
+                          border:`1.5px solid ${C.am}`, color:C.am, whiteSpace:"nowrap",
+                        }}>
+                        {a}
+                        {!viewOnly && (
+                          <button
+                            onClick={()=>setProbAl(prev=>prev.filter((_,j)=>j!==i))}
+                            style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
+                                    width:14,height:14,border:"none",background:"transparent",
+                                    cursor:"pointer",padding:0,color:C.am,opacity:0.55,flexShrink:0}}
+                            onMouseEnter={e=>e.currentTarget.style.opacity="1"}
+                            onMouseLeave={e=>e.currentTarget.style.opacity="0.55"}>
+                            <X size={10} strokeWidth={3}/>
+                          </button>
+                        )}
+                      </span>
+                    )) : (
+                      <span style={{fontSize:12, fontStyle:"italic", color:C.mutedFg}}>None declared</span>
+                    )}
+                    {!viewOnly && addingProb && (
+                      <>
+                        <div className="fixed inset-0 z-30" onClick={()=>{
+                          if(newProb.trim()) setProbAl(p=>[...p,newProb.trim()])
+                          setNewProb(""); setAddingProb(false)
+                        }}/>
+                        <span className="relative z-40 inline-flex items-center gap-1"
+                          style={{padding:"3px 8px 3px 10px",borderRadius:6,
+                                  border:`1.5px solid ${C.am}`,color:C.am,
+                                  backgroundColor:"transparent"}}>
+                          <input
+                            autoFocus
+                            value={newProb}
+                            onChange={e=>setNewProb(e.target.value)}
+                            onKeyDown={e=>{
+                              if(e.key==="Enter" && newProb.trim()){ setProbAl(p=>[...p,newProb.trim()]); setNewProb(""); setAddingProb(false) }
+                              if(e.key==="Escape"){ setNewProb(""); setAddingProb(false) }
+                            }}
+                            placeholder="Probable allergen…"
+                            style={{border:"none",outline:"none",background:"transparent",
+                                    fontSize:12,fontWeight:700,color:C.am,
+                                    width:Math.max(120,newProb.length*7.5),minWidth:120,maxWidth:200,padding:0}}/>
+                          <button
+                            onClick={()=>{ if(newProb.trim()) setProbAl(p=>[...p,newProb.trim()]); setNewProb(""); setAddingProb(false) }}
+                            aria-label="Save probable allergen"
+                            style={{display:"inline-flex",alignItems:"center",justifyContent:"center",width:16,height:16,border:"none",background:"transparent",cursor:"pointer",padding:0,color:C.am,flexShrink:0}}>
+                            <Check size={12} strokeWidth={3}/>
+                          </button>
+                        </span>
+                      </>
+                    )}
+                    {!viewOnly && !addingProb && (
+                      <button onClick={()=>setAddingProb(true)}
+                        style={{display:"inline-flex",alignItems:"center",gap:4,
+                                padding:"3px 10px",borderRadius:6,fontSize:12,fontWeight:600,
+                                backgroundColor:"transparent",color:C.mutedFg,
+                                border:`1.5px dashed ${C.border2}`,cursor:"pointer"}}
+                        onMouseEnter={e=>{e.currentTarget.style.borderColor=C.am;e.currentTarget.style.color=C.am}}
+                        onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border2;e.currentTarget.style.color=C.mutedFg}}>
+                        <Plus size={10} strokeWidth={2.5}/> Add probable
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* ══════ NUTRIENTS — 3-column clean table (Nutrient Name | Value | UOM) ══════ */}
+            <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
+              <SectionHdr k="nutrients" label="Nutrients"/>
+              {sec.nutrients && (
+                <div className="px-5 py-3" style={{backgroundColor:"#fff"}}>
+                  <div className="overflow-hidden" style={{border:`1px solid ${C.border}`, borderRadius:4}}>
+                    {/* Header */}
+                    <div className="flex" style={{backgroundColor:C.page, borderBottom:`1px solid ${C.border}`}}>
+                      <div className="px-3 py-2.5 flex-1"
+                        style={{fontSize:10,fontWeight:700,
+                                textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg}}>
+                        Nutrient Name
+                      </div>
+                      <div className="px-3 py-2.5 flex-1"
+                        style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",
+                                color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"center"}}>
+                        Per 100g / Per 100ml
+                      </div>
+                      <div className="px-3 py-2.5"
+                        style={{width:64,flexShrink:0,fontSize:10,fontWeight:700,textTransform:"uppercase",
+                                letterSpacing:"0.08em",color:C.mutedFg,borderLeft:`1px solid ${C.border}`}}>
+                        UOM
+                      </div>
                     </div>
-
-                    {/* Ingredient rows — fixed list, allergens editable only */}
-                    {alRows.map((row, ri) => {
-                      // Two-step add state for this row
-                      const isAddingThisRow = addState?.rowId === row.id
-                      const addStep = isAddingThisRow ? addState.step : null
-                      const addType = isAddingThisRow ? addState.type : null
-                      const isDef_input = addType === "definitive"
-
-                      const commitAllergen = () => {
-                        const label = addText.trim()
-                        if(label && addType) {
-                          setAlRows(rows=>rows.map(r=>
-                            r.id===row.id ? {...r, allergens:[...r.allergens,{label, type:addType}]} : r
-                          ))
-                        }
-                        setAddState(null); setAddText("")
-                      }
-
+                    {/* Rows */}
+                    {Object.entries(displayNuts).map(([k,n], idx, arr)=>{
+                      const isNA = n.c==="na"
+                      const isLast = idx === arr.length - 1
+                      const rowColor = isNA ? C.mutedFg : C.fg
                       return (
-                        <div key={row.id}
-                          style={{borderBottom: ri<alRows.length-1 ? `1px solid ${C.border}` : "none", backgroundColor:"#fff"}}>
-                          <div className="flex items-start" style={{minHeight:38}}>
-
-                            {/* Col 1 — Ingredient name (read-only) */}
-                            <div className="px-3 py-2.5 flex-shrink-0 flex items-center" style={{width:190}}>
-                              <span style={{fontSize:12,fontWeight:500,color:C.fg,lineHeight:1.45}}>{row.ingredient}</span>
-                            </div>
-
-                            {/* Col 2 — Allergen chips + add flow */}
-                            <div className="px-3 py-2 flex-1 flex flex-wrap items-center gap-1.5"
-                              style={{borderLeft:`1px solid ${C.border}`, minHeight:38}}>
-
-
-
-                              {/* Existing allergen chips — each with × */}
-                              {row.allergens.map((al, ai) => {
-                                const isDef = al.type==="definitive"
-                                return (
-                                  <span key={al.label+ai}
-                                    className="inline-flex items-center gap-1"
-                                    style={{
-                                      padding:"2px 5px 2px 8px", borderRadius:4,
-                                      fontSize:11, fontWeight:700, letterSpacing:"0.02em",
-                                      // Outline + text only, no fill — per styling brief.
-                                      backgroundColor: "transparent",
-                                      border:           `1px solid ${isDef ? C.rd : C.am}`,
-                                      color:           isDef ? C.rd : C.am,
-                                      whiteSpace:"nowrap",
-                                    }}>
-                                    {al.label}
-                                    {!viewOnly && (
-                                      <button
-                                        onClick={()=>setAlRows(rows=>rows.map(r=>
-                                          r.id===row.id ? {...r, allergens:r.allergens.filter((_,j)=>j!==ai)} : r
-                                        ))}
-                                        style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
-                                                width:14,height:14,border:"none",background:"transparent",
-                                                cursor:"pointer",padding:0,borderRadius:2,
-                                                color: isDef ? C.rd : C.am, opacity:0.55, flexShrink:0}}
-                                        onMouseEnter={e=>e.currentTarget.style.opacity="1"}
-                                        onMouseLeave={e=>e.currentTarget.style.opacity="0.55"}>
-                                        <X size={9} strokeWidth={3}/>
-                                      </button>
-                                    )}
-                                  </span>
-                                )
-                              })}
-
-                              {/* ── STEP 1: Type selector — shown after clicking + Add ── */}
-                              {!viewOnly && addStep === "type" && (
-                                <>
-                                  <div className="fixed inset-0 z-30" onClick={()=>{ setAddState(null); setAddText("") }}/>
-                                  <div className="relative z-40 inline-flex items-center gap-1 rounded-md overflow-hidden"
-                                    style={{border:`1px solid ${C.border2}`, backgroundColor:C.muted}}>
-                                    <span style={{fontSize:10,fontWeight:700,color:C.mutedFg,paddingLeft:7,paddingRight:4,textTransform:"uppercase",letterSpacing:"0.06em",whiteSpace:"nowrap"}}>Type:</span>
-                                    {/* Definitely allergen button */}
-                                    <button
-                                      onClick={()=>{ setAddState({rowId:row.id,step:"input",type:"definitive"}); setAddText("") }}
-                                      style={{
-                                        display:"inline-flex",alignItems:"center",gap:3,
-                                        padding:"3px 9px", border:"none",
-                                        fontSize:11,fontWeight:700,cursor:"pointer",
-                                        backgroundColor:C.rdBg, color:C.rd,
-                                        borderLeft:`1px solid ${C.rdBdr}`,
-                                      }}
-                                      onMouseEnter={e=>e.currentTarget.style.backgroundColor="#F5D5D5"}
-                                      onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.rdBg}>
-                                      Definitely allergen
-                                    </button>
-                                    {/* Probably allergen button */}
-                                    <button
-                                      onClick={()=>{ setAddState({rowId:row.id,step:"input",type:"probable"}); setAddText("") }}
-                                      style={{
-                                        display:"inline-flex",alignItems:"center",gap:3,
-                                        padding:"3px 9px", border:"none",
-                                        fontSize:11,fontWeight:700,cursor:"pointer",
-                                        backgroundColor:C.amBg, color:C.am,
-                                        borderLeft:`1px solid ${C.amBdr}`,
-                                      }}
-                                      onMouseEnter={e=>e.currentTarget.style.backgroundColor="#F5E5C0"}
-                                      onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.amBg}>
-                                      Probably allergen
-                                    </button>
-                                    {/* Cancel */}
-                                    <button
-                                      onClick={()=>{ setAddState(null); setAddText("") }}
-                                      style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
-                                              width:22,height:"100%",border:"none",background:"transparent",
-                                              cursor:"pointer",color:C.mutedFg,borderLeft:`1px solid ${C.border2}`}}
-                                      onMouseEnter={e=>e.currentTarget.style.color=C.rd}
-                                      onMouseLeave={e=>e.currentTarget.style.color=C.mutedFg}>
-                                      <X size={9} strokeWidth={3}/>
-                                    </button>
-                                  </div>
-                                </>
-                              )}
-
-                              {/* ── STEP 2: Inline editable tag — styled as the chip itself ── */}
-                              {!viewOnly && addStep === "input" && (
-                                <>
-                                  <div className="fixed inset-0 z-30" onClick={commitAllergen}/>
-                                  <span className="relative z-40 inline-flex items-center gap-1"
-                                    style={{
-                                      padding:"2px 5px 2px 8px", borderRadius:4,
-                                      fontSize:11, fontWeight:700, letterSpacing:"0.02em",
-                                      backgroundColor: "transparent",
-                                      color:           isDef_input ? C.rd : C.am,
-                                      border:`1.5px solid ${isDef_input ? C.rd : C.am}`,
-                                    }}>
-                                    <input
-                                      autoFocus
-                                      value={addText}
-                                      onChange={e=>setAddText(e.target.value)}
-                                      onKeyDown={e=>{
-                                        if(e.key==="Enter") commitAllergen()
-                                        if(e.key==="Escape"){ setAddState(null); setAddText("") }
-                                      }}
-                                      placeholder="Type allergen…"
-                                      style={{
-                                        border:"none", outline:"none", background:"transparent",
-                                        fontSize:11, fontWeight:700, letterSpacing:"0.02em",
-                                        color: isDef_input ? C.rd : C.am,
-                                        width: Math.max(80, addText.length * 7.5),
-                                        minWidth:80, maxWidth:160,
-                                        padding:0,
-                                      }}
-                                    />
-                                    {/* Confirm × / ✓ */}
-                                    <button onClick={commitAllergen}
-                                      style={{display:"inline-flex",alignItems:"center",justifyContent:"center",
-                                              width:14,height:14,border:"none",background:"transparent",
-                                              cursor:"pointer",padding:0,borderRadius:2,
-                                              color: isDef_input ? C.rd : C.am, opacity:0.7, flexShrink:0}}
-                                      onMouseEnter={e=>e.currentTarget.style.opacity="1"}
-                                      onMouseLeave={e=>e.currentTarget.style.opacity="0.7"}>
-                                      <Check size={9} strokeWidth={3}/>
-                                    </button>
-                                  </span>
-                                </>
-                              )}
-
-                              {/* + Add button — only shown when not in add flow for this row */}
-                              {!viewOnly && !isAddingThisRow && (
-                                <button
-                                  onClick={()=>{ setAddState({rowId:row.id, step:"type", type:null}); setAddText("") }}
-                                  style={{
-                                    display:"inline-flex",alignItems:"center",gap:3,
-                                    padding:"2px 8px",borderRadius:4,
-                                    fontSize:11,fontWeight:600,
-                                    backgroundColor:"transparent", color:C.mutedFg,
-                                    border:`1.5px dashed ${C.border2}`,
-                                    cursor:"pointer", transition:"border-color 0.15s, color 0.15s",
-                                  }}
-                                  onMouseEnter={e=>{e.currentTarget.style.borderColor=C.pr;e.currentTarget.style.color=C.pr}}
-                                  onMouseLeave={e=>{e.currentTarget.style.borderColor=C.border2;e.currentTarget.style.color=C.mutedFg}}>
-                                  <Plus size={9} strokeWidth={2.5}/> Add
-                                </button>
-                              )}
-                            </div>
+                        <div key={k} className="flex items-stretch"
+                          style={{borderBottom: isLast ? "none" : `1px solid ${C.border}`, backgroundColor:"#fff"}}>
+                          {/* Col 1 — Nutrient name */}
+                          <div className="px-3 py-2.5 flex-1 flex items-center">
+                            <span style={{fontSize:13, fontWeight:500, color:rowColor, lineHeight:1.3}}>
+                              {NNAMES[k]}
+                            </span>
+                          </div>
+                          {/* Col 2 — Per 100g/100ml input (centered) */}
+                          <div className="px-3 py-1.5 flex-1 flex items-center justify-center"
+                            style={{borderLeft:`1px solid ${C.border}`}}>
+                            <input
+                              value={isNA ? "N/A" : (nutVals[k] || "")}
+                              disabled={isNA || viewOnly}
+                              onChange={e=>{
+                                setNutVals(p=>({...p,[k]:e.target.value}))
+                                setNutEdited(p=>({...p,[k]:true}))
+                              }}
+                              style={{
+                                width:"100%", height:30,
+                                border:`1px solid ${C.border}`,
+                                borderRadius:4,
+                                backgroundColor: isNA ? C.page : "#fff",
+                                color: isNA ? C.mutedFg : C.fg,
+                                fontSize:13, fontWeight:500,
+                                paddingLeft:10, paddingRight:10,
+                                outline:"none", boxSizing:"border-box",
+                                fontFeatureSettings:'"tnum"',
+                                textAlign:"left",
+                                cursor: (isNA || viewOnly) ? "default" : "text",
+                              }}/>
+                          </div>
+                          {/* Col 3 — UOM */}
+                          <div className="px-3 py-2.5 flex items-center"
+                            style={{width:64,flexShrink:0,borderLeft:`1px solid ${C.border}`}}>
+                            <span style={{fontSize:12, color:C.mutedFg}}>{n.u}</span>
                           </div>
                         </div>
                       )
                     })}
                   </div>
-
-
-
                 </div>
               )}
             </div>
 
-            {/* ══════ NUTRIENTS ══════ */}
-            <div style={{borderBottom:`1px solid ${C.border}`}}>
-              <SectionHdr k="nutrients" label="Nutrients"/>
-              {sec.nutrients && (
-                <div className="px-5 py-3" style={{backgroundColor:"#fff"}}>
-                  {/* Per 100g banner */}
-                  <div className="mb-3 px-3 py-1.5 rounded-r"
-                    style={{backgroundColor:C.prBg,borderLeft:`2px solid ${C.pr}`,
-                            fontSize:12,fontWeight:600,color:C.pr}}>
-                    All values per 100g / 100ml
-                  </div>
-                  {/* Nutrients table — matches Allergens table styling for uniformity */}
-                  <div className="rounded-lg overflow-hidden" style={{border:`1px solid ${C.border}`}}>
-                    {/* Table header */}
-                    <div className="flex" style={{backgroundColor:C.muted, borderBottom:`1px solid ${C.border2}`}}>
-                      <div className="px-3 py-2 flex-1" style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg}}>Nutrient</div>
-                      <div className="px-3 py-2" style={{width:200,flexShrink:0,fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg,borderLeft:`1px solid ${C.border2}`,textAlign:"right"}}>Value</div>
+            {/* ══════ INGREDIENTS — FYI bullet list, read-only ══════ */}
+            <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
+              <SectionHdr k="ingredients" label="Ingredients"
+                badge={art.sme && (
+                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded flex-shrink-0"
+                    style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.04em",
+                            backgroundColor:C.prBg,color:C.pr,border:`1px solid ${C.prBdr}`}}>
+                    SME Updated Here
+                  </span>
+                )}/>
+              {sec.ingredients && (() => {
+                // SME-edited ingredients shown as "previous → new" so the nutritionist sees the change.
+                const smeChanges = art.sme ? { "Folic acid":"Folate", "Iron":"Ferrous fumarate" } : {}
+                const ingredients = ["Whole wheat flour (atta)","Salt","Vitamin B1","Vitamin B2","Vitamin B3","Vitamin B6","Folic acid","Iron","Zinc"]
+                return (
+                <div className="px-5 py-4 space-y-3" style={{backgroundColor:"#fff"}}>
+                  {art.sme && (
+                    <div className="flex items-start gap-2 px-3 py-2 rounded-lg" style={{backgroundColor:"#FEF9EE",border:`1px solid ${C.amBdr}`}}>
+                      <span style={{fontSize:13,lineHeight:1.2,color:C.am}}>⚠</span>
+                      <span style={{fontSize:11.5,fontWeight:500,color:"#7A5310",lineHeight:1.5}}>Article SME changed the highlighted ingredients (shown as old → new) — confirm the allergen list is still complete.</span>
                     </div>
-                  {/* Rows */}
-                  {Object.entries(displayNuts).map(([k,n], idx, arr)=>{
-                    const miss = n.c==="missing"
-                    const isLLM = n.c==="llm"
-                    const isNA  = n.c==="na"
-                    const edited = nutEdited[k]
-                    const badge  = nutBadge(n.c)
-                    const rStyle = nutRowStyle(n.c)
-                    const isLast = idx === arr.length - 1
-                    return (
-                      <div key={k}
-                        className="flex items-center px-3 py-2.5 gap-3"
-                        style={{
-                          borderBottom: isLast ? "none" : `1px solid ${C.border}`,
-                          borderLeft: rStyle.borderLeft,
-                          backgroundColor: rStyle.backgroundColor,
-                        }}>
-                        {/* Label col */}
-                        <div className="flex-1 min-w-0">
-                          <p style={{
-                            fontSize:13,
-                            fontWeight: miss||isLLM ? 700 : 500,
-                            color: miss?C.rd : isLLM?C.am : isNA?C.mutedFg : C.fg,
-                            lineHeight:1.3,
-                          }}>
-                            {NNAMES[k]}
-                          </p>
-                          {miss  && <p style={{fontSize:11,color:C.rd,  marginTop:2,lineHeight:1.4}}>Not found on label — manual entry required</p>}
-                          {isLLM && <p style={{fontSize:11,color:C.am,  marginTop:2,lineHeight:1.4}}>AI estimated — verify against label</p>}
-                        </div>
-                        {/* Value + unit + badge */}
-                        <div className="flex items-center gap-2 flex-shrink-0">
-                          <input
-                            style={{
-                              ...nutStyle(n.c),
-                              width:88, height:34,
-                              fontSize:13, fontFeatureSettings:'"tnum"',
-                              fontWeight:500,
-                              borderRadius:8,
-                              paddingLeft:10, paddingRight:6,
-                              outline:"none",
-                              boxSizing:"border-box",
-                              cursor: viewOnly ? "default" : undefined,
-                            }}
-                            value={isNA?"N/A":nutVals[k]||""}
-                            disabled={isNA || viewOnly}
-                            placeholder={miss?"—":""}
-                            onChange={e=>{
-                              setNutVals(p=>({...p,[k]:e.target.value}))
-                              setNutEdited(p=>({...p,[k]:true}))
-                            }}
-                          />
-                          <span style={{fontSize:12,color:C.mutedFg,width:26,flexShrink:0}}>{n.u}</span>
-                          <span style={{
-                            display:"inline-flex",alignItems:"center",justifyContent:"center",
-                            padding:"3px 10px",
-                            borderRadius:badge.radius,
-                            border:`1.5px solid ${badge.border}`,
-                            backgroundColor:badge.bg,
-                            color:badge.color,
-                            fontSize:11,fontWeight:700,
-                            whiteSpace:"nowrap",
-                            minWidth:64,
-                          }}>
-                            {badge.label}
-                          </span>
-                        </div>
-                      </div>
-                    )
-                  })}
+                  )}
+                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
+                    style={{backgroundColor:C.muted,border:`1px solid ${C.border}`,
+                            fontSize:12,fontWeight:500,color:C.mutedFg}}>
+                    <Lock size={11}/> Read-only — packet-level ingredients (not mapped to allergens)
                   </div>
+                  <ul className="space-y-1.5" style={{paddingLeft:4}}>
+                    {ingredients.map(t=>{
+                      const prev = smeChanges[t]
+                      const isChanged = prev !== undefined
+                      return (
+                        <li key={t} className="flex items-start gap-2" style={{lineHeight:1.5}}>
+                          <span style={{color: isChanged ? C.pr : C.mutedFg,flexShrink:0,marginTop:"0.15em",fontSize:13,fontWeight:700}}>•</span>
+                          {isChanged ? (
+                            <span className="inline-flex items-center gap-1.5 flex-wrap">
+                              <span style={{fontSize:13,color:C.mutedFg,textDecoration:"line-through"}}>{prev}</span>
+                              <span style={{fontSize:12,color:C.mutedFg}}>→</span>
+                              <span style={{fontSize:13,fontWeight:700,color:C.pr,backgroundColor:C.prBg,border:`1px solid ${C.prBdr}`,borderRadius:5,padding:"0 6px"}}>{t}</span>
+                              <span style={{fontSize:9,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.04em",color:C.pr}}>SME edited</span>
+                            </span>
+                          ) : (
+                            <span style={{fontSize:13,color:C.fg}}>{t}</span>
+                          )}
+                        </li>
+                      )
+                    })}
+                  </ul>
                 </div>
-              )}
+                )
+              })()}
             </div>
 
-            {/* ══════ REASONS ══════ */}
-            <div style={{borderBottom:`1px solid ${C.border}`}}>
+            {/* ══════ REASONS — last section; plain sentences, no color ══════ */}
+            <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
               <SectionHdr k="reasons" label="Reasons"/>
               {sec.reasons && (
                 <div className="px-5 py-4" style={{backgroundColor:"#fff"}}>
                   {(() => {
                     const isGreen = art.status === "green"
                     const isRed   = art.status === "red"
-                    const color   = isGreen ? C.gr : isRed ? C.rd : C.am
-                    const bg      = isGreen ? C.grBg : isRed ? C.rdBg : C.amBg
-                    const border  = isGreen ? C.grBdr : isRed ? C.rdBdr : C.amBdr
-                    const label   = isGreen ? "High confidence" : isRed ? "Low confidence" : "Need review"
+                    const bucket  = isGreen ? "Ready To Cookbook" : isRed ? "To Fix" : "To Review"
                     const reasons = art.reasons.length > 0
                       ? art.reasons
                       : isGreen
@@ -657,59 +705,208 @@ export function EditIngredientsPanel({ art, onClose, viewOnly=false }) {
                         : isRed
                           ? ["Critical data missing or unverifiable"]
                           : ["Requires manual verification"]
+                    const sentences = reasons.map(r => /[.!?]$/.test(r.trim()) ? r.trim() : r.trim() + ".")
                     return (
-                      <div className="rounded-xl px-4 py-3"
-                        style={{backgroundColor:bg, border:`1px solid ${border}`}}>
-                        <p style={{fontSize:12,fontWeight:700,color,marginBottom:8,textTransform:"uppercase",letterSpacing:"0.06em"}}>
-                          {label}
+                      <>
+                        <p style={{fontSize:12, color:C.mutedFg, marginBottom:8, lineHeight:1.5}}>
+                          Why this article is in the <span style={{fontWeight:700, color:C.fg}}>{bucket}</span> list:
                         </p>
-                        <ul className="space-y-1.5">
-                          {reasons.map((r,i)=>(
-                            <li key={i} className="flex items-start gap-2" style={{lineHeight:1.5}}>
-                              <span style={{color,flexShrink:0,marginTop:"0.15em",fontSize:13,fontWeight:700}}>•</span>
-                              <span style={{fontSize:13,color}}>{r}</span>
-                            </li>
-                          ))}
-                        </ul>
-                      </div>
+                        <p style={{fontSize:13, color:C.fg, lineHeight:1.75}}>
+                          {sentences.join(" ")}
+                        </p>
+                      </>
                     )
                   })()}
                 </div>
               )}
             </div>
 
-            {/* ══════ INGREDIENTS ══════ */}
-            <div>
-              <SectionHdr k="ingredients" label="Ingredients"/>
-              {sec.ingredients && (
-                <div className="px-5 py-4 space-y-3" style={{backgroundColor:"#fff"}}>
-                  <div className="flex items-center gap-2 px-3 py-2 rounded-lg"
-                    style={{backgroundColor:C.muted,border:`1px solid ${C.border}`,
-                            fontSize:12,fontWeight:500,color:C.mutedFg}}>
-                    <Lock size={11}/> View only — editable by Procurement team
-                  </div>
-                  <p style={{fontSize:13,color:C.mutedFg,lineHeight:1.7,
-                              backgroundColor:C.page,border:`1px solid ${C.border}`,
-                              borderRadius:10,padding:"10px 14px"}}>
-                    Whole wheat flour (atta), salt, vitamins (B1, B2, B3, B6, folic acid), iron, zinc.
-                    Contains gluten. May contain traces of soy.
-                  </p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {["Whole wheat flour","Salt","Vit B1","Iron","Zinc","Soy (trace)","Gluten"].map(t=>(
-                      <span key={t} className="px-2 py-0.5 rounded-full"
-                        style={{fontSize:11,fontWeight:500,backgroundColor:C.muted,
-                                color:C.mutedFg,border:`1px solid ${C.border}`}}>{t}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-
                   {/* bottom padding so last section isn't flush with end */}
-                  <div style={{height:8}}/>
+                  <div style={{height:96}}/>
           </div>{/* end RIGHT DETAILS PANEL */}
 
         </div>{/* end body */}
+
+        {/* ── Action footer — Approve is the single primary CTA ── */}
+        {/* Per 26 May review: once nutritionist approves, the article goes
+            straight to Cookbook (near real-time). No two-step push. */}
+        {!viewOnly && (
+          <div className="flex-shrink-0 px-5 py-3 flex items-center justify-end gap-2"
+            style={{borderTop:`1px solid ${C.border}`, backgroundColor:"#fff"}}>
+            <span style={{fontSize:11, color:C.mutedFg, marginRight:"auto"}}>
+              Approving will push this article to Cookbook.
+            </span>
+            <button
+              onClick={()=>{ setRescanRemark(""); setRescanOpen(true) }}
+              style={{
+                display:"inline-flex", alignItems:"center", gap:6,
+                padding:"8px 14px", borderRadius:8,
+                fontSize:13, fontWeight:600,
+                backgroundColor:"#fff", color:C.mutedFg,
+                border:`1px solid ${C.border2}`, cursor:"pointer",
+              }}
+              onMouseEnter={e=>{ e.currentTarget.style.backgroundColor=C.muted; e.currentTarget.style.borderColor=C.border3 }}
+              onMouseLeave={e=>{ e.currentTarget.style.backgroundColor="#fff"; e.currentTarget.style.borderColor=C.border2 }}>
+              <RefreshCw size={13}/> Request Re-scan
+            </button>
+            <button
+              onClick={()=>setApproveOpen(true)}
+              style={{
+                display:"inline-flex", alignItems:"center", gap:6,
+                padding:"8px 18px", borderRadius:8,
+                fontSize:13, fontWeight:700,
+                backgroundColor:C.pr, color:"#fff",
+                border:`1px solid ${C.pr}`, cursor:"pointer",
+                boxShadow:"0 1px 2px rgba(198,138,30,0.25)",
+              }}
+              onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.prHov}
+              onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.pr}>
+              <Check size={13} strokeWidth={3}/> Approve &amp; Push
+            </button>
+          </div>
+        )}
+
+        {/* ── Retired APL footer — no edit/approve; only Remove Entirely ── */}
+        {retired && (
+          <div className="flex-shrink-0 px-5 py-3 flex items-center justify-end gap-2"
+            style={{borderTop:`1px solid ${C.border}`, backgroundColor:"#fff"}}>
+            <span style={{fontSize:11, color:C.mutedFg, marginRight:"auto"}}>
+              This APL is retired — it can no longer be edited or approved.
+            </span>
+            <button
+              onClick={()=>{ removeArticle(art.id); showToast("APL retired article was removed"); onClose?.() }}
+              style={{
+                display:"inline-flex", alignItems:"center", gap:6,
+                padding:"8px 16px", borderRadius:8,
+                fontSize:13, fontWeight:700,
+                backgroundColor:"#fff", color:"#B42318",
+                border:"1px solid #F1B0AB", cursor:"pointer",
+                transition:"background-color 0.15s, border-color 0.15s",
+              }}
+              onMouseEnter={e=>{ e.currentTarget.style.backgroundColor="#FEF3F2"; e.currentTarget.style.borderColor="#E5736B" }}
+              onMouseLeave={e=>{ e.currentTarget.style.backgroundColor="#fff"; e.currentTarget.style.borderColor="#F1B0AB" }}>
+              <Trash2 size={13}/> Remove Entirely
+            </button>
+          </div>
+        )}
+
+        {/* ── Request Re-scan modal ── */}
+        {rescanOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center"
+            style={{backgroundColor:"rgba(15,23,42,0.5)", backdropFilter:"blur(2px)"}}
+            onClick={()=>setRescanOpen(false)}>
+            <div onClick={e=>e.stopPropagation()}
+              style={{width:440, maxWidth:"92vw", backgroundColor:"#fff", borderRadius:14,
+                      border:`1px solid ${C.border}`, boxShadow:"0 24px 64px rgba(0,0,0,0.25)", overflow:"hidden"}}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3.5" style={{borderBottom:`1px solid ${C.border}`}}>
+                <span style={{fontSize:14,fontWeight:700,color:C.fg}}>Request Re-scan</span>
+                <button onClick={()=>setRescanOpen(false)} aria-label="Close"
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-muted/50">
+                  <X size={15}/>
+                </button>
+              </div>
+              {/* Body */}
+              <div className="px-5 py-4 space-y-4">
+                <div className="flex items-center gap-3">
+                  <div style={{width:56,height:56,flexShrink:0,borderRadius:8,overflow:"hidden",backgroundColor:C.muted,border:`1px solid ${C.border}`}}>
+                    {resolvedImgs(0)
+                      ? <img src={resolvedImgs(0)} alt={art.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                      : <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:C.mutedFg}}>No image</div>}
+                  </div>
+                  <div className="min-w-0">
+                    <p style={{fontSize:14,fontWeight:700,color:C.fg,lineHeight:1.3}}>{art.name}</p>
+                    <p style={{fontSize:12,color:C.mutedFg,fontFeatureSettings:'"tnum"',marginTop:2}}>APL: {art.apl}</p>
+                  </div>
+                </div>
+                <div>
+                  <label style={{fontSize:11,fontWeight:600,color:C.mutedFg,display:"block",marginBottom:6}}>Remarks</label>
+                  <textarea
+                    value={rescanRemark}
+                    onChange={e=>setRescanRemark(e.target.value)}
+                    placeholder="Describe what needs re-scanning (e.g. blurry nutrition panel, missing barcode)…"
+                    rows={4}
+                    style={{width:"100%",borderRadius:8,border:`1px solid ${C.border}`,padding:"8px 10px",
+                            fontSize:13,color:C.fg,outline:"none",resize:"vertical",fontFamily:"inherit"}}/>
+                </div>
+              </div>
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-2 px-5 py-3.5" style={{borderTop:`1px solid ${C.border}`}}>
+                <button onClick={()=>setRescanOpen(false)}
+                  style={{padding:"8px 14px",borderRadius:8,fontSize:13,fontWeight:600,backgroundColor:"#fff",color:C.mutedFg,border:`1px solid ${C.border2}`,cursor:"pointer"}}>
+                  Cancel
+                </button>
+                <button
+                  onClick={()=>{ setRescanOpen(false); showTopToast("Re-scan request sent") }}
+                  style={{padding:"8px 16px",borderRadius:8,fontSize:13,fontWeight:700,backgroundColor:C.pr,color:"#fff",border:`1px solid ${C.pr}`,cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.prHov}
+                  onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.pr}>
+                  Submit Request
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Approve & Push confirmation modal (no remarks) ── */}
+        {approveOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center"
+            style={{backgroundColor:"rgba(15,23,42,0.5)", backdropFilter:"blur(2px)"}}
+            onClick={()=>setApproveOpen(false)}>
+            <div onClick={e=>e.stopPropagation()}
+              style={{width:440, maxWidth:"92vw", backgroundColor:"#fff", borderRadius:14,
+                      border:`1px solid ${C.border}`, boxShadow:"0 24px 64px rgba(0,0,0,0.25)", overflow:"hidden"}}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3.5" style={{borderBottom:`1px solid ${C.border}`}}>
+                <span style={{fontSize:14,fontWeight:700,color:C.fg}}>Approve &amp; Push to Cookbook</span>
+                <button onClick={()=>setApproveOpen(false)} aria-label="Close"
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-muted/50">
+                  <X size={15}/>
+                </button>
+              </div>
+              {/* Body */}
+              <div className="px-5 py-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div style={{width:56,height:56,flexShrink:0,borderRadius:8,overflow:"hidden",backgroundColor:C.muted,border:`1px solid ${C.border}`}}>
+                    {resolvedImgs(0)
+                      ? <img src={resolvedImgs(0)} alt={art.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                      : <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:C.mutedFg}}>No image</div>}
+                  </div>
+                  <div className="min-w-0">
+                    <p style={{fontSize:14,fontWeight:700,color:C.fg,lineHeight:1.3}}>{art.name}</p>
+                    <p style={{fontSize:12,color:C.mutedFg,fontFeatureSettings:'"tnum"',marginTop:2}}>APL: {art.apl}</p>
+                  </div>
+                </div>
+                <p style={{fontSize:12.5,color:C.mutedFg,lineHeight:1.5}}>
+                  This will approve the profile and push it to Cookbook.
+                </p>
+              </div>
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-2 px-5 py-3.5" style={{borderTop:`1px solid ${C.border}`}}>
+                <button onClick={()=>setApproveOpen(false)}
+                  style={{padding:"8px 14px",borderRadius:8,fontSize:13,fontWeight:600,backgroundColor:"#fff",color:C.mutedFg,border:`1px solid ${C.border2}`,cursor:"pointer"}}>
+                  Cancel
+                </button>
+                <button
+                  onClick={()=>{ setApproveOpen(false); showTopToast("Approved & pushed to Cookbook") }}
+                  style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,fontSize:13,fontWeight:700,backgroundColor:C.pr,color:"#fff",border:`1px solid ${C.pr}`,cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.prHov}
+                  onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.pr}>
+                  <Check size={13} strokeWidth={3}/> Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Shared completion toast (top-right) ── */}
+        {topToast && (
+          <div className="fixed top-4 right-4 z-[210] flex items-center gap-2 rounded-lg px-4 py-3"
+            style={{backgroundColor:"#1F2937", color:"#fff", boxShadow:"0 8px 24px rgba(0,0,0,0.25)"}}>
+            <Check size={15} className="text-emerald-400" strokeWidth={3}/>
+            <span style={{fontSize:13,fontWeight:600}}>{topToast}</span>
+          </div>
+        )}
       </div>
   )
 }

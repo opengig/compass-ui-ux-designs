@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>How to put your design system into Figma</title>
+<style>
+  :root {
+    --primary: #C68A1E;
+    --primary-bg: #FBF3E0;
+    --primary-border: #F4E4BC;
+    --brand-ink: #7A5310;
+    --ink: #2B2A26;
+    --ink-2: #44403C;
+    --ink-muted: #9C9B94;
+    --ink-faint: #C5C4BC;
+    --cream: #FBF8F0;
+    --cream-2: #F1ECDD;
+    --success: #5A8C1A;
+    --success-bg: #EAF3DE;
+    --warn-bg: #FFF4E6;
+    --warn-border: #FFD79B;
+    --warn-ink: #8A4B00;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--cream);
+    color: var(--ink);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    line-height: 1.6;
+  }
+  .wrap { max-width: 760px; margin: 0 auto; padding: 56px 28px 80px; }
+
+  header {
+    display: flex; gap: 14px; align-items: center; margin-bottom: 32px;
+  }
+  .logo {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(122,83,16,0.18);
+  }
+  .brand { font-weight: 700; font-size: 16px; letter-spacing: -0.2px; }
+  .brand .light { color: var(--ink-faint); }
+  .brand .sub {
+    display: block; font-size: 11px; font-weight: 500;
+    letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 4px;
+    text-transform: uppercase;
+  }
+
+  .eyebrow {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--primary); font-weight: 600;
+  }
+  h1 {
+    font-size: 40px; line-height: 1.1; margin: 6px 0 14px;
+    letter-spacing: -1px; font-weight: 700;
+  }
+  h1 em { font-style: normal; color: var(--primary); }
+  p.lede {
+    font-size: 17px; color: var(--ink-2); max-width: 620px;
+    margin: 0 0 36px;
+  }
+
+  h2 {
+    font-size: 22px; margin: 40px 0 14px; letter-spacing: -0.3px;
+    border-bottom: 1px solid var(--cream-2); padding-bottom: 8px;
+  }
+
+  /* Explainer card — "what even is this?" */
+  .explainer {
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 14px;
+    padding: 22px 24px;
+    margin-bottom: 36px;
+  }
+  .explainer h3 {
+    margin: 0 0 8px; font-size: 16px; color: var(--brand-ink);
+  }
+  .explainer p {
+    margin: 0 0 10px; color: var(--ink-2); font-size: 15px;
+  }
+  .explainer p:last-child { margin-bottom: 0; }
+
+  /* Before-you-start checklist */
+  .checklist {
+    background: var(--success-bg);
+    border: 1px solid #CFE2A8;
+    border-radius: 12px;
+    padding: 18px 22px;
+    margin-bottom: 36px;
+  }
+  .checklist h3 {
+    margin: 0 0 10px; font-size: 15px; color: #3F6510;
+    letter-spacing: 0.04em; text-transform: uppercase;
+  }
+  .checklist ul { padding: 0; margin: 0; list-style: none; }
+  .checklist li {
+    padding-left: 26px; position: relative; margin-bottom: 8px;
+    color: var(--ink-2); font-size: 15px;
+  }
+  .checklist li:last-child { margin-bottom: 0; }
+  .checklist li::before {
+    content: ""; position: absolute; left: 0; top: 6px;
+    width: 16px; height: 16px; border-radius: 4px;
+    border: 2px solid var(--success); background: #fff;
+  }
+  .checklist a { color: #3F6510; font-weight: 600; }
+
+  /* Steps */
+  ol.steps {
+    list-style: none; padding: 0; margin: 0 0 40px;
+    counter-reset: step;
+  }
+  ol.steps > li {
+    counter-increment: step;
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 14px;
+    padding: 24px 26px 24px 92px;
+    margin-bottom: 16px;
+    position: relative;
+  }
+  ol.steps > li::before {
+    content: counter(step);
+    position: absolute; top: 24px; left: 26px;
+    width: 46px; height: 46px; border-radius: 12px;
+    background: var(--primary-bg); border: 1px solid var(--primary-border);
+    color: var(--brand-ink); font-weight: 700; font-size: 18px;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+  }
+  ol.steps h3 {
+    margin: 0 0 8px; font-size: 18px; font-weight: 600; color: var(--ink);
+    letter-spacing: -0.2px;
+  }
+  ol.steps p {
+    margin: 0 0 10px; color: var(--ink-2); font-size: 15px;
+  }
+  ol.steps p:last-child { margin-bottom: 0; }
+  ol.steps .tip {
+    margin-top: 10px; padding: 10px 14px;
+    background: var(--cream); border-left: 3px solid var(--primary);
+    border-radius: 4px; font-size: 14px; color: var(--ink-2);
+  }
+  ol.steps .tip b { color: var(--brand-ink); }
+  ol.steps code {
+    background: var(--primary-bg); border: 1px solid var(--primary-border);
+    color: var(--brand-ink); padding: 1px 7px; border-radius: 6px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13.5px;
+    word-break: break-all;
+  }
+  .menu-trail {
+    display: inline-flex; align-items: center; flex-wrap: wrap; gap: 6px;
+    margin: 6px 0;
+  }
+  .menu-trail .pill {
+    background: #fff; border: 1px solid var(--ink-faint);
+    border-bottom-width: 2px; border-radius: 6px;
+    padding: 3px 10px;
+    font-size: 14px; color: var(--ink); font-weight: 500;
+  }
+  .menu-trail .arrow { color: var(--ink-muted); font-weight: 600; }
+
+  /* Big warning at top */
+  .heads-up {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-border);
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: var(--warn-ink);
+    margin: 0 0 36px;
+    font-size: 15px;
+    display: flex; gap: 14px; align-items: flex-start;
+  }
+  .heads-up .icon {
+    font-size: 22px; line-height: 1; flex-shrink: 0;
+  }
+  .heads-up b { display: block; margin-bottom: 4px; font-size: 15px; }
+
+  /* File path box — friendlier */
+  .path-card {
+    background: #fff;
+    border: 1px solid var(--cream-2);
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 10px 0 0;
+  }
+  .path-card .label {
+    font-size: 11px; letter-spacing: 0.16em; text-transform: uppercase;
+    color: var(--ink-muted); font-weight: 600; margin-bottom: 8px;
+  }
+  .path-card .path {
+    background: #1F1611; color: #FBF8F0;
+    border-radius: 8px; padding: 12px 16px;
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    font-size: 13px;
+    overflow-x: auto;
+    line-height: 1.6;
+  }
+  .path-card .path .muted { color: #9C9B94; }
+  .path-card .path .file { color: #F4E4BC; font-weight: 600; }
+  .path-card .hint {
+    margin-top: 10px; font-size: 13.5px; color: var(--ink-2);
+  }
+
+  /* What you get */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+  @media (max-width: 600px) { .grid-2 { grid-template-columns: 1fr; } }
+  .card {
+    background: #fff; border: 1px solid var(--cream-2); border-radius: 12px;
+    padding: 18px 20px;
+  }
+  .card h3 { margin: 0 0 8px; font-size: 15px; }
+  .card p { margin: 0 0 8px; color: var(--ink-2); font-size: 14px; }
+
+  ul.tick { padding: 0; margin: 6px 0 0 0; list-style: none; }
+  ul.tick li {
+    padding-left: 22px; position: relative; margin-bottom: 6px;
+    color: var(--ink-2); font-size: 14px;
+  }
+  ul.tick li::before {
+    content: "✓"; position: absolute; left: 0; top: 0;
+    color: var(--success); font-weight: 700;
+  }
+
+  /* Troubleshooting */
+  details {
+    background: #fff; border: 1px solid var(--cream-2);
+    border-radius: 12px; padding: 14px 20px; margin-bottom: 10px;
+  }
+  details summary {
+    cursor: pointer; font-weight: 600; font-size: 15px; color: var(--ink);
+    list-style: none;
+  }
+  details summary::-webkit-details-marker { display: none; }
+  details summary::before {
+    content: "+"; display: inline-block; width: 22px;
+    color: var(--primary); font-weight: 700;
+  }
+  details[open] summary::before { content: "−"; }
+  details p { margin: 10px 0 0; color: var(--ink-2); font-size: 14.5px; }
+
+  footer {
+    margin-top: 48px; padding-top: 16px;
+    border-top: 1px solid var(--cream-2);
+    font-size: 12px; color: var(--ink-muted);
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 8px;
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 44 44" aria-hidden="true">
+        <line x1="10" y1="34" x2="34" y2="10" stroke="#F1ECDD" stroke-width="1.6" stroke-linecap="round"/>
+        <polygon points="34,10 29,14 32,17" fill="#F1ECDD"/>
+        <polygon points="10,34 15,30 12,27" fill="#9C9B94"/>
+        <circle cx="22" cy="22" r="2.2" fill="#F1ECDD"/>
+      </svg>
+    </div>
+    <div class="brand">
+      RETINA <span class="light">AI</span>
+      <span class="sub">Design System · Figma Setup</span>
+    </div>
+  </header>
+
+  <div class="eyebrow">Store Manager Design System</div>
+  <h1>Get your design system <em>into Figma</em> in 5 minutes.</h1>
+  <p class="lede">
+    No coding needed. You'll click through a few menus in the Figma app and a
+    small helper will build the whole design system for you — colors, text styles,
+    buttons, the works.
+  </p>
+
+  <!-- Plain-English explainer -->
+  <div class="explainer">
+    <h3>Wait, what is this exactly?</h3>
+    <p>
+      A <b>"design system"</b> is basically a kit of all the colors, fonts, buttons, and
+      pieces that make your app look consistent. You already have one — it's the
+      PDF/HTML doc we made together.
+    </p>
+    <p>
+      A <b>"Figma plugin"</b> is just a little helper that lives inside Figma and does
+      a job for you. The one we built for you takes the design system from the doc
+      and puts it into Figma automatically, so designers can use those exact colors
+      and buttons in their work.
+    </p>
+    <p>
+      You don't need to write any code. You just point Figma at the helper, click
+      "run," and wait a couple seconds.
+    </p>
+  </div>
+
+  <!-- Heads up box -->
+  <div class="heads-up">
+    <div class="icon">⚠️</div>
+    <div>
+      <b>You'll need the Figma desktop app — not the website.</b>
+      The helper only works inside the app you download to your Mac. If you try to do this
+      in figma.com in your web browser, the menu we need will be greyed out. Don't worry,
+      the file you build will work on the website afterwards — just the setup step needs the app.
+    </div>
+  </div>
+
+  <!-- Before you start -->
+  <div class="checklist">
+    <h3>Before you start — do you have these?</h3>
+    <ul>
+      <li>The <b>Figma desktop app</b> installed on your Mac (free — <a href="https://www.figma.com/downloads/" target="_blank" rel="noopener">download here</a> if you don't have it)</li>
+      <li>A free Figma account (sign up at figma.com if you haven't)</li>
+      <li>About 5 minutes</li>
+    </ul>
+  </div>
+
+  <h2>The 5 steps</h2>
+
+  <ol class="steps">
+
+    <li>
+      <h3>Open the Figma desktop app and create a new file</h3>
+      <p>
+        Launch Figma on your Mac (the actual app, not the website in a browser).
+        Once it opens, click <b>"New design file"</b> on the home screen. A blank canvas opens.
+      </p>
+      <div class="tip">
+        <b>Heads up:</b> any Figma file will work — you can also open an existing one. The
+        helper just needs <i>some</i> file to be open so it has somewhere to put things.
+      </div>
+    </li>
+
+    <li>
+      <h3>Find the "Import plugin" menu</h3>
+      <p>At the very top of your Mac screen (the menu bar), click these in order:</p>
+      <div class="menu-trail">
+        <span class="pill">Menu</span>
+        <span class="arrow">→</span>
+        <span class="pill">Plugins</span>
+        <span class="arrow">→</span>
+        <span class="pill">Development</span>
+        <span class="arrow">→</span>
+        <span class="pill">Import plugin from manifest…</span>
+      </div>
+      <div class="tip">
+        <b>If "Import plugin from manifest…" is grey and you can't click it:</b>
+        you're probably in the website version, not the app. Close your browser, open the Figma
+        app from your Applications folder, and try again.
+      </div>
+    </li>
+
+    <li>
+      <h3>Pick the file called <code>manifest.json</code></h3>
+      <p>
+        A file picker window opens. You need to find a file called <code>manifest.json</code>
+        on your Mac. Here's exactly where it lives:
+      </p>
+
+      <div class="path-card">
+        <div class="label">Full path on your Mac</div>
+        <div class="path">
+          <span class="muted">/Users/saimyothu/claude-workspace/<br/>Retina AI/compass-ui-ux-designs/retina/figma-plugin/</span><br/>
+          ├── <span class="file">manifest.json</span>  <span class="muted">← pick this one</span><br/>
+          └── code.js
+        </div>
+        <div class="hint">
+          <b>Easiest way to get there:</b> in the file picker, press <b>Cmd + Shift + G</b>
+          on your keyboard. A little box appears — paste the path above (the part with the
+          slashes) into it and hit Enter. You'll jump straight to the right folder.
+          Then double-click <code>manifest.json</code>.
+        </div>
+      </div>
+    </li>
+
+    <li>
+      <h3>Run the helper</h3>
+      <p>
+        Figma now knows about the helper. To actually run it, click through these menus
+        the same way as before:
+      </p>
+      <div class="menu-trail">
+        <span class="pill">Menu</span>
+        <span class="arrow">→</span>
+        <span class="pill">Plugins</span>
+        <span class="arrow">→</span>
+        <span class="pill">Development</span>
+        <span class="arrow">→</span>
+        <span class="pill">Store Manager — Design System Builder</span>
+      </div>
+      <p>Click that last one. You won't see a popup or window — it just starts working quietly.</p>
+    </li>
+
+    <li>
+      <h3>Wait about 2 seconds — and you're done</h3>
+      <p>
+        After a moment, a new page called <b>"Store Manager — Design System"</b> appears
+        in your Figma file. The view zooms in on a cover page automatically. Scroll around
+        and you'll see all the colors, fonts, buttons, and screen examples laid out for you.
+      </p>
+      <div class="tip">
+        <b>To save and share it:</b> Figma saves automatically. To share with someone,
+        click the blue <b>"Share"</b> button in the top-right of Figma and either invite
+        them by email or copy a link.
+      </div>
+    </li>
+
+  </ol>
+
+  <h2>What just got built for you</h2>
+  <div class="grid-2">
+    <div class="card">
+      <h3>🎨 All the colors</h3>
+      <p>Every brand color, neutral grey, and status color (success, error, etc.) is set up so designers can pick them with one click.</p>
+    </div>
+    <div class="card">
+      <h3>✍️ All the text styles</h3>
+      <p>Headings, body text, captions — 8 ready-made text styles that match your brand.</p>
+    </div>
+    <div class="card">
+      <h3>🔘 Buttons and pieces</h3>
+      <p>Primary buttons, secondary buttons, step pills, filter chips, badges — all the small parts your app uses.</p>
+    </div>
+    <div class="card">
+      <h3>📱 Example screens</h3>
+      <p>Four full mockup screens (A–D) showing how everything fits together, including the camera scanner view.</p>
+    </div>
+  </div>
+
+  <h2>Something went wrong?</h2>
+
+  <details>
+    <summary>The "Import plugin from manifest…" menu item is greyed out</summary>
+    <p>
+      You're almost certainly in the browser version of Figma. The "Development" menu only
+      shows up in the desktop app. Quit your browser, open Figma from your Applications folder
+      (or download it from <a href="https://www.figma.com/downloads/" target="_blank" rel="noopener">figma.com/downloads</a>), and try again.
+    </p>
+  </details>
+
+  <details>
+    <summary>I can't find the manifest.json file</summary>
+    <p>
+      In the file picker, press <b>Cmd + Shift + G</b> to open a "Go to folder" box.
+      Paste this into it:
+    </p>
+    <p><code>/Users/saimyothu/claude-workspace/Retina AI/compass-ui-ux-designs/retina/figma-plugin/</code></p>
+    <p>Hit Enter. You'll see <code>manifest.json</code> — double-click it.</p>
+  </details>
+
+  <details>
+    <summary>The fonts look wrong or boxy after the helper runs</summary>
+    <p>
+      The design system uses two free fonts: <b>Inter</b> and <b>JetBrains Mono</b>. If you
+      don't have them installed on your Mac, Figma will substitute something else and it'll
+      look off. Download them free from <a href="https://fonts.google.com" target="_blank" rel="noopener">fonts.google.com</a> (search the names),
+      install both, restart Figma, and run the helper again.
+    </p>
+  </details>
+
+  <details>
+    <summary>I ran it twice and now there are duplicate pages</summary>
+    <p>
+      That's normal — each run creates a fresh new page so you can compare or pick the best
+      one. To delete an old one, right-click the page name in the left sidebar of Figma and
+      choose "Delete page."
+    </p>
+  </details>
+
+  <details>
+    <summary>It says variables didn't get created</summary>
+    <p>
+      "Variables" is a Figma feature that needs a paid plan (Professional or higher).
+      If you're on the free plan, the colors and fonts still get built as regular styles —
+      designers can still use them, they just won't be in the fancier "variables" format.
+      No action needed unless you specifically want variables.
+    </p>
+  </details>
+
+  <details>
+    <summary>I'm still stuck</summary>
+    <p>
+      Take a screenshot of what you're seeing and send it over — we'll figure out the
+      specific step that's tripping you up. There's no dumb question here, the menu paths
+      in Figma are genuinely a bit hidden.
+    </p>
+  </details>
+
+  <footer>
+    <span>Retina AI · Store Manager Design System</span>
+    <span>Last updated 27 May 2026</span>
+  </footer>
+</div>
+</body>
+</html>

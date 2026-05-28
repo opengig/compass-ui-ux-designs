@@ -88,7 +88,7 @@ export function DetailScreen() {
       <div className="bg-[#ffffff] border-b border-[#ECE6DA] px-5 py-2.5 flex items-center gap-2.5 flex-shrink-0 min-h-12">
         <BtnGhost style={{color:C.pr, fontSize:12, fontWeight:600}}
           onClick={()=>goApp(backTarget)}>
-          <ArrowLeft size={13}/>{backTarget==="approved"?"Back to Approved":"Back to Queue"}
+          <ArrowLeft size={13}/>{backTarget==="approved"?"Back to Submitted":"Back to Queue"}
         </BtnGhost>
         <span className="text-gray-200 text-base">/</span>
         <span className="text-[13px] font-semibold text-[#1A1A1A]">{art.name}</span>
@@ -258,9 +258,9 @@ export function DetailScreen() {
             {/* RIGHT — accordions */}
             <div className="flex-1 flex flex-col gap-4">
 
-              {/* ALLERGENS accordion */}
+              {/* ALLERGENS (Contains) accordion */}
               {(() => {
-                const [open, setOpen] = useState(false)
+                const [open, setOpen] = useState(true)
                 return (
                   <div style={{border:`1px solid ${C.border}`, backgroundColor:C.card, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)"}}>
                     <button className="w-full flex items-center justify-between px-5 py-4 transition-colors"
@@ -268,14 +268,14 @@ export function DetailScreen() {
                       onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.muted}
                       onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}
                       onClick={()=>setOpen(o=>!o)}>
-                      <span style={{fontSize:13,fontWeight:600,color:C.fg,letterSpacing:"0.04em",textTransform:"uppercase"}}>Allergens</span>
+                      <span style={{fontSize:13,fontWeight:600,color:C.fg,letterSpacing:"0.04em",textTransform:"uppercase"}}>Allergens (Contains)</span>
                       {open ? <ChevronUp size={16} color={C.mutedFg}/> : <ChevronDown size={16} color={C.mutedFg}/>}
                     </button>
                     {open && (
                       <div style={{borderTop:`1px solid ${C.border}`, padding:"16px 20px 20px", borderRadius:"0 0 14px 14px"}}>
                         <div className="space-y-4">
                           <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2" style={{color:C.mutedFg}}>Definitely allergen (Contains)</p>
+                            <p className="text-[11px] mb-2" style={{color:C.mutedFg}}>Allergens definitely present on the packet label.</p>
                             <div className="flex flex-wrap gap-2 mb-2">
                               {defAl.length ? defAl.map((a,i)=>(
                                 <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:C.rdBg,color:C.rd,border:`1px solid ${C.rdBdr}`}}>
@@ -289,27 +289,6 @@ export function DetailScreen() {
                                   onKeyDown={e=>{if(e.key==="Enter"&&newAlDef.trim()){setDefAl(p=>[...p,newAlDef.trim()]);setNewAlDef("")}}}/>
                                 <BtnSecondary style={{height:32, borderColor:C.rdBdr, color:C.rd}}
                                   onClick={()=>{if(newAlDef.trim()){setDefAl(p=>[...p,newAlDef.trim()]);setNewAlDef("")}}}>
-                                  <Plus size={11}/>Add
-                                </BtnSecondary>
-                              </div>
-                            )}
-                          </div>
-                          <div className="h-px" style={{backgroundColor:C.border}}/>
-                          <div>
-                            <p className="text-[11px] font-semibold uppercase tracking-[0.05em] mb-2" style={{color:C.mutedFg}}>Probably allergen (May contain)</p>
-                            <div className="flex flex-wrap gap-2 mb-2">
-                              {probAl.length ? probAl.map((a,i)=>(
-                                <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:C.amBg,color:C.am,border:`1px solid ${C.amBdr}`}}>
-                                  {a}{!viewOnly&&<button onClick={()=>setProbAl(prev=>prev.filter((_,j)=>j!==i))}><X size={11} className="opacity-50 hover:opacity-100"/></button>}
-                                </span>
-                              )) : <span className="text-xs italic" style={{color:C.mutedFg}}>None declared</span>}
-                            </div>
-                            {!viewOnly && (
-                              <div className="flex gap-2">
-                                <Input className="h-8 text-xs flex-1" placeholder="Add probable allergen..." value={newAlProb} onChange={e=>setNewAlProb(e.target.value)}
-                                  onKeyDown={e=>{if(e.key==="Enter"&&newAlProb.trim()){setProbAl(p=>[...p,newAlProb.trim()]);setNewAlProb("")}}}/>
-                                <BtnSecondary style={{height:32, borderColor:C.amBdr, color:C.am}}
-                                  onClick={()=>{if(newAlProb.trim()){setProbAl(p=>[...p,newAlProb.trim()]);setNewAlProb("")}}}>
                                   <Plus size={11}/>Add
                                 </BtnSecondary>
                               </div>
@@ -331,6 +310,45 @@ export function DetailScreen() {
                 )
               })()}
 
+              {/* MAY CONTAIN accordion */}
+              {(() => {
+                const [open, setOpen] = useState(true)
+                return (
+                  <div style={{border:`1px solid ${C.border}`, backgroundColor:C.card, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)"}}>
+                    <button className="w-full flex items-center justify-between px-5 py-4 transition-colors"
+                      style={{backgroundColor:"transparent", borderRadius: open ? "14px 14px 0 0" : 14}}
+                      onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.muted}
+                      onMouseLeave={e=>e.currentTarget.style.backgroundColor="transparent"}
+                      onClick={()=>setOpen(o=>!o)}>
+                      <span style={{fontSize:13,fontWeight:600,color:C.fg,letterSpacing:"0.04em",textTransform:"uppercase"}}>May Contain</span>
+                      {open ? <ChevronUp size={16} color={C.mutedFg}/> : <ChevronDown size={16} color={C.mutedFg}/>}
+                    </button>
+                    {open && (
+                      <div style={{borderTop:`1px solid ${C.border}`, padding:"16px 20px 20px", borderRadius:"0 0 14px 14px"}}>
+                        <p className="text-[11px] mb-2" style={{color:C.mutedFg}}>Probable allergens — trace contamination from the same factory line.</p>
+                        <div className="flex flex-wrap gap-2 mb-2">
+                          {probAl.length ? probAl.map((a,i)=>(
+                            <span key={i} className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold" style={{backgroundColor:C.amBg,color:C.am,border:`1px solid ${C.amBdr}`}}>
+                              {a}{!viewOnly&&<button onClick={()=>setProbAl(prev=>prev.filter((_,j)=>j!==i))}><X size={11} className="opacity-50 hover:opacity-100"/></button>}
+                            </span>
+                          )) : <span className="text-xs italic" style={{color:C.mutedFg}}>None declared</span>}
+                        </div>
+                        {!viewOnly && (
+                          <div className="flex gap-2">
+                            <Input className="h-8 text-xs flex-1" placeholder="Add probable allergen..." value={newAlProb} onChange={e=>setNewAlProb(e.target.value)}
+                              onKeyDown={e=>{if(e.key==="Enter"&&newAlProb.trim()){setProbAl(p=>[...p,newAlProb.trim()]);setNewAlProb("")}}}/>
+                            <BtnSecondary style={{height:32, borderColor:C.amBdr, color:C.am}}
+                              onClick={()=>{if(newAlProb.trim()){setProbAl(p=>[...p,newAlProb.trim()]);setNewAlProb("")}}}>
+                              <Plus size={11}/>Add
+                            </BtnSecondary>
+                          </div>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )
+              })()}
+
               {/* NUTRIENTS accordion */}
               {(() => {
                 const [open, setOpen] = useState(true)
@@ -346,42 +364,75 @@ export function DetailScreen() {
                     </button>
                     {open && (
                       <div style={{borderTop:`1px solid ${C.border}`, borderRadius:"0 0 14px 14px"}}>
-                        <div className="px-5 pt-3 pb-1">
-                          <div className="text-xs font-medium px-3 py-1.5 rounded-r mb-3" style={{color:C.pr,backgroundColor:C.prBg,borderLeft:`2px solid ${C.pr}`}}>All values per 100g / 100ml</div>
-                        </div>
-                        <div className="px-5 pb-4">
-                          {Object.entries(displayNuts).map(([k,n])=>{
-                            const miss=n.c==="missing", isNA=n.c==="na", isLLM=n.c==="llm"
-                            const edited = nutEdited[k]
-                            return (
-                              <div key={k} className={`flex items-center py-2.5 border-b border-[#ECE6DA] last:border-0 gap-4 rounded-sm ${edited?"border-l-2 border-amber-400 pl-3 -ml-3":miss?"border-l-2 pl-3 -ml-3":isLLM?"border-l-2 pl-3 -ml-3":""}`}
-                                style={{borderLeftColor: miss ? C.rd : isLLM ? C.am : "transparent", backgroundColor: miss ? "#FEF7F7" : isLLM ? "#FFFBF2" : "transparent"}}>
-                                <span className="flex-1 text-sm font-medium" style={{color: miss ? C.rd : isLLM ? C.am : isNA ? C.mutedFg : C.fg, fontWeight: miss||isLLM ? 600 : 500}}>
-                                  {NNAMES[k]}
-                                  {miss  && <span style={{display:"block",fontSize:11,color:C.rd,  marginTop:2,lineHeight:1.4,fontWeight:400}}>Not found on label — manual entry required</span>}
-                                  {isLLM && <span style={{display:"block",fontSize:11,color:C.am,  marginTop:2,lineHeight:1.4,fontWeight:400}}>AI estimated — verify against label</span>}
-                                </span>
-                                <div className="flex items-center gap-2 flex-shrink-0">
-                                  <Input
-                                    className={`h-8 text-sm font-mono ${nutInputClass(n.c)}`}
-                                    style={{textAlign:"left", paddingLeft:10, width:120, flexShrink:0}}
-                                    value={isNA?"N/A":nutVals[k]||""}
-                                    disabled={viewOnly||isNA}
-                                    placeholder={miss?"—":""}
-                                    onChange={e=>{
-                                      setNutVals(prev=>({...prev,[k]:e.target.value}))
-                                      setNutEdited(prev=>({...prev,[k]:true}))
-                                    }}
-                                  />
-                                  <span className="text-xs" style={{width:28,flexShrink:0,color:C.mutedFg}}>{n.u}</span>
-                                  <div style={{width:76, flexShrink:0}}><NutBadge c={n.c}/></div>
-                                </div>
+                        <div className="px-5 py-4">
+                          {/* 3-column clean table: Nutrient Name | Per 100g/100ml | UOM */}
+                          <div className="overflow-hidden" style={{border:`1px solid ${C.border}`, borderRadius:4}}>
+                            {/* Header */}
+                            <div className="flex" style={{backgroundColor:C.page, borderBottom:`1px solid ${C.border}`}}>
+                              <div className="px-3 py-2.5"
+                                style={{width:200,flexShrink:0,fontSize:10,fontWeight:700,
+                                        textTransform:"uppercase",letterSpacing:"0.08em",color:C.mutedFg}}>
+                                Nutrient Name
                               </div>
-                            )
-                          })}
+                              <div className="px-3 py-2.5 flex-1"
+                                style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",
+                                        color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"center"}}>
+                                Per 100g / Per 100ml
+                              </div>
+                              <div className="px-3 py-2.5"
+                                style={{width:64,flexShrink:0,fontSize:10,fontWeight:700,textTransform:"uppercase",
+                                        letterSpacing:"0.08em",color:C.mutedFg,borderLeft:`1px solid ${C.border}`}}>
+                                UOM
+                              </div>
+                            </div>
+                            {/* Rows */}
+                            {Object.entries(displayNuts).map(([k,n], idx, arr)=>{
+                              const isNA = n.c==="na"
+                              const isLast = idx === arr.length - 1
+                              const rowColor = isNA ? C.mutedFg : C.fg
+                              return (
+                                <div key={k} className="flex items-stretch"
+                                  style={{borderBottom: isLast ? "none" : `1px solid ${C.border}`, backgroundColor:"#fff"}}>
+                                  <div className="px-3 py-2.5 flex items-center"
+                                    style={{width:200,flexShrink:0}}>
+                                    <span style={{fontSize:13, fontWeight:500, color:rowColor, lineHeight:1.3}}>
+                                      {NNAMES[k]}
+                                    </span>
+                                  </div>
+                                  <div className="px-3 py-1.5 flex-1 flex items-center justify-center"
+                                    style={{borderLeft:`1px solid ${C.border}`}}>
+                                    <input
+                                      value={isNA ? "N/A" : (nutVals[k] || "")}
+                                      disabled={isNA || viewOnly}
+                                      onChange={e=>{
+                                        setNutVals(prev=>({...prev,[k]:e.target.value}))
+                                        setNutEdited(prev=>({...prev,[k]:true}))
+                                      }}
+                                      style={{
+                                        width:"100%", height:30,
+                                        border:`1px solid ${C.border}`,
+                                        borderRadius:4,
+                                        backgroundColor: isNA ? C.page : "#fff",
+                                        color: isNA ? C.mutedFg : C.fg,
+                                        fontSize:13, fontWeight:500,
+                                        paddingLeft:10, paddingRight:10,
+                                        outline:"none", boxSizing:"border-box",
+                                        fontFeatureSettings:'"tnum"',
+                                        textAlign:"left",
+                                        cursor: (isNA || viewOnly) ? "default" : "text",
+                                      }}/>
+                                  </div>
+                                  <div className="px-3 py-2.5 flex items-center"
+                                    style={{width:64,flexShrink:0,borderLeft:`1px solid ${C.border}`}}>
+                                    <span style={{fontSize:12, color:C.mutedFg}}>{n.u}</span>
+                                  </div>
+                                </div>
+                              )
+                            })}
+                          </div>
                           {!viewOnly && hasEdits && (
                             <Alert className="mt-3 border-[#E8C97A] bg-[#FEF9EE]">
-                              <AlertDescription className="text-[#7A5310] text-xs font-medium">⚠ Unsaved edits — highlighted rows have been modified.</AlertDescription>
+                              <AlertDescription className="text-[#7A5310] text-xs font-medium">⚠ Unsaved edits — values have been modified.</AlertDescription>
                             </Alert>
                           )}
                         </div>

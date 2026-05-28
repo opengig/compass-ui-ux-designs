@@ -24,7 +24,6 @@ import { DashboardScreen as NutritionistDashboard } from './components/nutrition
 import { QueueScreen as NutritionistQueue } from './components/nutritionist/screens/QueueScreen';
 import { DetailScreen as NutritionistDetail } from './components/nutritionist/screens/DetailScreen';
 import { ApprovedScreen as NutritionistApproved } from './components/nutritionist/screens/ApprovedScreen';
-import { AuditScreen as NutritionistAudit } from './components/nutritionist/screens/AuditScreen';
 import { NotifScreen as NutritionistNotif } from './components/nutritionist/screens/NotifScreen';
 import { StoreManagerShell } from './components/store-manager/StoreManagerShell';
 import { StoreManagerLayout } from './components/store-manager/StoreManagerApp';
@@ -83,10 +82,7 @@ export function App() {
           <Route path={ROUTES.base} element={<Navigate to={ROUTES.review} replace />} />
           <Route element={<Shell />}>
             <Route path={ROUTES.review} element={<QueueScreen />} />
-            <Route
-              path={ROUTES.submitted}
-              element={<Navigate to={`${ROUTES.review}?tab=submitted`} replace />}
-            />
+            <Route path={ROUTES.submitted} element={<QueueScreen variant="submitted" />} />
             <Route path={ROUTES.catalog} element={<CatalogScreen />} />
             <Route path={ROUTES.dashboard} element={<DashboardPage />} />
             <Route path={ROUTES.approved} element={<ApprovedPage />} />
@@ -103,7 +99,6 @@ export function App() {
             <Route path={NUTRITIONIST_ROUTES.queueArticle} element={<NutritionistQueue />} />
             <Route path={NUTRITIONIST_ROUTES.article} element={<NutritionistDetail />} />
             <Route path={NUTRITIONIST_ROUTES.approved} element={<NutritionistApproved />} />
-            <Route path={NUTRITIONIST_ROUTES.audit} element={<NutritionistAudit />} />
             <Route path={NUTRITIONIST_ROUTES.notifications} element={<NutritionistNotif />} />
             {/* back-compat: old /nutritionist/home links redirect to /dashboard */}
             <Route path={NUTRITIONIST_ROUTES.home} element={<Navigate to={NUTRITIONIST_ROUTES.dashboard} replace />} />

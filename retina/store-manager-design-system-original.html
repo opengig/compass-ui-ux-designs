@@ -1,0 +1,1447 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>Store Manager Prototype — Design System</title>
+<style>
+  /* ====== PDF page setup ====== */
+  @page {
+    size: A4;
+    margin: 18mm 16mm 18mm 16mm;
+  }
+  @page :first {
+    margin: 0;
+  }
+
+  :root {
+    --primary: #C68A1E;
+    --primary-hover: #A8741A;
+    --primary-bg: #FBF3E0;
+    --primary-border: #F4E4BC;
+    --brand-ink: #7A5310;
+    --ink: #2B2A26;
+    --ink-2: #44403C;
+    --ink-muted: #9C9B94;
+    --ink-faint: #C5C4BC;
+    --cream: #FBF8F0;
+    --cream-2: #F1ECDD;
+    --surface: #FFFFFF;
+    --bg: #F5F5F4;
+    --border: #E5E5E4;
+    --success: #5A8C1A;
+    --success-2: #7DBD3B;
+    --success-ink: #3B6D11;
+    --success-bg: #EAF3DE;
+    --scan: #97C459;
+    --error: #A32D2D;
+    --error-2: #E24B4A;
+    --error-bg: #FDE7E7;
+    --info: #0067B8;
+    --info-bg: #E8F0F9;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    color: var(--ink);
+    background: var(--cream);
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 11pt;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  code, pre, .mono {
+    font-family: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  }
+
+  /* ====== Layout ====== */
+  .page {
+    page-break-after: always;
+    padding: 0;
+  }
+  .page:last-child { page-break-after: auto; }
+
+  /* Cover */
+  .cover {
+    height: 297mm;
+    width: 100%;
+    background:
+      radial-gradient(ellipse at 90% 10%, rgba(198,138,30,0.18), transparent 55%),
+      radial-gradient(ellipse at 10% 90%, rgba(122,83,16,0.14), transparent 55%),
+      linear-gradient(180deg, #FBF8F0 0%, #F4E4BC 100%);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 28mm 22mm;
+    position: relative;
+  }
+  .cover .top { display: flex; align-items: center; gap: 14px; }
+  .cover .logo {
+    width: 56px; height: 56px; border-radius: 14px; background: var(--primary);
+    display: inline-flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 18px rgba(122,83,16,0.25);
+  }
+  .cover .logo svg { display: block; }
+  .cover .brand {
+    font-size: 13pt; font-weight: 700; letter-spacing: -0.2px; color: var(--ink);
+  }
+  .cover .brand .light { color: var(--ink-faint); }
+  .cover .brand .sub {
+    display: block; font-size: 8.5pt; font-weight: 500;
+    letter-spacing: 0.18em; color: var(--ink-muted); margin-top: 4px;
+    text-transform: uppercase;
+  }
+  .cover h1 {
+    font-size: 44pt; line-height: 1.04; margin: 0; font-weight: 700;
+    letter-spacing: -1.2px; color: var(--ink);
+  }
+  .cover h1 em {
+    font-style: normal; color: var(--primary);
+  }
+  .cover .lede {
+    font-size: 13pt; color: var(--ink-2); max-width: 130mm; margin-top: 14px;
+  }
+  .cover .meta {
+    display: flex; gap: 24px; font-size: 9.5pt; color: var(--ink-muted);
+    border-top: 1px solid rgba(122,83,16,0.18); padding-top: 14px;
+  }
+  .cover .meta b { color: var(--ink); font-weight: 600; }
+
+  /* Inner pages */
+  .inner { padding: 0; }
+  .inner header.section {
+    display: flex; align-items: baseline; gap: 12px;
+    border-bottom: 1px solid var(--cream-2); padding-bottom: 8px; margin-bottom: 16px;
+  }
+  .eyebrow {
+    font-size: 8.5pt; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--primary); font-weight: 600;
+  }
+  h2 {
+    font-size: 22pt; line-height: 1.1; margin: 0; letter-spacing: -0.5px;
+    font-weight: 700; color: var(--ink);
+  }
+  h3 {
+    font-size: 12.5pt; margin: 18px 0 8px; color: var(--ink); font-weight: 600;
+    letter-spacing: -0.1px;
+  }
+  h4 {
+    font-size: 10pt; margin: 12px 0 6px; color: var(--ink-2); font-weight: 600;
+    text-transform: uppercase; letter-spacing: 0.06em;
+  }
+  p { margin: 6px 0 10px; color: var(--ink-2); }
+  p.lede { font-size: 12pt; color: var(--ink); max-width: 150mm; }
+  ul { margin: 6px 0 10px 18px; padding: 0; color: var(--ink-2); }
+  li { margin-bottom: 4px; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
+  .grid-4 { display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; }
+  .grid-6 { display: grid; grid-template-columns: repeat(6, 1fr); gap: 8px; }
+
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--cream-2);
+    border-radius: 12px;
+    padding: 16px;
+    page-break-inside: avoid;
+  }
+  .card.tight { padding: 12px; }
+  .callout {
+    background: var(--primary-bg);
+    border: 1px solid var(--primary-border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    color: var(--brand-ink);
+    font-size: 10pt;
+  }
+  .callout b { color: var(--brand-ink); }
+
+  /* Color swatches */
+  .swatch {
+    border: 1px solid var(--cream-2);
+    border-radius: 10px;
+    overflow: hidden;
+    background: var(--surface);
+    page-break-inside: avoid;
+  }
+  .swatch .chip {
+    height: 64px;
+    border-bottom: 1px solid rgba(0,0,0,0.04);
+  }
+  .swatch .meta {
+    padding: 8px 10px;
+    font-size: 8.5pt;
+  }
+  .swatch .meta .name {
+    font-weight: 600; color: var(--ink); font-size: 9.5pt;
+  }
+  .swatch .meta .hex {
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--ink-muted); font-size: 8.5pt; margin-top: 2px;
+  }
+  .swatch .meta .role {
+    color: var(--ink-muted); font-size: 8pt; margin-top: 2px;
+  }
+
+  /* Type specimen */
+  .type-row {
+    display: grid; grid-template-columns: 32mm 1fr 36mm; align-items: baseline;
+    padding: 10px 0; border-bottom: 1px dashed var(--cream-2);
+  }
+  .type-row:last-child { border-bottom: none; }
+  .type-row .label { font-size: 8.5pt; color: var(--ink-muted); letter-spacing: 0.04em; text-transform: uppercase; }
+  .type-row .meta { font-family: 'JetBrains Mono', monospace; font-size: 8.5pt; color: var(--ink-muted); text-align: right; }
+  .type-row .sample { color: var(--ink); }
+
+  /* Mini phone preview frame */
+  .phone {
+    width: 100%;
+    max-width: 78mm;
+    background: var(--cream);
+    border: 1px solid var(--cream-2);
+    border-radius: 18px;
+    padding: 10px;
+    page-break-inside: avoid;
+  }
+  .phone .screen {
+    background: #fff;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--cream-2);
+  }
+
+  /* Buttons mockup */
+  .btn {
+    display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+    padding: 12px 16px; border-radius: 8px; font-weight: 500; font-size: 10pt;
+    border: 1px solid transparent; min-height: 40px;
+  }
+  .btn.primary { background: var(--primary); color: #fff; border-color: var(--primary); }
+  .btn.primary:hover { background: var(--primary-hover); border-color: var(--primary-hover); }
+  .btn.secondary { background: #fff; color: var(--ink); border-color: var(--ink-faint); }
+  .btn.ghost { background: transparent; color: var(--ink-2); }
+  .btn.disabled { opacity: 0.55; }
+  .btn.full { width: 100%; }
+
+  /* Pill / chip / badge mockups */
+  .pill {
+    font-size: 8.5pt; padding: 4px 11px; border-radius: 4px;
+    border: 1px solid var(--ink-faint); background: #fff; color: var(--ink-muted);
+    display: inline-block; margin-right: 4px;
+  }
+  .pill.on {
+    background: var(--primary); color: #fff; border-color: var(--primary); font-weight: 500;
+  }
+  .fchip {
+    font-size: 8.5pt; color: var(--primary); background: var(--primary-bg);
+    border: 1px solid var(--primary-border); padding: 3px 10px; border-radius: 99px;
+    font-weight: 500; display: inline-block; margin-right: 4px;
+  }
+  .fchip.more {
+    background: var(--primary); color: #fff; border-color: var(--primary);
+    padding: 4px 9px; font-weight: 600;
+  }
+  .badge-count {
+    background: var(--primary); color: #fff; padding: 1px 6px; border-radius: 99px;
+    font-size: 8pt; font-weight: 600;
+  }
+  .badge-status {
+    background: var(--success-bg); color: var(--success-ink);
+    padding: 3px 8px; border-radius: 5px; font-size: 8.5pt; font-weight: 500;
+  }
+  .badge-error {
+    background: var(--error-bg); color: var(--error);
+    padding: 3px 8px; border-radius: 5px; font-size: 8.5pt; font-weight: 500;
+  }
+  .badge-counter {
+    background: var(--bg); color: var(--ink-muted);
+    padding: 4px 9px; border-radius: 5px; font-size: 8.5pt;
+  }
+
+  /* Toast mockup */
+  .toast {
+    display: inline-flex; align-items: center; gap: 7px;
+    background: var(--primary); color: #fff; font-size: 9pt;
+    padding: 9px 14px; border-radius: 8px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.25);
+  }
+  .toast .dot {
+    width: 10px; height: 10px; border-radius: 999px; background: var(--scan);
+    box-shadow: 0 0 6px rgba(151,196,89,0.6);
+  }
+
+  /* Quality bar */
+  .qbar { background: var(--cream-2); height: 4px; border-radius: 2px; overflow: hidden; }
+  .qbar .fill { background: var(--success); height: 100%; }
+
+  /* Scan-frame illustration */
+  .scan {
+    background: #080808; border-radius: 12px; padding: 24px;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; height: 110px;
+  }
+  .scan .frame {
+    position: relative; width: 160px; height: 70px;
+  }
+  .scan .corner {
+    position: absolute; width: 14px; height: 14px;
+  }
+  .scan .corner.tl { top: 0; left: 0; border-top: 2px solid var(--scan); border-left: 2px solid var(--scan); border-radius: 3px 0 0 0; }
+  .scan .corner.tr { top: 0; right: 0; border-top: 2px solid var(--scan); border-right: 2px solid var(--scan); border-radius: 0 3px 0 0; }
+  .scan .corner.bl { bottom: 0; left: 0; border-bottom: 2px solid var(--scan); border-left: 2px solid var(--scan); border-radius: 0 0 0 3px; }
+  .scan .corner.br { bottom: 0; right: 0; border-bottom: 2px solid var(--scan); border-right: 2px solid var(--scan); border-radius: 0 0 3px 0; }
+  .scan .line {
+    position: absolute; left: 4px; right: 4px; top: 45%; height: 1.5px;
+    background: linear-gradient(90deg, transparent, var(--scan) 50%, transparent);
+    box-shadow: 0 0 6px rgba(151,196,89,0.7);
+    border-radius: 1px;
+  }
+
+  /* Thumbnail tile */
+  .thumb-row { display: flex; gap: 6px; }
+  .thumb {
+    width: 52px; height: 52px; border-radius: 8px;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-size: 7.5pt; color: var(--ink-muted);
+    background: var(--bg); border: 1px solid var(--cream-2);
+    text-align: center; gap: 2px;
+  }
+  .thumb.active { border: 2px solid var(--primary); }
+  .thumb.done { background: var(--success-bg); color: var(--success-ink); border: 1px solid var(--success-2); }
+  .thumb.more { border: 1px dashed var(--cream-2); }
+  .thumb svg { display: block; }
+
+  /* Token table */
+  table.tokens {
+    width: 100%; border-collapse: collapse; font-size: 9pt;
+  }
+  table.tokens th, table.tokens td {
+    text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--cream-2);
+    vertical-align: top;
+  }
+  table.tokens th {
+    font-weight: 600; color: var(--ink); background: var(--cream);
+    font-size: 8.5pt; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  table.tokens td.mono { font-family: 'JetBrains Mono', monospace; color: var(--ink-2); }
+
+  /* Footer (printed on each non-cover page via fixed div fallback) */
+  .pg-footer {
+    margin-top: 18px;
+    padding-top: 8px;
+    border-top: 1px solid var(--cream-2);
+    display: flex; justify-content: space-between;
+    font-size: 8pt; color: var(--ink-muted);
+  }
+
+  /* Do-Don't */
+  .dd { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .dd .do, .dd .dont {
+    border-radius: 10px; padding: 12px 14px; font-size: 9.5pt;
+  }
+  .dd .do { background: #F1F6F2; border: 1px solid #D9E8C0; color: #2B4A1A; }
+  .dd .dont { background: #FFF5F5; border: 1px solid #F09595; color: #6B1A1A; }
+  .dd b { display: block; margin-bottom: 4px; }
+
+  /* Section index */
+  .toc { margin-top: 12px; }
+  .toc li { margin: 6px 0; }
+  .toc .num {
+    font-family: 'JetBrains Mono', monospace; font-size: 9pt;
+    color: var(--primary); margin-right: 10px;
+  }
+
+  /* Misc helpers */
+  .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .row.between { justify-content: space-between; }
+  .stack-2 > * + * { margin-top: 8px; }
+  .stack-3 > * + * { margin-top: 12px; }
+  .muted { color: var(--ink-muted); }
+  .strong { color: var(--ink); font-weight: 600; }
+  .divider { height: 1px; background: var(--cream-2); margin: 14px 0; }
+  .tag { font-size: 8pt; color: var(--ink-muted); letter-spacing: 0.08em; text-transform: uppercase; }
+
+</style>
+</head>
+<body>
+
+<!-- ============================================================
+     COVER
+     ============================================================ -->
+<section class="page cover">
+  <div class="top">
+    <div class="logo">
+      <svg width="34" height="34" viewBox="0 0 44 44" aria-hidden="true">
+        <line x1="10" y1="34" x2="34" y2="10" stroke="#F1ECDD" stroke-width="1.6" stroke-linecap="round"/>
+        <polygon points="34,10 29,14 32,17" fill="#F1ECDD"/>
+        <polygon points="10,34 15,30 12,27" fill="#9C9B94"/>
+        <circle cx="22" cy="22" r="2.2" fill="#F1ECDD"/>
+      </svg>
+    </div>
+    <div class="brand">
+      RETINA <span class="light">AI</span>
+      <span class="sub">by Compass Group</span>
+    </div>
+  </div>
+
+  <div>
+    <div class="eyebrow" style="color: var(--brand-ink);">Design System · v1.0</div>
+    <h1>Store Manager<br/><em>Prototype</em></h1>
+    <p class="lede">
+      The foundational visual and interaction language for the Retina&nbsp;AI Store Manager
+      mobile capture flow — colors, type, components and motion grounded in a warm,
+      utility-first product experience.
+    </p>
+  </div>
+
+  <div class="meta">
+    <div><b>Product</b><br/>Retina AI · Compass Group</div>
+    <div><b>Surface</b><br/>Phone-first capture flow</div>
+    <div><b>Stack</b><br/>React · Tailwind · Lucide</div>
+    <div><b>Issued</b><br/>May 2026</div>
+  </div>
+</section>
+
+<!-- ============================================================
+     INTRO + TOC
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">01 · Overview</span>
+    <h2>What this document is</h2>
+  </header>
+
+  <p class="lede">
+    The Store Manager prototype is the phone-shaped surface of Retina&nbsp;AI: a focused,
+    no-chrome capture flow used by Compass Group store associates to onboard items
+    via barcode and label photography. This system codifies the choices that make
+    that flow feel calm, tactile, and quick — so future screens stay coherent.
+  </p>
+
+  <div class="grid-2" style="margin-top: 12px;">
+    <div class="card">
+      <h4>Design tenets</h4>
+      <ul>
+        <li><b>Phone-first, full-bleed.</b> No surrounding chrome. Content fills the viewport; safe-areas respected.</li>
+        <li><b>Warm utility.</b> Cream surfaces and an amber primary signal “workwear,” not consumer flash.</li>
+        <li><b>One job per screen.</b> Each screen has a single primary action, anchored in a bottom action bar.</li>
+        <li><b>Quiet motion.</b> Subtle scanlines, pulses and toasts confirm progress without stealing focus.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Where this applies</h4>
+      <ul>
+        <li>Routes under <code>/store-manager/*</code> in the Retina app.</li>
+        <li>Screens: Login, SSO, Articles, Capture (Barcode → Front → Back → More), Review, Progress, Done, Retry, Mark Irrelevant, Account.</li>
+        <li>The shared <code>StoreManagerShell</code> + <code>StoreManagerLayout</code> wrappers and the toast/context provider.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Contents</h3>
+  <ol class="toc">
+    <li><span class="num">01</span> Overview &amp; tenets</li>
+    <li><span class="num">02</span> Brand &amp; logo</li>
+    <li><span class="num">03</span> Color system</li>
+    <li><span class="num">04</span> Typography</li>
+    <li><span class="num">05</span> Spacing, radius &amp; elevation</li>
+    <li><span class="num">06</span> Iconography</li>
+    <li><span class="num">07</span> Components — buttons, pills, chips</li>
+    <li><span class="num">08</span> Components — capture surfaces</li>
+    <li><span class="num">09</span> Feedback — toasts, badges, progress</li>
+    <li><span class="num">10</span> Motion</li>
+    <li><span class="num">11</span> Layout &amp; screen patterns</li>
+    <li><span class="num">12</span> Voice &amp; tone</li>
+  </ol>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">01 / OVERVIEW</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     BRAND
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">02 · Brand</span>
+    <h2>Logo &amp; mark</h2>
+  </header>
+
+  <div class="grid-2">
+    <div class="card" style="text-align:center;">
+      <div style="display:inline-flex;align-items:center;justify-content:center;width:120px;height:120px;border-radius:28px;background:var(--primary);box-shadow:0 8px 24px rgba(122,83,16,0.25);">
+        <svg width="72" height="72" viewBox="0 0 44 44">
+          <line x1="10" y1="34" x2="34" y2="10" stroke="#F1ECDD" stroke-width="1.6" stroke-linecap="round"/>
+          <polygon points="34,10 29,14 32,17" fill="#F1ECDD"/>
+          <polygon points="10,34 15,30 12,27" fill="#9C9B94"/>
+          <circle cx="22" cy="22" r="2.2" fill="#F1ECDD"/>
+        </svg>
+      </div>
+      <div style="margin-top: 16px;">
+        <div style="font-size:18pt;font-weight:700;color:var(--ink);letter-spacing:-0.4px;">
+          RETINA <span style="color: var(--ink-faint);">AI</span>
+        </div>
+        <div style="font-size:8pt;color:var(--ink-muted);letter-spacing:0.18em;text-transform:uppercase;margin-top:4px;">
+          by Compass Group
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <h4>Mark anatomy</h4>
+      <p>
+        A compass diagonal — needle and counter-arrow — set on a rounded amber tile.
+        The diagonal references both navigation (Compass Group) and the act of
+        capturing an item from corner to corner.
+      </p>
+      <h4 style="margin-top:14px;">Wordmark</h4>
+      <p>
+        <span class="strong">RETINA</span> set in Inter Bold, paired with a faint-grey
+        <span class="muted">AI</span> to keep the AI signifier present but quiet.
+        Tagline “by Compass Group” always uppercase, tracked 0.18em, in <span class="muted">#9C9B94</span>.
+      </p>
+      <h4 style="margin-top:14px;">Minimum size</h4>
+      <p>
+        Mark: 44&nbsp;px minimum on screen. Wordmark + tagline lockup: 120&nbsp;px wide minimum.
+      </p>
+    </div>
+  </div>
+
+  <h3>Brand voice in the mark</h3>
+  <div class="grid-3" style="margin-top: 8px;">
+    <div class="card tight">
+      <h4>Warm</h4>
+      <p>Amber over cream evokes paper, packaging, retail backrooms — not a sci-fi scanner.</p>
+    </div>
+    <div class="card tight">
+      <h4>Precise</h4>
+      <p>The diagonal is hairline; corners are crisp. Implies measurement, not branding flourish.</p>
+    </div>
+    <div class="card tight">
+      <h4>Operational</h4>
+      <p>The tagline carries the parent brand quietly. The app is a tool, not a marketing surface.</p>
+    </div>
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">02 / BRAND</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     COLOR
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">03 · Color</span>
+    <h2>Color system</h2>
+  </header>
+
+  <p>
+    A single amber primary anchors every interactive surface; everything else recedes
+    into warm neutrals (cream-on-stone) or quiet semantic tints. Avoid pure black
+    and pure white in content — they break the warmth.
+  </p>
+
+  <h3>Primary (amber)</h3>
+  <div class="grid-4">
+    <div class="swatch">
+      <div class="chip" style="background:#C68A1E"></div>
+      <div class="meta">
+        <div class="name">Primary</div>
+        <div class="hex">#C68A1E</div>
+        <div class="role">Buttons, focus, brand</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#A8741A"></div>
+      <div class="meta">
+        <div class="name">Primary / Hover</div>
+        <div class="hex">#A8741A</div>
+        <div class="role">Hover, pressed</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#FBF3E0"></div>
+      <div class="meta">
+        <div class="name">Primary / Background</div>
+        <div class="hex">#FBF3E0</div>
+        <div class="role">Filter chips, accents</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#F4E4BC"></div>
+      <div class="meta">
+        <div class="name">Primary / Border</div>
+        <div class="hex">#F4E4BC</div>
+        <div class="role">Chip outlines</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#7A5310"></div>
+      <div class="meta">
+        <div class="name">Brand Ink</div>
+        <div class="hex">#7A5310</div>
+        <div class="role">Text on amber tints</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#F6E8C7"></div>
+      <div class="meta">
+        <div class="name">Primary / Hover bg</div>
+        <div class="hex">#F6E8C7</div>
+        <div class="role">Strip hover</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#F9F4EA"></div>
+      <div class="meta">
+        <div class="name">Primary / Soft</div>
+        <div class="hex">#F9F4EA</div>
+        <div class="role">Icon-button press</div>
+      </div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#FBF8F0;border:1px solid var(--cream-2)"></div>
+      <div class="meta">
+        <div class="name">Canvas Cream</div>
+        <div class="hex">#FBF8F0</div>
+        <div class="role">Phone background</div>
+      </div>
+    </div>
+  </div>
+
+  <h3>Neutrals — ink &amp; surfaces</h3>
+  <div class="grid-4">
+    <div class="swatch">
+      <div class="chip" style="background:#2B2A26"></div>
+      <div class="meta"><div class="name">Ink / Primary</div><div class="hex">#2B2A26</div><div class="role">Headlines, body</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#44403C"></div>
+      <div class="meta"><div class="name">Ink / Secondary</div><div class="hex">#44403C</div><div class="role">Paragraph copy</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#9C9B94"></div>
+      <div class="meta"><div class="name">Ink / Muted</div><div class="hex">#9C9B94</div><div class="role">Labels, hints</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#C5C4BC"></div>
+      <div class="meta"><div class="name">Ink / Faint</div><div class="hex">#C5C4BC</div><div class="role">Disabled, dividers</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#F1ECDD"></div>
+      <div class="meta"><div class="name">Cream / 2</div><div class="hex">#F1ECDD</div><div class="role">Soft dividers, tracks</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#F5F5F4"></div>
+      <div class="meta"><div class="name">Surface / Sub</div><div class="hex">#F5F5F4</div><div class="role">Inactive tiles</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#ECECEB"></div>
+      <div class="meta"><div class="name">Surface / Muted</div><div class="hex">#ECECEB</div><div class="role">Counters, pills bg</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#FFFFFF;border:1px solid var(--cream-2)"></div>
+      <div class="meta"><div class="name">Surface / Card</div><div class="hex">#FFFFFF</div><div class="role">Sheets, cards</div></div>
+    </div>
+  </div>
+
+  <h3>Semantic</h3>
+  <div class="grid-4">
+    <div class="swatch">
+      <div class="chip" style="background:#5A8C1A"></div>
+      <div class="meta"><div class="name">Success</div><div class="hex">#5A8C1A</div><div class="role">Quality bar, “Good”</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#7DBD3B"></div>
+      <div class="meta"><div class="name">Success / 2</div><div class="hex">#7DBD3B</div><div class="role">Done borders</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#97C459"></div>
+      <div class="meta"><div class="name">Scan</div><div class="hex">#97C459</div><div class="role">Scanline + dot</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#EAF3DE"></div>
+      <div class="meta"><div class="name">Success / Bg</div><div class="hex">#EAF3DE</div><div class="role">Done tile fill</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#A32D2D"></div>
+      <div class="meta"><div class="name">Error</div><div class="hex">#A32D2D</div><div class="role">Errors, retry</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#E24B4A"></div>
+      <div class="meta"><div class="name">Error / 2</div><div class="hex">#E24B4A</div><div class="role">Accent border</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#FDE7E7"></div>
+      <div class="meta"><div class="name">Error / Bg</div><div class="hex">#FDE7E7</div><div class="role">Banners, badges</div></div>
+    </div>
+    <div class="swatch">
+      <div class="chip" style="background:#0067B8"></div>
+      <div class="meta"><div class="name">Info / SSO</div><div class="hex">#0067B8</div><div class="role">Microsoft Entra</div></div>
+    </div>
+  </div>
+
+  <div class="callout" style="margin-top:14px;">
+    <b>Pairing rule.</b> Amber on cream, ink on cream, white on amber. Never put muted ink (#9C9B94)
+    on white below 11&nbsp;pt — fails AA. Use Ink&nbsp;Secondary (#44403C) instead.
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">03 / COLOR</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     TYPOGRAPHY
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">04 · Typography</span>
+    <h2>Type system</h2>
+  </header>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Display / UI · Inter</h4>
+      <p style="font-family:'Inter',sans-serif;font-size:36pt;font-weight:700;letter-spacing:-1px;line-height:1;color:var(--ink);">Aa</p>
+      <p class="mono muted" style="font-size:9pt;">Inter · 400 / 500 / 600 / 700 · feature settings <code>cv11, ss01, ss03</code></p>
+      <p>The entire interface uses Inter. It pairs cleanly with the brand’s warm neutrals and reads well at small sizes on phones.</p>
+    </div>
+    <div class="card">
+      <h4>Numeric / Code · JetBrains Mono</h4>
+      <p class="mono" style="font-size:36pt;font-weight:500;letter-spacing:-0.5px;line-height:1;color:var(--ink);">Aa</p>
+      <p class="mono muted" style="font-size:9pt;">JetBrains Mono · 400 / 500</p>
+      <p>Reserved for GTINs, codes, and any tabular numerics where alignment matters. Never used for body copy.</p>
+    </div>
+  </div>
+
+  <h3>Scale</h3>
+  <div class="card" style="padding: 4px 14px;">
+    <div class="type-row">
+      <div class="label">Display</div>
+      <div class="sample" style="font-size:28pt;font-weight:700;letter-spacing:-0.4px;line-height:1;">Retina AI</div>
+      <div class="meta">28&nbsp;px · 700 · ‑0.4&nbsp;px</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Title XL</div>
+      <div class="sample" style="font-size:22pt;font-weight:600;">Review &amp; Submit</div>
+      <div class="meta">22&nbsp;px · 600</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Title L</div>
+      <div class="sample" style="font-size:17pt;font-weight:600;">Capture flow</div>
+      <div class="meta">17&nbsp;px · 600</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Title M</div>
+      <div class="sample" style="font-size:14pt;font-weight:600;">Front label</div>
+      <div class="meta">16&nbsp;px · 600</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Body</div>
+      <div class="sample" style="font-size:11pt;">Tap a step below to start capturing this item.</div>
+      <div class="meta">14&nbsp;px · 400</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Body S</div>
+      <div class="sample" style="font-size:10pt;color:var(--ink-2);">Point at front label</div>
+      <div class="meta">13&nbsp;px · 400</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Caption</div>
+      <div class="sample" style="font-size:8.5pt;color:var(--ink-muted);">3 / 4 captured</div>
+      <div class="meta">11.5&nbsp;px · 400</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Micro</div>
+      <div class="sample" style="font-size:7.5pt;letter-spacing:0.18em;text-transform:uppercase;color:var(--ink-muted);">by Compass Group</div>
+      <div class="meta">11&nbsp;px · 500 · 0.18em</div>
+    </div>
+    <div class="type-row">
+      <div class="label">Tag</div>
+      <div class="sample mono" style="font-size:8pt;color:var(--ink-2);">8901491100093</div>
+      <div class="meta">9&nbsp;px · mono</div>
+    </div>
+  </div>
+
+  <h3>Pairing rules</h3>
+  <ul>
+    <li>Titles use <span class="strong">Ink Primary</span> (#2B2A26). Labels above icons use <span class="muted">Ink Muted</span>.</li>
+    <li>All-caps text only at Micro/Tag sizes; always tracked 0.06–0.18em.</li>
+    <li>Use <code>font-weight: 500</code> for button labels — 600 reads too aggressive at button sizes.</li>
+    <li>Number-heavy data (GTIN, percent, counts) → JetBrains Mono, never Inter.</li>
+  </ul>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">04 / TYPOGRAPHY</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     SPACING / RADIUS / ELEVATION
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">05 · Spacing &amp; shape</span>
+    <h2>Spacing, radius, elevation</h2>
+  </header>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Spacing scale</h4>
+      <table class="tokens">
+        <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">sp-1</td><td class="mono">2&nbsp;px</td><td>Inner icon → label gap</td></tr>
+          <tr><td class="mono">sp-2</td><td class="mono">4&nbsp;px</td><td>Tight stack inside chips</td></tr>
+          <tr><td class="mono">sp-3</td><td class="mono">6&nbsp;px</td><td>Thumb-row gap, button gap</td></tr>
+          <tr><td class="mono">sp-4</td><td class="mono">8&nbsp;px</td><td>Card inner stack</td></tr>
+          <tr><td class="mono">sp-5</td><td class="mono">12&nbsp;px</td><td>Section-to-section in card</td></tr>
+          <tr><td class="mono">sp-6</td><td class="mono">14&nbsp;px</td><td>Action-bar padding</td></tr>
+          <tr><td class="mono">sp-7</td><td class="mono">16&nbsp;px</td><td>Screen edge padding</td></tr>
+          <tr><td class="mono">sp-8</td><td class="mono">24&nbsp;px</td><td>Hero block padding</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Bottom action bars must respect <code>env(safe-area-inset-bottom)</code> — minimum 14&nbsp;px above the safe-area.
+      </p>
+    </div>
+
+    <div class="card">
+      <h4>Radius scale</h4>
+      <table class="tokens">
+        <thead><tr><th>Token</th><th>Value</th><th>Usage</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">r-1</td><td class="mono">2&nbsp;px</td><td>Quality-bar fills</td></tr>
+          <tr><td class="mono">r-2</td><td class="mono">4&nbsp;px</td><td>Step pills</td></tr>
+          <tr><td class="mono">r-3</td><td class="mono">5&nbsp;px</td><td>Counter badges</td></tr>
+          <tr><td class="mono">r-4</td><td class="mono">8&nbsp;px</td><td>Buttons, thumbnails, toast</td></tr>
+          <tr><td class="mono">r-5</td><td class="mono">10&nbsp;px</td><td>Callouts, banners</td></tr>
+          <tr><td class="mono">r-6</td><td class="mono">12&nbsp;px</td><td>Scan frame, cards</td></tr>
+          <tr><td class="mono">r-xl</td><td class="mono">16&nbsp;px</td><td>Bottom sheet top corners</td></tr>
+          <tr><td class="mono">r-pill</td><td class="mono">99&nbsp;px</td><td>Filter chips, count badges</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <h3>Elevation &amp; surface treatment</h3>
+  <div class="grid-3">
+    <div class="card tight" style="text-align:center;">
+      <div style="height:60px;background:#fff;border:1px solid var(--cream-2);border-radius:8px;"></div>
+      <h4 style="margin-top:10px;">Flat</h4>
+      <p style="font-size:9pt;">Default surface. 1&nbsp;px <code>#F1ECDD</code> border. No shadow.</p>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <div style="height:60px;background:#fff;border-radius:8px;box-shadow:0 4px 14px rgba(0,0,0,0.10);"></div>
+      <h4 style="margin-top:10px;">Lifted</h4>
+      <p style="font-size:9pt;">Toast, floating action sheets. <code>0 4px 14px rgba(0,0,0,0.25)</code>.</p>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <div style="height:60px;background:rgba(0,0,0,0.4);border-radius:8px;"></div>
+      <h4 style="margin-top:10px;">Scrim</h4>
+      <p style="font-size:9pt;">Modal overlay. <code>rgba(0,0,0,0.4)</code>, inherits 38&nbsp;px corner.</p>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>No drop shadows on resting UI.</b> Cards, tiles, chips and pills sit flat on cream. Elevation is reserved
+    for transient, focus-stealing UI — toasts, sheets, the SSO modal.
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">05 / SHAPE</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     ICONOGRAPHY
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">06 · Iconography</span>
+    <h2>Icons</h2>
+  </header>
+
+  <p>
+    Lucide icons exclusively, rendered at 1.5–2 stroke weight. Default size 18×18, scaled to 14–22 in
+    context. Icons take on the color of the text or button they sit beside — never tinted independently.
+  </p>
+
+  <h3>Inventory in the flow</h3>
+  <div class="grid-4">
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h2v12H3z M7 6h1v12H7z M10 6h2v12h-2z M14 6h1v12h-1z M17 6h2v12h-2z M21 6v12"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">Barcode</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">Camera</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7V5a2 2 0 0 1 2-2h2 M17 3h2a2 2 0 0 1 2 2v2 M21 17v2a2 2 0 0 1-2 2h-2 M7 21H5a2 2 0 0 1-2-2v-2 M3 12h18"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">ScanLine</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">Check</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5 M12 19l-7-7 7-7"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">ArrowLeft</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">Plus</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2B2A26" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+      <div style="margin-top:6px;font-size:9pt;">Square</div>
+    </div>
+    <div class="card tight" style="text-align:center;">
+      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#A32D2D" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v4 M12 16h.01"/></svg>
+      <div style="margin-top:6px;font-size:9pt;color:var(--error)">Alert</div>
+    </div>
+  </div>
+
+  <h3>Sizing in context</h3>
+  <ul>
+    <li><b>Button leading icon</b> — 14–15&nbsp;px, matches button text weight.</li>
+    <li><b>Header back affordance</b> — 20&nbsp;px in a 36×36 tap target.</li>
+    <li><b>Thumbnail tile</b> — 15&nbsp;px, centered above an 8&nbsp;pt label.</li>
+    <li><b>Toast leading</b> — 14&nbsp;px, always Scan green (<code>#97C459</code>) on amber fill.</li>
+  </ul>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">06 / ICONS</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     COMPONENTS - BUTTONS / PILLS / CHIPS
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">07 · Components</span>
+    <h2>Buttons, pills &amp; chips</h2>
+  </header>
+
+  <h3>Buttons</h3>
+  <div class="grid-2">
+    <div class="card">
+      <h4>Primary</h4>
+      <button class="btn primary full">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
+        Sign in with Compass SSO
+      </button>
+      <p class="muted" style="font-size:9pt;margin-top:8px;">
+        <code>#C68A1E</code> fill, white text, 8&nbsp;px radius, 48&nbsp;px min-height. One per screen.
+        Always pinned to the bottom action bar with <code>border-top: 1px solid #F1ECDD</code>.
+      </p>
+    </div>
+    <div class="card">
+      <h4>Secondary</h4>
+      <button class="btn secondary full">Cancel</button>
+      <p class="muted" style="font-size:9pt;margin-top:8px;">
+        White fill, 1&nbsp;px <code>#C5C4BC</code> border, ink-primary text. Pairs with a primary in
+        a 0.55&nbsp;/&nbsp;1 flex ratio inside the action bar.
+      </p>
+    </div>
+    <div class="card">
+      <h4>Disabled state</h4>
+      <button class="btn primary full disabled">Capture</button>
+      <p class="muted" style="font-size:9pt;margin-top:8px;">
+        Opacity <code>0.55</code>, <code>pointer-events: none</code>. Don’t grey out — keep amber so the
+        next available action remains visually present.
+      </p>
+    </div>
+    <div class="card">
+      <h4>Icon-only · header</h4>
+      <button class="btn ghost" style="width:36px;height:36px;padding:0;border-radius:999px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5 M12 19l-7-7 7-7"/></svg>
+      </button>
+      <p class="muted" style="font-size:9pt;margin-top:8px;">
+        36×36 round tap target. <code>#9C9B94</code> stroke. Active state tints background <code>#F9F4EA</code>.
+      </p>
+    </div>
+  </div>
+
+  <h3>Step pills</h3>
+  <div class="card">
+    <div class="row" style="margin-bottom: 8px;">
+      <span class="pill on">Barcode</span>
+      <span class="pill">Front</span>
+      <span class="pill">Back</span>
+      <span class="pill">More</span>
+    </div>
+    <p class="muted" style="font-size:9pt;">
+      Used to scrub between capture steps. Off-state: white, 1&nbsp;px <code>#C5C4BC</code> border, <code>#9C9B94</code> text.
+      On-state: amber fill, white text, weight 500. 4&nbsp;px radius — pills, not chips.
+    </p>
+  </div>
+
+  <h3>Filter chips</h3>
+  <div class="card">
+    <div class="row" style="margin-bottom: 8px;">
+      <span class="fchip">Beverages</span>
+      <span class="fchip">Snacks</span>
+      <span class="fchip">Dairy &amp; eggs</span>
+      <span class="fchip more">+4</span>
+    </div>
+    <p class="muted" style="font-size:9pt;">
+      Pill-shaped (<code>99&nbsp;px</code> radius), amber-on-cream. The <span class="strong">+N</span> chip flips the colors —
+      amber fill, white text — to read as a contained CTA, not a passive filter.
+    </p>
+  </div>
+
+  <h3>Status &amp; counter badges</h3>
+  <div class="card row" style="gap:14px;">
+    <span class="badge-status">3 / 4 captured</span>
+    <span class="badge-counter">3 / 4</span>
+    <span class="badge-error">Retry needed</span>
+    <span class="badge-count">+3</span>
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">07 / BUTTONS &amp; CHIPS</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     COMPONENTS - CAPTURE SURFACES
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">08 · Components</span>
+    <h2>Capture surfaces</h2>
+  </header>
+
+  <p>
+    The capture screen is the heart of the prototype. It composes four distinct surfaces: a
+    light <span class="strong">sub-bar</span>, a dark <span class="strong">camera stage</span>, a slim
+    <span class="strong">quality bar</span>, a horizontal <span class="strong">thumbnail row</span>,
+    and a pinned <span class="strong">action bar</span>.
+  </p>
+
+  <h3>Camera stage</h3>
+  <div class="grid-2">
+    <div class="card">
+      <div class="scan">
+        <div class="frame">
+          <span class="corner tl"></span><span class="corner tr"></span>
+          <span class="corner bl"></span><span class="corner br"></span>
+          <span class="line"></span>
+        </div>
+      </div>
+      <h4 style="margin-top:10px;">Barcode framing</h4>
+      <p class="muted" style="font-size:9pt;">
+        230×118 frame on a <code>#080808</code> stage with a radial vignette. Green
+        <code>#97C459</code> corner markers (2.5&nbsp;px) and a scanline that travels top→bottom on
+        a 2.2&nbsp;s ease (<code>cubic-bezier(0.45, 0, 0.55, 1)</code>).
+      </p>
+    </div>
+    <div class="card">
+      <div class="scan" style="background:#080808;">
+        <div style="width:140px;height:90px;border:2px dashed rgba(255,255,255,0.35);border-radius:12px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,0.5);font-size:9pt;">
+          Point at front label
+        </div>
+      </div>
+      <h4 style="margin-top:10px;">Label framing</h4>
+      <p class="muted" style="font-size:9pt;">
+        For Front / Back / More: a 180×220 dashed frame in 35% white. Hint text in 45% white. No
+        scanline — only the barcode step uses the green markers.
+      </p>
+    </div>
+  </div>
+
+  <h3>Thumbnail row</h3>
+  <div class="card">
+    <div class="thumb-row">
+      <div class="thumb done">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3B6D11" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        Barcode
+      </div>
+      <div class="thumb active">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Front
+      </div>
+      <div class="thumb">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#9C9B94" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+        Back
+      </div>
+      <div class="thumb more" style="position:relative;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#C5C4BC" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14 M5 12h14"/></svg>
+        More
+        <span class="badge-count" style="position:absolute;top:-4px;right:-4px;font-size:7.5pt;padding:1px 5px;">+2</span>
+      </div>
+    </div>
+    <p class="muted" style="font-size:9pt;margin-top:8px;">
+      52×52 squares with 8&nbsp;px radius. Three visual states:
+      <span class="strong">Idle</span> (cream fill, <code>#F1ECDD</code> border) ·
+      <span class="strong">Active</span> (2&nbsp;px amber border) ·
+      <span class="strong">Done</span> (#EAF3DE fill, #7DBD3B border, ink in <code>#3B6D11</code>).
+      “More” uses a dashed border and a +N counter pill anchored top-right.
+    </p>
+  </div>
+
+  <h3>Quality bar</h3>
+  <div class="card">
+    <div class="row between" style="font-size:9pt;color:var(--ink-muted);margin-bottom:4px;">
+      <span>Quality</span>
+      <span style="color:var(--success);font-weight:500;">Good</span>
+    </div>
+    <div class="qbar"><div class="fill" style="width:78%;"></div></div>
+    <p class="muted" style="font-size:9pt;margin-top:8px;">
+      4&nbsp;px track in <code>#F1ECDD</code>, fill in success green. Labels: <span class="strong">Low</span>,
+      <span class="strong">Fair</span>, <span class="strong">Good</span>. Never show numeric percentages — the user only needs to know if it’s acceptable.
+    </p>
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">08 / CAPTURE</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     FEEDBACK
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">09 · Feedback</span>
+    <h2>Toasts, sheets &amp; progress</h2>
+  </header>
+
+  <h3>Toast</h3>
+  <div class="card" style="text-align:center; padding: 24px;">
+    <div class="toast">
+      <span class="dot"></span>
+      <span>Barcode captured</span>
+    </div>
+    <p class="muted" style="font-size:9pt;margin-top:14px;">
+      Amber pill, white text, scan-green leading dot. Slides up 8&nbsp;px and fades in over 200&nbsp;ms;
+      auto-dismisses at 1.8&nbsp;s. Anchored 84&nbsp;px from the bottom — clears the action bar.
+      One toast at a time; never stack.
+    </p>
+  </div>
+
+  <h3>Bottom sheet</h3>
+  <div class="card">
+    <div style="border:1px solid var(--cream-2);border-radius:12px;overflow:hidden;">
+      <div style="background:rgba(0,0,0,0.35);padding:60px 0 0;">
+        <div style="background:#fff;border-radius:16px 16px 0 0;padding:14px 16px 24px;">
+          <div style="width:32px;height:3px;border-radius:2px;background:#F1ECDD;margin:0 auto 12px;"></div>
+          <h4 style="margin-top:0;">Filter articles</h4>
+          <div class="row" style="margin-top:6px;">
+            <span class="fchip">Beverages</span>
+            <span class="fchip">Snacks</span>
+            <span class="fchip">Dairy &amp; eggs</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <p class="muted" style="font-size:9pt;margin-top:8px;">
+      Top corners 16&nbsp;px, white fill, sat on a <code>rgba(0,0,0,0.4)</code> scrim that inherits
+      the phone-shell’s 38&nbsp;px corner. A 32×3 handle pill in <code>#F1ECDD</code> sits 10&nbsp;px from the top.
+    </p>
+  </div>
+
+  <h3>Processing &amp; states</h3>
+  <div class="grid-3">
+    <div class="card tight">
+      <h4>Processing</h4>
+      <div class="row" style="margin-top:6px;">
+        <span style="width:8px;height:8px;border-radius:99px;background:var(--primary);box-shadow:0 0 0 4px rgba(198,138,30,0.18);"></span>
+        <span style="font-size:9.5pt;color:var(--ink-2);">Analyzing 2 of 4 items…</span>
+      </div>
+      <p class="muted" style="font-size:8.5pt;margin-top:6px;">Pulsing amber dot, 1.5&nbsp;s loop.</p>
+    </div>
+    <div class="card tight">
+      <h4>Success</h4>
+      <div class="row" style="margin-top:6px;">
+        <span class="badge-status">3 / 4 captured</span>
+      </div>
+      <p class="muted" style="font-size:8.5pt;margin-top:6px;">Done-state badge, no animation needed.</p>
+    </div>
+    <div class="card tight">
+      <h4>Retry</h4>
+      <div class="row" style="margin-top:6px;">
+        <span class="badge-error">Front blurry — retry</span>
+      </div>
+      <p class="muted" style="font-size:8.5pt;margin-top:6px;">Error-bg + error-ink. Always paired with a remedy verb.</p>
+    </div>
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">09 / FEEDBACK</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     MOTION
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">10 · Motion</span>
+    <h2>Motion language</h2>
+  </header>
+
+  <p>
+    Motion is reserved for confirming machine actions — the device is scanning, processing,
+    succeeding. UI transitions themselves are nearly instant (≤200&nbsp;ms), with no flourish.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Scanline · sm-scanmove</h4>
+      <table class="tokens">
+        <tbody>
+          <tr><td>Duration</td><td class="mono">2.2&nbsp;s</td></tr>
+          <tr><td>Easing</td><td class="mono">cubic-bezier(0.45, 0, 0.55, 1)</td></tr>
+          <tr><td>Iterations</td><td class="mono">infinite</td></tr>
+          <tr><td>Track</td><td>top: 6&nbsp;px → calc(100% − 8&nbsp;px)</td></tr>
+          <tr><td>Opacity arc</td><td>0.4 → 1.0 → 0.4</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Communicates active scanning. Only present on the Barcode step inside the camera stage.
+      </p>
+    </div>
+    <div class="card">
+      <h4>Pulse · sm-pulse</h4>
+      <table class="tokens">
+        <tbody>
+          <tr><td>Duration</td><td class="mono">1.5&nbsp;s</td></tr>
+          <tr><td>Easing</td><td class="mono">default ease</td></tr>
+          <tr><td>Opacity</td><td>1 → 0.5 → 1</td></tr>
+        </tbody>
+      </table>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Used on processing dots in the Progress and Articles screens.
+      </p>
+    </div>
+    <div class="card">
+      <h4>Toast slide-in</h4>
+      <table class="tokens">
+        <tbody>
+          <tr><td>Duration</td><td class="mono">200&nbsp;ms (in &amp; out)</td></tr>
+          <tr><td>Translate</td><td class="mono">translateY(8px) → 0</td></tr>
+          <tr><td>Opacity</td><td>0 → 1</td></tr>
+          <tr><td>Visible window</td><td class="mono">1800&nbsp;ms</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h4>Chip hover</h4>
+      <table class="tokens">
+        <tbody>
+          <tr><td>Property</td><td class="mono">background</td></tr>
+          <tr><td>Duration</td><td class="mono">150&nbsp;ms</td></tr>
+          <tr><td>From → To</td><td class="mono">#FBF3E0 → #F6E8C7</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Reduced motion.</b> Honor <code>prefers-reduced-motion: reduce</code> — collapse the scanline
+    to a static centered line, freeze pulses at 100% opacity, and skip the toast translation.
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">10 / MOTION</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     LAYOUT / SCREEN PATTERNS
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">11 · Layout</span>
+    <h2>Screen patterns</h2>
+  </header>
+
+  <p>
+    Every screen sits inside <code>.sm-outer → .sm-phone</code>, a full-viewport column on cream.
+    The flow uses four reusable patterns; almost every screen is built from one of them.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>A · Hero + Bottom CTA</h4>
+      <div class="phone">
+        <div class="screen" style="padding:18px;display:flex;flex-direction:column;gap:14px;align-items:center;height:220px;justify-content:space-between;">
+          <div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;">
+            <div style="width:42px;height:42px;border-radius:10px;background:var(--primary);"></div>
+            <div style="font-weight:700;letter-spacing:-0.3px;">RETINA <span style="color:var(--ink-faint);">AI</span></div>
+          </div>
+          <button class="btn primary full" style="font-size:9pt;">Sign in with Compass SSO</button>
+        </div>
+      </div>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Login, SSO, Done. Centered hero block, single pinned primary at the bottom with safe-area padding.
+      </p>
+    </div>
+    <div class="card">
+      <h4>B · Sub-bar + Stage + Action bar</h4>
+      <div class="phone">
+        <div class="screen" style="display:flex;flex-direction:column;height:220px;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--cream-2);display:flex;align-items:center;gap:8px;">
+            <div style="width:24px;height:24px;border-radius:99px;background:var(--bg);"></div>
+            <div style="flex:1;">
+              <div style="font-weight:600;font-size:10pt;">Paneer 200g</div>
+              <div style="font-size:8pt;color:var(--ink-muted);">Front label</div>
+            </div>
+            <div class="badge-counter" style="font-size:7.5pt;padding:3px 7px;">2 / 3</div>
+          </div>
+          <div style="flex:1;background:#080808;"></div>
+          <div style="padding:8px;display:flex;gap:6px;border-top:1px solid var(--cream-2);">
+            <div class="btn secondary" style="flex:0.5;padding:8px;font-size:9pt;">Cancel</div>
+            <div class="btn primary" style="flex:1;padding:8px;font-size:9pt;">Capture</div>
+          </div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Capture, Barcode, Mark Irrelevant. The bottom action bar uses a 0.55 / 1 flex split for the
+        secondary / primary pair.
+      </p>
+    </div>
+    <div class="card">
+      <h4>C · List + Filter strip</h4>
+      <div class="phone">
+        <div class="screen" style="display:flex;flex-direction:column;height:220px;">
+          <div style="padding:10px 12px;border-bottom:1px solid var(--cream-2);">
+            <div style="font-weight:600;font-size:10pt;">Articles</div>
+            <div class="row" style="margin-top:6px;">
+              <span class="fchip" style="font-size:7.5pt;">Beverages</span>
+              <span class="fchip" style="font-size:7.5pt;">Snacks</span>
+              <span class="fchip more" style="font-size:7.5pt;">+4</span>
+            </div>
+          </div>
+          <div style="flex:1;padding:10px 12px;display:flex;flex-direction:column;gap:6px;">
+            <div style="height:24px;background:var(--bg);border-radius:6px;"></div>
+            <div style="height:24px;background:var(--bg);border-radius:6px;"></div>
+            <div style="height:24px;background:var(--bg);border-radius:6px;"></div>
+          </div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Articles screen. Filter strip is horizontally scrollable, last chip is always the +N flip-color CTA.
+      </p>
+    </div>
+    <div class="card">
+      <h4>D · Progress / status</h4>
+      <div class="phone">
+        <div class="screen" style="display:flex;flex-direction:column;height:220px;padding:14px;gap:10px;">
+          <div style="font-weight:600;">Processing your items</div>
+          <div class="qbar"><div class="fill" style="width:60%;"></div></div>
+          <div class="row" style="font-size:8.5pt;color:var(--ink-muted);">
+            <span style="width:6px;height:6px;border-radius:99px;background:var(--primary);"></span>
+            Paneer 200g — analyzing…
+          </div>
+          <div class="row" style="font-size:8.5pt;color:var(--success);">
+            <span style="width:6px;height:6px;border-radius:99px;background:var(--success);"></span>
+            Cola 330ml — done
+          </div>
+        </div>
+      </div>
+      <p class="muted" style="font-size:9pt;margin-top:6px;">
+        Progress and Done. Status uses a colored dot + role label; the quality-bar component is reused as
+        a top-of-screen progress indicator.
+      </p>
+    </div>
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">11 / LAYOUT</span>
+  </div>
+</section>
+
+<!-- ============================================================
+     VOICE
+     ============================================================ -->
+<section class="page inner">
+  <header class="section">
+    <span class="eyebrow">12 · Voice &amp; tone</span>
+    <h2>How the app speaks</h2>
+  </header>
+
+  <p>
+    The user is on a clock, often standing, often interrupted. Copy is short, specific to the moment, and
+    avoids both apology and celebration.
+  </p>
+
+  <div class="grid-2">
+    <div class="card">
+      <h4>Microcopy principles</h4>
+      <ul>
+        <li><b>Verbs first.</b> “Capture front”, “Retry barcode”, “Mark irrelevant”.</li>
+        <li><b>Name what was captured.</b> Toasts say <i>“Barcode captured”</i>, not <i>“Done”</i>.</li>
+        <li><b>Counts over percentages.</b> <i>“3 / 4 captured”</i>, not <i>“75% done”</i>.</li>
+        <li><b>One sentence ceiling.</b> Two only on error screens that need a remedy.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h4>Vocabulary</h4>
+      <ul>
+        <li><b>Article</b> — a product the manager is onboarding.</li>
+        <li><b>Capture</b> — taking one of barcode / front / back / more.</li>
+        <li><b>Mark irrelevant</b> — soft-deletes an article from this session.</li>
+        <li><b>SSO</b> — Microsoft Entra ID; never expand inline.</li>
+        <li><b>GTIN</b> — always uppercase, mono font.</li>
+      </ul>
+    </div>
+  </div>
+
+  <h3>Do &amp; Don’t</h3>
+  <div class="dd">
+    <div class="do">
+      <b>Do</b>
+      “Front label captured” → toast on success.<br/>
+      “Point at front label” → hint inside the camera frame.<br/>
+      “Retry — image was blurry” → specific remedy.
+    </div>
+    <div class="dont">
+      <b>Don’t</b>
+      “Great job! ✨” — performative.<br/>
+      “Something went wrong.” — generic and unactionable.<br/>
+      “Click here to continue.” — desktop language, vague verb.
+    </div>
+  </div>
+
+  <h3>End-of-flow language</h3>
+  <ul>
+    <li><b>Done screen</b> — “Items submitted. You can capture another.” Provide one secondary “Back to Articles” link.</li>
+    <li><b>Retry screen</b> — name the failed capture step, offer “Retake” as the primary action, “Skip” as secondary only when truly optional.</li>
+    <li><b>Mark Irrelevant</b> — confirm with a single line: “Removed from this session.” No undo toast; the article re-appears in the list with a strike-through.</li>
+  </ul>
+
+  <div class="callout">
+    <b>This system is alive.</b> When you add a screen, name the pattern it follows (A–D) and the tokens
+    it borrows. If a new pattern emerges, propose it as a section before shipping — coherence is a feature.
+  </div>
+
+  <div class="pg-footer">
+    <span>Retina AI · Store Manager · Design System</span>
+    <span class="mono">12 / VOICE · END</span>
+  </div>
+</section>
+
+</body>
+</html>

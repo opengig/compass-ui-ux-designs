@@ -1,261 +1,97 @@
 import React from 'react';
-import { NavLink, useNavigate } from 'react-router-dom';
-import {
-  Inbox,
-  LayoutDashboard,
-  BookMarked,
-  Settings,
-  ChevronRight,
-  ChevronLeft,
-  LogOut,
-} from 'lucide-react';
-import { ROUTES, SHARED_ROUTES } from '../router/routes';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Inbox, Send } from 'lucide-react';
+import { ROUTES } from '../router/routes';
+import { COMPASS_LOGO } from './nutritionist/data/images';
 
 type NavItemDef = {
-  to: string;
-  icon: React.ElementType;
+  key: string;
   label: string;
-  badge?: number;
+  Icon: React.ElementType;
+  path: string;
 };
 
+/**
+ * Left-side icon nav rail for the Article SME flow.
+ * Mirrors the Nutritionist SideNav look: fixed 72px rail, Compass logo on top,
+ * vertical icon+label buttons, user avatar pinned to the bottom.
+ */
 export function IconNavRail() {
+  const location = useLocation();
   const navigate = useNavigate();
-  const [expanded, setExpanded] = React.useState<boolean>(() => {
-    if (typeof window === 'undefined') {
-      return false;
-    }
-    return window.localStorage.getItem('retina:nav-expanded') === '1';
-  });
-  const [profileOpen, setProfileOpen] = React.useState(false);
-  const [confirmSignOut, setConfirmSignOut] = React.useState(false);
-  const profileRef = React.useRef<HTMLDivElement | null>(null);
 
-  const toggleExpanded = () => {
-    setExpanded((prev) => {
-      const next = !prev;
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('retina:nav-expanded', next ? '1' : '0');
-      }
-      return next;
-    });
-  };
-
-  React.useEffect(() => {
-    if (!profileOpen) {
-      return;
-    }
-    const onDocClick = (event: MouseEvent) => {
-      if (profileRef.current && !profileRef.current.contains(event.target as Node)) {
-        setProfileOpen(false);
-      }
-    };
-    document.addEventListener('mousedown', onDocClick);
-    return () => document.removeEventListener('mousedown', onDocClick);
-  }, [profileOpen]);
-
-  const items: NavItemDef[] = [
-    { to: ROUTES.review, icon: Inbox, label: 'Inbox' },
-    { to: ROUTES.dashboard, icon: LayoutDashboard, label: 'Dashboard' },
-    { to: ROUTES.catalog, icon: BookMarked, label: 'Catalog' },
+  const NAV: NavItemDef[] = [
+    { key: 'inbox', label: 'My Tasks', Icon: Inbox, path: ROUTES.review },
+    { key: 'submitted', label: 'Submitted', Icon: Send, path: ROUTES.submitted },
   ];
 
+  const pathname = location.pathname;
+  const active = pathname.startsWith(ROUTES.submitted) ? 'submitted' : 'inbox';
+
   return (
-    <aside
-      className={`flex-shrink-0 flex flex-col py-3 bg-card border-r border-border transition-[width] duration-150 ${
-        expanded ? 'w-48' : 'w-14'
-      }`}
-    >
-      {/* Collapse toggle — top of the rail */}
-      <button
-        onClick={toggleExpanded}
-        className={`flex items-center rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 transition-colors mb-3 ${
-          expanded ? 'gap-2 mx-2 px-2 py-1.5 justify-end' : 'mx-2 justify-center py-1.5'
-        }`}
-        title={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-        aria-label={expanded ? 'Collapse sidebar' : 'Expand sidebar'}
-      >
-        {expanded ? (
-          <ChevronLeft className="w-4 h-4 shrink-0" />
-        ) : (
-          <ChevronRight className="w-4 h-4 shrink-0" />
-        )}
-      </button>
+    <aside className="flex-shrink-0 flex flex-col w-[72px] bg-card border-r border-border relative z-[100]">
+      {/* Logo */}
+      <div className="flex items-center justify-center flex-shrink-0 h-[52px] px-2 pt-2.5 pb-1">
+        <img src={COMPASS_LOGO} alt="Compass Group" className="w-11 h-11 object-contain" />
+      </div>
 
       {/* Main nav */}
-      <nav className="flex flex-col gap-0.5 px-2 flex-1">
-        {items.map((item) => (
-          <NavItem key={item.to} item={item} expanded={expanded} />
+      <nav className="flex-1 flex flex-col overflow-y-auto py-1">
+        {NAV.map((item) => (
+          <NavBtn
+            key={item.key}
+            item={item}
+            isActive={active === item.key}
+            onClick={() => navigate(item.path)}
+          />
         ))}
       </nav>
 
-      {/* Footer: Settings + Profile */}
-      <div className="mt-auto flex flex-col gap-0.5 px-2 pt-2 border-t border-border">
-        <NavItem
-          item={{ to: ROUTES.settings, icon: Settings, label: 'Settings' }}
-          expanded={expanded}
-        />
-
-        {/* Profile button */}
-        <div className="relative" ref={profileRef}>
-          <button
-            onClick={() => setProfileOpen((prev) => !prev)}
-            className={`w-full flex items-center rounded-md transition-colors hover:bg-muted/40 ${
-              expanded ? 'gap-2 px-2 py-1.5' : 'justify-center py-1.5'
-            } ${profileOpen ? 'bg-muted/40' : ''}`}
-            aria-label="Profile menu"
-            title="Profile"
-          >
-            <span className="w-7 h-7 rounded-full border border-foreground/40 text-foreground flex items-center justify-center text-[11px] font-semibold shrink-0">
-              PS
-            </span>
-            {expanded ? (
-              <div className="min-w-0 text-left">
-                <p className="text-[12.5px] font-medium text-foreground leading-tight truncate">
-                  Priya Sharma
-                </p>
-                <p className="text-[10.5px] text-muted-foreground truncate">Article SME</p>
-              </div>
-            ) : null}
-          </button>
-
-          {profileOpen ? (
-            <div className="absolute bottom-full left-full ml-2 mb-1 w-48 rounded-lg border border-border bg-card shadow-soft overflow-hidden z-50">
-              <NavLink
-                to={ROUTES.settings}
-                onClick={() => setProfileOpen(false)}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-foreground hover:bg-muted/40"
-              >
-                <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                Settings
-              </NavLink>
-              <button
-                onClick={() => {
-                  setProfileOpen(false);
-                  setConfirmSignOut(true);
-                }}
-                className="w-full flex items-center gap-2.5 px-3 py-2 text-[13px] text-foreground hover:bg-muted/40 border-t border-border/70"
-              >
-                <LogOut className="w-3.5 h-3.5 text-muted-foreground" />
-                Sign out
-              </button>
-            </div>
-          ) : null}
+      {/* User avatar */}
+      <div className="flex-shrink-0 flex flex-col items-center justify-center py-3 gap-1 border-t border-border">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-muted border border-border">
+          <span className="text-[11px] font-semibold text-muted-foreground -tracking-[0.01em]">PS</span>
         </div>
+        <span className="text-[10px] text-muted-foreground/80 tracking-wide leading-none">Priya</span>
       </div>
-
-      {confirmSignOut ? (
-        <SignOutConfirm
-          onCancel={() => setConfirmSignOut(false)}
-          onConfirm={() => {
-            setConfirmSignOut(false);
-            navigate(SHARED_ROUTES.login);
-          }}
-        />
-      ) : null}
     </aside>
   );
 }
 
-function SignOutConfirm({
-  onCancel,
-  onConfirm,
+function NavBtn({
+  item,
+  isActive,
+  onClick,
 }: {
-  onCancel: () => void;
-  onConfirm: () => void;
+  item: NavItemDef;
+  isActive: boolean;
+  onClick: () => void;
 }) {
-  React.useEffect(() => {
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') onCancel();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
-  }, [onCancel]);
-
+  const { Icon } = item;
   return (
-    <div
-      className="fixed inset-0 z-[100] flex items-center justify-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="signout-title"
+    <button
+      onClick={onClick}
+      title={item.label}
+      className={`relative w-full h-16 flex flex-col items-center justify-center gap-[3px] transition-colors ${
+        isActive ? '' : 'hover:bg-muted/40'
+      }`}
     >
-      <div
-        className="absolute inset-0 bg-foreground/30"
-        onClick={onCancel}
-      />
-      <div className="relative bg-card border border-border rounded-lg shadow-soft w-[360px] max-w-[92vw] p-5">
-        <h2 id="signout-title" className="text-[15px] font-semibold text-foreground">
-          Sign out?
-        </h2>
-        <p className="mt-1.5 text-[12.5px] text-muted-foreground leading-relaxed">
-          You&apos;ll be returned to the Compass SSO login screen. Any unsaved edits on the current article will remain in this browser.
-        </p>
-        <div className="mt-4 flex items-center justify-end gap-2">
-          <button
-            type="button"
-            onClick={onCancel}
-            className="h-8 px-3 rounded-md text-[12.5px] text-muted-foreground hover:text-foreground hover:bg-muted/40"
-          >
-            Cancel
-          </button>
-          <button
-            type="button"
-            onClick={onConfirm}
-            className="h-8 px-3.5 rounded-md bg-primary text-primary-foreground text-[12.5px] font-semibold hover:bg-primary-hover transition-colors"
-          >
-            Sign out
-          </button>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function NavItem({ item, expanded }: { item: NavItemDef; expanded: boolean }) {
-  return (
-    <NavLink
-      to={item.to}
-      title={!expanded ? item.label : undefined}
-      className={({ isActive }) =>
-        `relative flex items-center rounded-md transition-colors ${
-          expanded ? 'gap-2 px-2 py-1.5' : 'justify-center py-2'
-        } ${
-          isActive
-            ? 'bg-primary/15 text-primary font-semibold'
-            : 'text-muted-foreground hover:text-foreground hover:bg-muted/40'
-        }`
-      }
-    >
-      {({ isActive }) => (
-        <>
-          {isActive ? (
-            <span
-              className={`absolute bg-primary rounded-r-full ${
-                expanded ? 'left-0 top-1.5 bottom-1.5 w-0.5' : 'left-0 top-1 bottom-1 w-0.5'
-              }`}
-              aria-hidden
-            />
-          ) : null}
-          <item.icon className={`w-4 h-4 shrink-0 ${isActive ? 'text-primary' : ''}`} />
-          {expanded ? <span className="text-[12.5px]">{item.label}</span> : null}
-          {item.badge && item.badge > 0 ? (
-            expanded ? (
-              <span
-                className={`ml-auto inline-flex items-center justify-center min-w-[18px] h-[18px] px-1 rounded-full text-[10px] tabular-nums ${
-                  isActive
-                    ? 'bg-primary text-primary-foreground'
-                    : 'border border-border text-muted-foreground'
-                }`}
-              >
-                {item.badge}
-              </span>
-            ) : (
-              <span className="absolute top-1 right-1 inline-flex items-center justify-center min-w-[14px] h-[14px] px-1 rounded-full bg-primary text-primary-foreground text-[9px] tabular-nums">
-                {item.badge}
-              </span>
-            )
-          ) : null}
-        </>
+      {isActive && (
+        <span
+          className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-r-full bg-primary"
+          aria-hidden
+        />
       )}
-    </NavLink>
+      <div className="relative flex items-center justify-center w-10 h-8 rounded-lg">
+        <Icon size={17} className={isActive ? 'text-primary' : 'text-muted-foreground'} />
+      </div>
+      <span
+        className={`text-[10px] tracking-wide leading-none ${
+          isActive ? 'text-primary font-semibold' : 'text-muted-foreground font-normal'
+        }`}
+      >
+        {item.label}
+      </span>
+    </button>
   );
 }

@@ -2,17 +2,17 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import {
   ALLERGEN_MASTER,
-  INGREDIENT_MASTER,
   NUTRIENT_MASTER,
   fuzzySearchAllergens,
-  fuzzySearchIngredients,
   fuzzySearchNutrients,
 } from '../data/masterData';
 
-type CatalogTab = 'ingredients' | 'allergens' | 'nutrients';
+// Ingredients catalog hidden per 26 May review — packet-level ingredients
+// are not normalized in compass master, so only Allergens and Nutrients are
+// shown as reference for the nutritionist/article SME.
+type CatalogTab = 'allergens' | 'nutrients';
 
 const TABS: { key: CatalogTab; label: string; count: number }[] = [
-  { key: 'ingredients', label: 'Ingredients', count: INGREDIENT_MASTER.length },
   { key: 'allergens', label: 'Allergens', count: ALLERGEN_MASTER.length },
   { key: 'nutrients', label: 'Nutrients', count: NUTRIENT_MASTER.length },
 ];
@@ -39,14 +39,10 @@ function highlight(text: string, query: string): React.ReactNode {
 }
 
 export function CatalogScreen() {
-  const [tab, setTab] = React.useState<CatalogTab>('ingredients');
+  const [tab, setTab] = React.useState<CatalogTab>('allergens');
   const [query, setQuery] = React.useState('');
 
   const results = React.useMemo(() => {
-    if (tab === 'ingredients') {
-      const matches = fuzzySearchIngredients(query, 500);
-      return { kind: 'ingredients' as const, matches };
-    }
     if (tab === 'allergens') {
       return { kind: 'allergens' as const, matches: fuzzySearchAllergens(query) };
     }
@@ -54,11 +50,7 @@ export function CatalogScreen() {
   }, [tab, query]);
 
   const totalForTab =
-    tab === 'ingredients'
-      ? INGREDIENT_MASTER.length
-      : tab === 'allergens'
-        ? ALLERGEN_MASTER.length
-        : NUTRIENT_MASTER.length;
+    tab === 'allergens' ? ALLERGEN_MASTER.length : NUTRIENT_MASTER.length;
 
   return (
     <div className="flex-1 flex flex-col min-h-0 bg-background">
@@ -123,9 +115,7 @@ export function CatalogScreen() {
       <div className="flex-1 overflow-auto retina-thin-scroll">
         <div className="px-5 py-5 w-full">
           <div className="rounded-lg border border-border bg-card overflow-hidden">
-            {results.kind === 'ingredients' ? (
-              <IngredientsTable matches={results.matches} query={query} />
-            ) : results.kind === 'allergens' ? (
+            {results.kind === 'allergens' ? (
               <AllergensTable matches={results.matches} query={query} />
             ) : (
               <NutrientsTable matches={results.matches} query={query} />
@@ -138,51 +128,6 @@ export function CatalogScreen() {
           </p>
         </div>
       </div>
-    </div>
-  );
-}
-
-function IngredientsTable({
-  matches,
-  query,
-}: {
-  matches: { item: { code: string; name: string; uom: string; alias: string } }[];
-  query: string;
-}) {
-  const COLS = 'grid-cols-[10rem_2fr_5rem_2fr]';
-  return (
-    <div>
-      <div
-        className={`grid ${COLS} gap-3 px-4 py-2.5 text-[10px] uppercase tracking-wider text-muted-foreground/80 bg-muted/30 sticky top-0 z-10 border-b border-border`}
-      >
-        <div>MOG Code</div>
-        <div>Name</div>
-        <div>UOM</div>
-        <div>Aliases</div>
-      </div>
-      <ul className="divide-y divide-border/60">
-        {matches.length === 0 ? (
-          <li className="px-4 py-8 text-center text-muted-foreground text-[13px]">
-            No matches for &ldquo;{query}&rdquo;
-          </li>
-        ) : (
-          matches.map(({ item }) => (
-            <li
-              key={item.code}
-              className={`grid ${COLS} gap-3 px-4 py-2.5 items-center text-[13px] hover:bg-muted/20 transition-colors`}
-            >
-              <span className="font-mono text-[11.5px] text-foreground/80">
-                {highlight(item.code, query)}
-              </span>
-              <span className="text-foreground">{highlight(item.name, query)}</span>
-              <span className="text-muted-foreground text-[12px]">{item.uom}</span>
-              <span className="text-muted-foreground text-[12px]">
-                {item.alias ? highlight(item.alias, query) : <span className="text-muted-foreground/40">—</span>}
-              </span>
-            </li>
-          ))
-        )}
-      </ul>
     </div>
   );
 }

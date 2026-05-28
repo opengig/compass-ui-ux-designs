@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ClipboardList, CheckCircle2, BookOpen,
+  LayoutDashboard, ClipboardList, Send,
   Building, Check,
 } from "lucide-react";
 import { ALL_SITES } from "../data/sites";
@@ -26,8 +26,7 @@ export function SideNav() {
   const NAV = [
     { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard, path: NUTRITIONIST_ROUTES.dashboard },
     { key: "queue",     label: "Tasks",     Icon: ClipboardList,   path: NUTRITIONIST_ROUTES.queue, badge: pendingCount > 0 ? pendingCount : null },
-    { key: "approved",  label: "Approved",  Icon: CheckCircle2,    path: NUTRITIONIST_ROUTES.approved },
-    { key: "audit",     label: "Audit",     Icon: BookOpen,        path: NUTRITIONIST_ROUTES.audit },
+    { key: "approved",  label: "Submitted", Icon: Send,            path: NUTRITIONIST_ROUTES.approved },
   ];
 
   const pathname = location.pathname;
@@ -36,7 +35,6 @@ export function SideNav() {
     pathname.startsWith("/nutritionist/queue") ? "queue" :
     pathname.startsWith("/nutritionist/article") ? "queue" :
     pathname.startsWith("/nutritionist/approved") ? "approved" :
-    pathname.startsWith("/nutritionist/audit") ? "audit" :
     "dashboard";
 
   const toggleSite = (s) =>
@@ -52,7 +50,7 @@ export function SideNav() {
   return (
     <aside className="flex-shrink-0 flex flex-col w-[72px] bg-card border-r border-border relative z-[100]">
       {/* Logo */}
-      <div className="flex items-center justify-center flex-shrink-0 h-[72px] border-b border-border px-2 py-2.5">
+      <div className="flex items-center justify-center flex-shrink-0 h-[52px] px-2 pt-2.5 pb-1">
         <img src={COMPASS_LOGO} alt="Compass Group" className="w-11 h-11 object-contain" />
       </div>
 
@@ -67,66 +65,6 @@ export function SideNav() {
           />
         ))}
       </nav>
-
-      {/* Sites filter */}
-      <div className="flex-shrink-0 relative border-t border-border">
-        <button
-          onClick={() => setSiteOpen((o) => !o)}
-          title={siteLabel}
-          className={`relative w-full h-16 flex flex-col items-center justify-center gap-[3px] transition-colors ${
-            siteOpen ? "bg-muted/40" : "hover:bg-muted/40"
-          }`}
-        >
-          {sitesIndicate && (
-            <span
-              className="absolute left-0 top-1/2 -translate-y-1/2 w-[3px] h-7 rounded-r-full bg-primary"
-              aria-hidden
-            />
-          )}
-          <div className="relative flex items-center justify-center w-10 h-8 rounded-lg">
-            <Building
-              size={17}
-              className={sitesIndicate ? "text-primary" : "text-muted-foreground"}
-            />
-            {selectedSites.length > 0 && selectedSites.length < ALL_SITES.length && (
-              <span className="absolute -top-1 -right-1.5 inline-flex items-center justify-center min-w-[17px] h-[17px] px-[3px] rounded-full bg-primary text-primary-foreground text-[9px] font-bold tabular-nums leading-none">
-                {selectedSites.length}
-              </span>
-            )}
-          </div>
-          <span
-            className={`text-[10px] tracking-wide leading-none ${
-              sitesIndicate ? "text-primary font-semibold" : "text-muted-foreground font-normal"
-            }`}
-          >
-            Sites
-          </span>
-        </button>
-
-        {siteOpen && (
-          <>
-            <div className="fixed inset-0 z-40" onClick={() => setSiteOpen(false)} />
-            <div className="absolute z-50 rounded-xl p-2 w-[168px] bg-card border border-border shadow-lg"
-              style={{ bottom: 0, left: "calc(100% + 8px)" }}
-            >
-              <SitePopoverItem
-                label="All Sites"
-                selected={allSelected}
-                onClick={() => (allSelected ? setSelectedSites([]) : setSelectedSites([...ALL_SITES]))}
-              />
-              <div className="h-px bg-border my-1 mx-2" />
-              {ALL_SITES.map((s) => (
-                <SitePopoverItem
-                  key={s}
-                  label={s}
-                  selected={selectedSites.includes(s)}
-                  onClick={() => toggleSite(s)}
-                />
-              ))}
-            </div>
-          </>
-        )}
-      </div>
 
       {/* User avatar */}
       <div className="flex-shrink-0 flex flex-col items-center justify-center py-3 gap-1 border-t border-border">

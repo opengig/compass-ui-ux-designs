@@ -1,329 +1,331 @@
 // @ts-nocheck
 import React, { useState, useRef } from "react";
-import { useNavigate } from "react-router-dom";
-import { X } from "lucide-react";
-import { Card } from "../components/ui";
-import { C, T } from "../data/tokens";
+import { Search, X, Filter, ArrowUpDown, Check } from "lucide-react";
+import { C } from "../data/tokens";
 import { ARTS, APPR } from "../data/mockData";
 import { PageHeader } from "../components/shared";
 import { EditIngredientsPanel } from "../components/EditIngredientsPanel";
 import { useNutritionist } from "../NutritionistContext";
 
-/** Approved profiles list with date/status/category filters + inline view panel. */
+/**
+ * Submitted profiles — same layout as My Tasks but read-only.
+ * Two tabs: Sent to Cookbook (green) and Rejected (red).
+ */
 
 export function ApprovedScreen() {
-  const navigate = useNavigate();
-  const { selectedSites, setNavIds } = useNutritionist();
-  // Approved articles open in read-only mode.
-  const openArt = (id, _ro, ids) => {
-    if (ids) setNavIds(ids);
-    navigate(`/nutritionist/article/${id}`, { state: { viewOnly: true, backTarget: "approved" } });
-  };
-  const [viewPanelArtId, setViewPanelArtId] = useState(APPR[0]?.artId ?? null)
-  const [panelWidth, setPanelWidth] = useState(70)
-  const [datePreset, setDatePreset] = useState("all")
-  const [customFrom, setCustomFrom] = useState("")
-  const [customTo, setCustomTo]     = useState("")
-  const [filterStatus, setFilterStatus] = useState("all")
-  const [filterCat, setFilterCat]       = useState("all")
-  const [visibleCount, setVisibleCount] = useState(10)
-  const [isLoadingMore, setIsLoadingMore] = useState(false)
-  const containerRef = useRef(null)
-  const sentinelRef = useRef(null)
+  const { selectedSites, removedIds } = useNutritionist();
 
-  const DATE_PRESETS = [
-    {key:"today",    label:"Today"},
-    {key:"week",     label:"This Week"},
-    {key:"month",    label:"This Month"},
-    {key:"all",      label:"All Time"},
-    {key:"custom",   label:"Custom"},
+  const [tab, setTab]             = useState("sent")     // "sent" | "rejected"
+  const [searchQ, setSearchQ]     = useState("")
+  const [sortBy, setSortBy]       = useState("newest")
+  const [sortOpen, setSortOpen]   = useState(false)
+  const [sortAnchor, setSortAnchor] = useState(null)
+  const [filterOpen, setFilterOpen] = useState(false)
+  const [filterAnchor, setFilterAnchor] = useState(null)
+  const [filterCats, setFilterCats] = useState([])
+  const [catOpen, setCatOpen]     = useState(false)
+  const [listWidth, setListWidth] = useState(320)
+  const [viewPanelArtId, setViewPanelArtId] = useState(null)
+  const containerRef = useRef(null)
+  const sortBtnRef   = useRef(null)
+  const filterBtnRef = useRef(null)
+
+  // ── Data per tab ──
+  const sentIds      = [...new Set(APPR.map(a => a.artId))]
+  const sentArts     = sentIds.map(id => ARTS.find(a => a.id === id)).filter(Boolean)
+  const rejectedArts = ARTS.filter(a => a.rescanRequested)
+  const ALL_CATS     = [...new Set(ARTS.map(a => a.cat))].sort()
+
+  const TABS = [
+    { key: "sent",     label: "Sent to Cookbook", dotClass: "bg-emerald-500", count: sentArts.filter(a=>selectedSites.includes(a.site) && !removedIds.includes(a.id)).length },
+    { key: "rejected", label: "Re-scan Requested", dotClass: "bg-rose-500",   count: rejectedArts.filter(a=>selectedSites.includes(a.site) && !removedIds.includes(a.id)).length },
   ]
 
-  // Filter by site, date, status, category
-  const filteredAPPR = APPR.filter(a => {
-    const art = ARTS.find(x=>x.id===a.artId)
-    if(art && !selectedSites.includes(art.site)) return false
-    if(datePreset === "today")  return a.date.startsWith("Today")
-    if(datePreset === "week")   return !a.date.includes("5 days")
-    if(datePreset === "month")  return true
-    if(datePreset === "all")    return true
-    if(datePreset === "custom") return true
-    return true
-  }).filter(a => {
-    const art = ARTS.find(x=>x.id===a.artId)
-    if(filterStatus !== "all" && art?.status !== filterStatus) return false
-    if(filterCat !== "all" && art?.cat !== filterCat) return false
-    return true
+  // ── Build the filtered + sorted list ──
+  const base = tab === "sent" ? sentArts : rejectedArts
+  let list = base.filter(a => selectedSites.includes(a.site) && !removedIds.includes(a.id))
+  if (filterCats.length) list = list.filter(a => filterCats.includes(a.cat))
+  if (searchQ.trim()) {
+    const q = searchQ.trim().toLowerCase()
+    list = list.filter(a => a.name.toLowerCase().includes(q) || a.apl.toLowerCase().includes(q))
+  }
+  list = [...list].sort((a, b) => {
+    if (sortBy === "name")     return a.name.localeCompare(b.name)
+    if (sortBy === "oldest")   return a.id - b.id
+    if (sortBy === "confLow")  return (a.conf ?? 0) - (b.conf ?? 0)
+    if (sortBy === "confHigh") return (b.conf ?? 0) - (a.conf ?? 0)
+    return b.id - a.id // newest
   })
 
-  const ALL_CATS = [...new Set(ARTS.map(a=>a.cat))].sort()
+  const panelArt = list.find(a => a.id === viewPanelArtId) || list[0] || null
+  const activeFilters = filterCats.length
 
-  // Reset visible count when any filter changes
-  React.useEffect(() => { setVisibleCount(10) }, [datePreset, customFrom, customTo, filterStatus, filterCat])
-
-  const apprVisibleList = filteredAPPR.slice(0, visibleCount)
-
-  // Infinite scroll observer
-  React.useEffect(() => {
-    const sentinel = sentinelRef.current
-    if (!sentinel) return
-    const observer = new IntersectionObserver((entries) => {
-      if (entries[0].isIntersecting && !isLoadingMore && visibleCount < filteredAPPR.length) {
-        setIsLoadingMore(true)
-        setTimeout(() => {
-          setVisibleCount(c => c + 10)
-          setIsLoadingMore(false)
-        }, 2000)
-      }
-    }, { threshold: 0.1 })
-    observer.observe(sentinel)
-    return () => observer.disconnect()
-  }, [isLoadingMore, visibleCount, filteredAPPR.length])
-
-  const startDrag = (e) => {
+  // ── List column resize ──
+  const startListDrag = (e) => {
     e.preventDefault()
     const startX = e.clientX
-    const startW = panelWidth
-    const containerW = containerRef.current?.offsetWidth || window.innerWidth
-    const onMove = (mv) => {
-      const dx = startX - mv.clientX
-      const newPct = Math.min(75, Math.max(25, startW + (dx / containerW) * 100))
-      setPanelWidth(newPct)
-    }
+    const startW = listWidth
+    const onMove = (mv) => setListWidth(Math.min(520, Math.max(220, startW + (mv.clientX - startX))))
     const onUp = () => {
       window.removeEventListener("mousemove", onMove)
       window.removeEventListener("mouseup", onUp)
-      document.body.style.cursor = ""
-      document.body.style.userSelect = ""
+      document.body.style.cursor = ""; document.body.style.userSelect = ""
     }
-    document.body.style.cursor = "col-resize"
-    document.body.style.userSelect = "none"
+    document.body.style.cursor = "col-resize"; document.body.style.userSelect = "none"
     window.addEventListener("mousemove", onMove)
     window.addEventListener("mouseup", onUp)
   }
 
+  const toggleCat = (c) => setFilterCats(prev => prev.includes(c) ? prev.filter(x => x !== c) : [...prev, c])
+
   return (
     <div className="flex flex-col flex-1 overflow-hidden bg-background">
-      <PageHeader title="Approved Profiles"/>
+      <PageHeader title="Submitted Profiles" divider={false} dense/>
 
-      {/* ── Compact filter bar ── */}
-      <div className="flex-shrink-0 flex items-center gap-3 px-5 py-2 bg-card border-b border-border">
-
-        {/* Date — segmented pill group */}
-        <div className="flex items-center rounded-md overflow-hidden flex-shrink-0"
-          style={{border:`1px solid ${C.border}`, height:28}}>
-          {DATE_PRESETS.filter(p=>p.key!=="custom").map((p, i, arr) => (
-            <button key={p.key}
-              onClick={()=>{ setDatePreset(p.key); setCustomFrom(""); setCustomTo("") }}
-              style={{
-                padding:"0 10px", height:"100%", fontSize:11, fontWeight:600,
-                backgroundColor: datePreset===p.key ? C.pr : "transparent",
-                color: datePreset===p.key ? "#fff" : C.mutedFg,
-                border:"none",
-                borderRight: i < arr.length-1 ? `1px solid ${C.border}` : "none",
-                cursor:"pointer", transition:"all 0.1s", whiteSpace:"nowrap",
-              }}>
-              {p.label}
-            </button>
-          ))}
-        </div>
-
-        {/* Custom date inputs */}
-        <div className="flex items-center gap-1.5">
-          <input type="date" value={customFrom}
-            onChange={e=>{ setCustomFrom(e.target.value); setDatePreset("custom") }}
-            style={{
-              height:28, padding:"0 6px", borderRadius:6, fontSize:11,
-              border:`1px solid ${datePreset==="custom"&&customFrom ? C.pr : C.border}`,
-              backgroundColor: datePreset==="custom"&&customFrom ? C.prBg : "#fff",
-              color:C.fg, outline:"none", cursor:"pointer",
-            }}/>
-          <span style={{fontSize:10,color:C.mutedFg,flexShrink:0}}>→</span>
-          <input type="date" value={customTo}
-            onChange={e=>{ setCustomTo(e.target.value); setDatePreset("custom") }}
-            style={{
-              height:28, padding:"0 6px", borderRadius:6, fontSize:11,
-              border:`1px solid ${datePreset==="custom"&&customTo ? C.pr : C.border}`,
-              backgroundColor: datePreset==="custom"&&customTo ? C.prBg : "#fff",
-              color:C.fg, outline:"none", cursor:"pointer",
-            }}/>
-          {datePreset==="custom" && (customFrom||customTo) && (
-            <button onClick={()=>{ setCustomFrom(""); setCustomTo(""); setDatePreset("all") }}
-              style={{display:"flex",alignItems:"center",gap:3,padding:"0 7px",height:28,
-                      borderRadius:6,fontSize:11,color:C.mutedFg,border:`1px solid ${C.border}`,
-                      backgroundColor:"transparent",cursor:"pointer"}}>
-              <X size={9}/>Clear
-            </button>
-          )}
-        </div>
-
-        {/* Divider */}
-        <div style={{width:1, height:16, backgroundColor:C.border, flexShrink:0}}/>
-
-        {/* Status filter */}
-        <select value={filterStatus} onChange={e=>setFilterStatus(e.target.value)}
-          style={{
-            height:28, padding:"0 8px", borderRadius:6, fontSize:11, fontWeight:500,
-            border:`1px solid ${filterStatus!=="all" ? C.pr : C.border}`,
-            backgroundColor: filterStatus!=="all" ? C.prBg : "#fff",
-            color: filterStatus!=="all" ? C.pr : C.fg,
-            outline:"none", cursor:"pointer",
-          }}>
-          <option value="all">All Statuses</option>
-          <option value="green">High Confidence</option>
-          <option value="amber">Need Review</option>
-          <option value="red">Low Confidence</option>
-        </select>
-
-        {/* Category filter */}
-        <select value={filterCat} onChange={e=>setFilterCat(e.target.value)}
-          style={{
-            height:28, padding:"0 8px", borderRadius:6, fontSize:11, fontWeight:500,
-            border:`1px solid ${filterCat!=="all" ? C.pr : C.border}`,
-            backgroundColor: filterCat!=="all" ? C.prBg : "#fff",
-            color: filterCat!=="all" ? C.pr : C.fg,
-            outline:"none", cursor:"pointer",
-          }}>
-          <option value="all">All Categories</option>
-          {ALL_CATS.map(c=><option key={c} value={c}>{c}</option>)}
-        </select>
-
-        {/* Active filter count badge */}
-        {(filterStatus!=="all"||filterCat!=="all") && (
-          <button onClick={()=>{ setFilterStatus("all"); setFilterCat("all") }}
-            style={{display:"flex",alignItems:"center",gap:3,padding:"0 7px",height:28,
-                    borderRadius:6,fontSize:11,fontWeight:500,color:C.rd,
-                    border:`1px solid ${C.rdBdr}`,backgroundColor:C.rdBg,cursor:"pointer"}}>
-            <X size={9}/>Reset
-          </button>
-        )}
-
-        {/* Result count */}
-        <span style={{marginLeft:"auto",fontSize:11,color:C.mutedFg,flexShrink:0}}>
-          {filteredAPPR.length} article{filteredAPPR.length!==1?"s":""}
-        </span>
+      {/* Tabs — Sent to Cookbook (green) / Rejected (red), My Tasks pill style */}
+      <div className="flex-shrink-0 flex items-center px-6 h-9 bg-card gap-2">
+        <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
+          {TABS.map(t => {
+            const on = tab === t.key
+            return (
+              <button key={t.key}
+                onClick={() => { setTab(t.key); setSearchQ("") }}
+                className={`inline-flex items-center gap-2 h-7 px-2.5 rounded-md transition-all shrink-0 ${
+                  on
+                    ? "bg-card text-foreground font-semibold shadow-soft"
+                    : "bg-transparent text-muted-foreground hover:text-foreground hover:bg-card/50"
+                }`}>
+                <span className="text-[12.5px] whitespace-nowrap">{t.label}</span>
+                <span className={`tabular-nums text-[11px] px-1.5 py-0.5 rounded font-semibold ${
+                  on ? "bg-foreground/10 text-foreground/85" : "bg-stone-300/60 text-muted-foreground/90"
+                }`}>
+                  {t.count}
+                </span>
+              </button>
+            )
+          })}
+        </nav>
       </div>
 
+      {/* White gap + divider touching the content */}
+      <div className="flex-shrink-0 h-2 bg-card border-b border-border"/>
+
+      {/* ── Main body: list + read-only detail panel ── */}
       <div ref={containerRef} className="flex flex-1 overflow-hidden">
 
-        {/* TABLE COLUMN */}
-        <div className={`flex flex-col overflow-hidden bg-background ${viewPanelArtId ? "border-r border-border" : ""}`}
-          style={{
-            width: viewPanelArtId ? 280 : "100%",
-            flex: viewPanelArtId ? "none" : 1,
-            flexShrink: viewPanelArtId ? 0 : 1,
-          }}>
-          <div className="flex-1 overflow-y-auto">
-            <div>
-              <Card className="shadow-none overflow-hidden rounded-none border-x-0 border-t-0">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-left">
-                    <tbody>
-                      {apprVisibleList.length === 0 ? (
-                        <tr><td colSpan={3} className="text-center py-16">
-                          <div className="flex flex-col items-center gap-2">
-                            {selectedSites.length === 0 ? (
-                              <>
-                                <svg width="32" height="32" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg" style={{opacity:0.35}}>
-                                  <rect x="4" y="8" width="24" height="18" rx="3" stroke={C.mutedFg} strokeWidth="1.5" fill="none"/>
-                                  <path d="M4 13h24" stroke={C.mutedFg} strokeWidth="1.5"/>
-                                  <circle cx="24" cy="24" r="7" fill={C.page} stroke={C.mutedFg} strokeWidth="1.5"/>
-                                  <path d="M21.5 24h5M24 21.5v5" stroke={C.mutedFg} strokeWidth="1.5" strokeLinecap="round" transform="rotate(45 24 24)"/>
-                                </svg>
-                                <p style={{fontSize:13,color:C.mutedFg,fontWeight:500}}>There are no articles to review</p>
-                                <p style={{fontSize:11,color:C.ink4}}>Select a site to load articles</p>
-                              </>
-                            ) : (
-                              <p style={{fontSize:13,color:C.mutedFg,fontWeight:500}}>No approved articles in this date range.</p>
-                            )}
-                          </div>
-                        </td></tr>
-                      ) : apprVisibleList.map(a => {
-                        const art = ARTS.find(x=>x.id===a.artId)
-                        const isActive = a.artId === viewPanelArtId
+        {/* ── LIST COLUMN ── */}
+        <div className="flex flex-col overflow-hidden flex-shrink-0 bg-background relative"
+          style={{ width: listWidth, minWidth: 220, maxWidth: 520 }}>
+
+          {/* Search + Filter + Sort (no move button) */}
+          <div className="flex-shrink-0 flex items-center gap-2 px-3 py-1.5"
+            style={{ borderBottom: `1px solid ${C.border}`, backgroundColor: C.card }}>
+            {/* Search box */}
+            <div className="relative flex-1 min-w-0">
+              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
+              <input
+                value={searchQ}
+                onChange={e => setSearchQ(e.target.value)}
+                placeholder="Search articles..."
+                className="w-full h-9 rounded-md border bg-card pl-8 pr-7 text-[12.5px] outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
+                style={{ borderColor: C.border, color: C.fg }}
+              />
+              {searchQ && (
+                <button onClick={() => setSearchQ("")} aria-label="Clear search"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40">
+                  <X size={11}/>
+                </button>
+              )}
+            </div>
+
+            {/* Filter button */}
+            <div className="flex-shrink-0">
+              <button
+                ref={filterBtnRef}
+                onClick={() => {
+                  setSortOpen(false); setSortAnchor(null)
+                  setFilterOpen(o => {
+                    const next = !o
+                    if (next && filterBtnRef.current) {
+                      const r = filterBtnRef.current.getBoundingClientRect()
+                      setFilterAnchor({ top: r.bottom + 6, left: r.left })
+                    } else { setFilterAnchor(null) }
+                    return next
+                  })
+                }}
+                aria-label="Filter"
+                className="inline-flex items-center justify-center rounded-md border transition-colors"
+                style={{
+                  width: 36, height: 36,
+                  borderColor: activeFilters > 0 ? C.prBdr : C.border,
+                  backgroundColor: activeFilters > 0 ? "#FEF9EE" : C.card,
+                  color: activeFilters > 0 ? C.pr : C.mutedFg,
+                  position: "relative",
+                }}>
+                <Filter size={14}/>
+                {activeFilters > 0 && (
+                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full border-2 border-white" style={{ backgroundColor: "#E53935" }}/>
+                )}
+              </button>
+              {filterOpen && filterAnchor && (
+                <>
+                  <div className="fixed inset-0 z-[60]" onClick={() => { setFilterOpen(false); setFilterAnchor(null); setCatOpen(false) }}/>
+                  <div className="fixed z-[70]"
+                    style={{ top: filterAnchor.top, left: filterAnchor.left, width: 280,
+                             backgroundColor: C.card, border: `1px solid ${C.border3}`, borderRadius: 14,
+                             boxShadow: "0 12px 32px rgba(26,26,26,0.14)", padding: "16px 18px 18px" }}>
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.mutedFg, marginBottom: 8 }}>
+                      Category
+                    </p>
+                    <div className="flex flex-wrap gap-2">
+                      {ALL_CATS.map(c => {
+                        const on = filterCats.includes(c)
                         return (
-                          <tr key={a.id}
-                            className={`cursor-pointer transition-colors border-b border-border/60 border-l-[3px] ${
-                              isActive
-                                ? "bg-primary/10 border-l-primary"
-                                : "border-l-transparent hover:bg-muted/40"
-                            }`}
-                            onClick={()=>setViewPanelArtId(a.artId)}>
-                            <td className="px-4 py-3">
-                              <p className={`${viewPanelArtId ? "text-[12px]" : "text-[13px]"} font-medium text-foreground`}>{art?.name}</p>
-                              <p className="text-[11.5px] text-muted-foreground">{art?.apl}</p>
-                            </td>
-                            {!viewPanelArtId && <td className="px-4 py-3 whitespace-nowrap text-[12px] text-muted-foreground">{a.date}</td>}
-                          </tr>
+                          <button key={c} onClick={() => toggleCat(c)}
+                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all"
+                            style={on
+                              ? { backgroundColor: "#FEF9EE", color: C.pr, borderColor: C.prBdr }
+                              : { backgroundColor: "#fff", color: C.mutedFg, borderColor: C.border }}>
+                            {on && <Check size={10} strokeWidth={3}/>}{c}
+                          </button>
                         )
                       })}
-                    </tbody>
-                  </table>
-                </div>
-              </Card>
-              {/* Infinite scroll sentinel + loader */}
-              <div ref={sentinelRef} style={{height:1}}/>
-              {isLoadingMore && (
-                <div className="flex items-center justify-center gap-2 py-5" style={{borderTop:`1px solid ${C.border}`}}>
-                  <svg width="18" height="18" viewBox="0 0 18 18" style={{animation:"spin 0.8s linear infinite"}}>
-                    <circle cx="9" cy="9" r="7" fill="none" stroke={C.border} strokeWidth="2.5"/>
-                    <path d="M9 2 A7 7 0 0 1 16 9" fill="none" stroke={C.pr} strokeWidth="2.5" strokeLinecap="round"/>
-                  </svg>
-                  <span style={{fontSize:12,color:C.mutedFg,fontWeight:500}}>Loading more articles…</span>
-                </div>
+                    </div>
+                    {activeFilters > 0 && (
+                      <button onClick={() => setFilterCats([])}
+                        className="mt-3 text-[11px] underline underline-offset-2"
+                        style={{ color: C.pr }}>
+                        Clear filter
+                      </button>
+                    )}
+                  </div>
+                </>
               )}
-              {!isLoadingMore && visibleCount >= filteredAPPR.length && filteredAPPR.length > 0 && (
-                <div className="flex items-center justify-center py-4">
-                  <span style={{fontSize:11,color:C.mutedFg}}>All {filteredAPPR.length} articles loaded</span>
-                </div>
+            </div>
+
+            {/* Sort button */}
+            <div className="flex-shrink-0">
+              <button
+                ref={sortBtnRef}
+                onClick={() => {
+                  setFilterOpen(false); setFilterAnchor(null)
+                  setSortOpen(o => {
+                    const next = !o
+                    if (next && sortBtnRef.current) {
+                      const r = sortBtnRef.current.getBoundingClientRect()
+                      setSortAnchor({ top: r.bottom + 6, right: window.innerWidth - r.right })
+                    } else { setSortAnchor(null) }
+                    return next
+                  })
+                }}
+                aria-label="Sort"
+                className="inline-flex items-center justify-center rounded-md border transition-colors"
+                style={{
+                  width: 36, height: 36,
+                  borderColor: sortBy !== "newest" ? C.prBdr : C.border,
+                  backgroundColor: sortBy !== "newest" ? "#FEF9EE" : C.card,
+                  color: sortBy !== "newest" ? C.pr : C.mutedFg,
+                }}>
+                <ArrowUpDown size={14}/>
+              </button>
+              {sortOpen && sortAnchor && (
+                <>
+                  <div className="fixed inset-0 z-[60]" onClick={() => { setSortOpen(false); setSortAnchor(null) }}/>
+                  <div className="fixed z-[70] rounded-xl py-1.5 w-52"
+                    style={{ top: sortAnchor.top, right: sortAnchor.right, backgroundColor: C.card,
+                             border: `1px solid ${C.border3}`, boxShadow: "0 8px 16px rgba(26,26,26,0.12)" }}>
+                    <p className="px-3 py-1.5 text-[9px] font-bold uppercase tracking-[0.05em]" style={{ color: C.mutedFg }}>Sort by</p>
+                    {[
+                      { k: "newest",   label: "Newest first" },
+                      { k: "oldest",   label: "Oldest first" },
+                      { k: "name",     label: "Name (A → Z)" },
+                      { k: "confLow",  label: "Confidence (low → high)" },
+                      { k: "confHigh", label: "Confidence (high → low)" },
+                    ].map(o => {
+                      const on = sortBy === o.k
+                      return (
+                        <button key={o.k} onClick={() => { setSortBy(o.k); setSortOpen(false) }}
+                          className="w-full flex items-center justify-between px-3 py-2 text-left transition-colors"
+                          style={{ fontSize: 12.5, color: on ? C.pr : C.fg, fontWeight: on ? 600 : 500, backgroundColor: on ? "#FEF9EE" : "transparent" }}
+                          onMouseEnter={e => { if (!on) e.currentTarget.style.backgroundColor = C.muted }}
+                          onMouseLeave={e => { if (!on) e.currentTarget.style.backgroundColor = "transparent" }}>
+                          {o.label}
+                          {on && <Check size={12} strokeWidth={3}/>}
+                        </button>
+                      )
+                    })}
+                  </div>
+                </>
               )}
             </div>
           </div>
+
+          {/* Rows */}
+          <div className="flex-1 overflow-y-auto">
+            <div className="overflow-x-auto bg-card">
+              <table className="w-full text-left">
+                <tbody>
+                  {list.length ? list.map(a => {
+                    const isActive = a.id === (panelArt?.id ?? null)
+                    return (
+                      <tr key={a.id}
+                        className={`cursor-pointer transition-colors border-b border-border/60 ${
+                          isActive ? "bg-[#F0EDE6]" : "hover:bg-muted/40"
+                        }`}
+                        onClick={() => setViewPanelArtId(a.id)}>
+                        <td className="pl-3 pr-4 py-3">
+                          <div className="flex items-center gap-2 flex-wrap mb-0.5">
+                            <p className="text-[13px] font-medium text-foreground">{a.name}</p>
+                            {a.sme && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border flex-shrink-0 text-[9px] font-bold uppercase tracking-wide bg-primary/10 text-primary border-primary/30">
+                                SME Updated
+                              </span>
+                            )}
+                            {a.retired && (
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border flex-shrink-0 text-[9px] font-bold uppercase tracking-wide bg-stone-200 text-stone-500 border-stone-300">
+                                APL Retired
+                              </span>
+                            )}
+                          </div>
+                          <p className="text-[11.5px] text-muted-foreground">{a.apl}</p>
+                        </td>
+                      </tr>
+                    )
+                  }) : (
+                    <tr><td className="text-center py-16">
+                      <p style={{ fontSize: 13, color: C.mutedFg, fontWeight: 500 }}>
+                        {selectedSites.length === 0 ? "Select a site to load articles" : "No articles in this view."}
+                      </p>
+                    </td></tr>
+                  )}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* List resize handle (right edge) */}
+          <div
+            onMouseDown={startListDrag}
+            style={{ position: "absolute", top: 0, right: 0, width: 5, height: "100%", cursor: "col-resize", zIndex: 10,
+                     backgroundColor: "transparent", borderRight: `1px solid ${C.border}`, transition: "background-color 0.15s, border-color 0.15s" }}
+            onMouseEnter={e => { e.currentTarget.style.backgroundColor = C.prBg; e.currentTarget.style.borderRightColor = C.pr }}
+            onMouseLeave={e => { e.currentTarget.style.backgroundColor = "transparent"; e.currentTarget.style.borderRightColor = C.border }}
+          />
         </div>
 
-        {/* INLINE VIEW PANEL */}
-        {selectedSites.length === 0 ? (
-          <div className="flex flex-1 items-center justify-center overflow-hidden"
-            style={{borderLeft:`1px solid ${C.border}`, backgroundColor:C.page}}>
-            <div className="flex flex-col items-center gap-3" style={{opacity:0.7}}>
-              <svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <rect x="12" y="8" width="32" height="40" rx="4" stroke={C.border3} strokeWidth="1.5" fill={C.muted}/>
-                <path d="M19 20h18M19 27h18M19 34h11" stroke={C.border3} strokeWidth="1.5" strokeLinecap="round"/>
-                <circle cx="46" cy="46" r="10" fill={C.page} stroke={C.border2} strokeWidth="1.5"/>
-                <path d="M42 46h8M46 42v8" stroke={C.ink4} strokeWidth="1.5" strokeLinecap="round" transform="rotate(45 46 46)"/>
-              </svg>
-              <p style={{fontSize:13,fontWeight:500,color:C.mutedFg,textAlign:"center"}}>No article selected</p>
-              <p style={{fontSize:11,color:C.ink4,textAlign:"center",maxWidth:160,lineHeight:1.5}}>Select a site to load articles for review</p>
+        {/* ── READ-ONLY DETAIL PANEL ── */}
+        {panelArt ? (
+          <div className="flex flex-1 overflow-hidden" style={{ minWidth: 400, borderLeft: `1px solid ${C.border}` }}>
+            <div className="flex-1 overflow-hidden">
+              <EditIngredientsPanel key={panelArt.id} art={panelArt} viewOnly={true} onClose={() => {}}/>
             </div>
           </div>
-        ) : viewPanelArtId ? (() => {
-          const panelArt = ARTS.find(a=>a.id===viewPanelArtId)
-          if(!panelArt) return null
-          return (
-            <div className="flex flex-1 overflow-hidden"
-              style={{borderLeft:`1px solid ${C.border}`}}>
-              <div onMouseDown={startDrag}
-                style={{
-                  width:6, flexShrink:0, cursor:"col-resize",
-                  backgroundColor:"transparent", borderLeft:`1px solid ${C.border}`,
-                  transition:"background-color 0.15s",
-                  display:"flex", alignItems:"center", justifyContent:"center", position:"relative",
-                }}
-                onMouseEnter={e=>{ e.currentTarget.style.backgroundColor=C.prBg; e.currentTarget.style.borderLeftColor=C.pr }}
-                onMouseLeave={e=>{ e.currentTarget.style.backgroundColor="transparent"; e.currentTarget.style.borderLeftColor=C.border }}>
-                <div style={{display:"flex",flexDirection:"column",gap:3,pointerEvents:"none"}}>
-                  {[0,1,2].map(i=>(
-                    <div key={i} style={{width:3,height:3,borderRadius:"50%",backgroundColor:C.border}}/>
-                  ))}
-                </div>
-              </div>
-              <div className="flex-1 overflow-hidden">
-                <EditIngredientsPanel key={panelArt.id} art={panelArt} viewOnly={true} onClose={()=>setViewPanelArtId(APPR[0]?.artId ?? null)}/>
-              </div>
-            </div>
-          )
-        })() : null}
-
+        ) : (
+          <div className="flex flex-1 items-center justify-center overflow-hidden"
+            style={{ borderLeft: `1px solid ${C.border}`, backgroundColor: C.page }}>
+            <p style={{ fontSize: 13, fontWeight: 500, color: C.mutedFg }}>No article selected</p>
+          </div>
+        )}
       </div>
     </div>
   )
