@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const TITLES: Record<string, string> = {
-  "/": "Morning Brief",
+  "/": "Current Status",
   "/worklist": "My Tasks",
   "/mapped": "Mapped Items",
   "/exceptions": "Exceptions",

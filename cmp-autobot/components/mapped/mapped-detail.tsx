@@ -12,6 +12,7 @@ import Link from "next/link";
 import type { APL, MappingDecision, MOG } from "@/lib/types";
 import { useMockStore } from "@/lib/mock-store";
 import { AuditLogDrawer } from "@/components/shared/audit-log-drawer";
+import { RowDetailDrawer } from "@/components/worklist/row-detail-drawer";
 import { aplCode, cn, mogCode } from "@/lib/utils";
 
 // ── Dummy-article fallback ───────────────────────────────────────────────
@@ -203,6 +204,23 @@ export function MappedDetail({ decision }: { decision: MappingDecision }) {
     setAuditOpen(false);
   }, [decision.id]);
 
+  // APL detail drawer — opens when the user clicks any APL row.
+  const [detailAplId, setDetailAplId] = useState<string | null>(null);
+  const [aplDrawerOpen, setAplDrawerOpen] = useState(false);
+  useEffect(() => {
+    if (!aplDrawerOpen) setDetailAplId(null);
+  }, [aplDrawerOpen]);
+  // Reset when navigating to a different decision.
+  useEffect(() => {
+    setAplDrawerOpen(false);
+    setDetailAplId(null);
+  }, [decision.id]);
+
+  const handleAplClick = (aplId: string) => {
+    setDetailAplId(aplId);
+    setAplDrawerOpen(true);
+  };
+
   // Toast — auto-dismiss.
   const [toast, setToast] = useState<string | null>(null);
   useEffect(() => {
@@ -379,15 +397,16 @@ export function MappedDetail({ decision }: { decision: MappingDecision }) {
                 <div
                   key={apl.id}
                   role="row"
+                  onClick={() => handleAplClick(apl.id)}
                   className={cn(
                     // Same row template + py-2.5 compact padding as
                     // the Worklist APL row.
-                    "grid grid-cols-[2fr_1fr_72px] items-center gap-4 border-b border-border px-4 py-2.5 transition-colors duration-200 last:border-b-0",
+                    "grid grid-cols-[2fr_1fr_72px] items-center gap-4 border-b border-border px-4 py-2.5 transition-colors duration-200 last:border-b-0 cursor-pointer",
                     // Selected row → subtle green wash. The radio +
                     // DEFAULT badge already signal selection, so the
                     // tint stays light (~40% green-soft).
-                    isDefault && "bg-green-queue-soft/40",
-                    !isDefault && "hover:bg-accent/30"
+                    isDefault && "bg-green-queue-soft/40 hover:bg-green-queue-soft/60",
+                    !isDefault && "hover:bg-accent/50"
                   )}
                 >
                   {/* ─── COL 1 (2fr): APL name + code + DEFAULT ────
@@ -521,7 +540,8 @@ export function MappedDetail({ decision }: { decision: MappingDecision }) {
                   <div
                     key={apl.id}
                     role="row"
-                    className="grid grid-cols-[2fr_1fr_72px] items-center gap-4 border-b border-border/60 px-4 py-2.5 last:border-b-0 opacity-70"
+                    onClick={() => handleAplClick(apl.id)}
+                    className="grid grid-cols-[2fr_1fr_72px] items-center gap-4 border-b border-border/60 px-4 py-2.5 last:border-b-0 opacity-70 cursor-pointer hover:opacity-100 hover:bg-accent/30 transition-all duration-150"
                   >
                     {/* COL 1 — name + code (no DEFAULT badge here) */}
                     <div className="flex items-center gap-2 min-w-0">
@@ -595,6 +615,21 @@ export function MappedDetail({ decision }: { decision: MappingDecision }) {
           </button>
         </div>
       )}
+
+      {/* APL detail drawer — opens when any APL row is clicked */}
+      <RowDetailDrawer
+        open={aplDrawerOpen}
+        onOpenChange={setAplDrawerOpen}
+        decision={decision}
+        mog={mog}
+        candidateApls={[...mappedApls, ...otherSuggestions]}
+        defaultArticleIds={currentDefaultSet}
+        mappedArticleIds={mappedSet}
+        onConfirm={() => {}}
+        onReject={() => {}}
+        onChangeDefault={handleDefaultToggle}
+        focusedAplId={detailAplId}
+      />
 
       {/* Audit Log drawer — right-side slide-in, scoped to this MOG */}
       <AuditLogDrawer

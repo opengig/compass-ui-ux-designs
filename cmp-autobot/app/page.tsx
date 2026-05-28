@@ -7,7 +7,6 @@ import { useMockStore } from "@/lib/mock-store";
 import { daysToTarget, effectiveTargetDate } from "@/lib/selectors";
 import type { Queue } from "@/lib/types";
 import { cn } from "@/lib/utils";
-
 export default function DashboardPage() {
   const decisions = useMockStore((s) => s.decisions);
   const mogs = useMockStore((s) => s.mogs);
@@ -87,7 +86,7 @@ export default function DashboardPage() {
 
   // Aggregate Today's Progress card — independent of the per-row
   // sums so the headline numbers can be spec-perfect.
-  const clearedToday = 5;
+  const clearedToday = 0;
   const addedToday = 12;
   const dailyTarget = 20;
   const todayPct = Math.min(
@@ -143,7 +142,7 @@ export default function DashboardPage() {
                   <span className="text-muted-foreground/70 mx-1"> / </span>
                   {dailyTarget}
                   <span className="text-sm font-normal text-muted-foreground ml-2 align-baseline">
-                    MOGs completed today
+                    MOGs completed
                   </span>
                 </div>
 
@@ -183,38 +182,38 @@ export default function DashboardPage() {
               accentVar="--brand"
               softVar="--brand-soft"
               title="Needs Attention"
-              message={`${movement.amber.completedToday + movement.amber.newToday + movement.amber.remainingOld} MOGs in Likely Matches need a decision.`}
+              message={`${movement.amber.completedToday + movement.amber.newToday + movement.amber.remainingOld} Articles in Likely Matches need a decision.`}
               href="/worklist?queue=amber"
             />
             <AlertCard
               accentVar="--blue-queue"
               softVar="--blue-queue-soft"
               title="Needs transition"
-              message={`${blueQueueTotal} MOGs need a replacement APLs.`}
-              href="/worklist?queue=blue"
+              message={`1 Article Retired`}
+              href="/worklist?status=blue"
             />
           </div>
         </div>
 
         {/* ─── ROW 2 — 5 metric cards ─────────────────────────────── */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-3">
-          <MetricCard label="Total Original MOGs" value={mogs.length} />
+          <MetricCard label="Total MOGs" value={mogs.length} />
           <MetricCard
             label="Incremental MOGs"
             value={incrementalMogsCount}
             // accentVar="--blue-queue"
           />
-          <MetricCard label="Total Articles" value={aplTotals.total} />
           <MetricCard
             label="Mapped MOGs"
-            value={aplTotals.mapped}
+            value={(1)}
             // accentVar="--green-queue"
           />
           <MetricCard
             label="Unmapped MOGs"
-            value={Math.max(0, aplTotals.total - aplTotals.mapped)}
+            value={Math.max(0, mogs.length - 1)}
             // accentVar="--amber-queue"
           />
+          <MetricCard label="Total APLs" value={aplTotals.total} />
         </div>
 
         {/* ─── ROW 3 — Work Progress ──────────────────────────────
@@ -245,10 +244,10 @@ export default function DashboardPage() {
               tone="red"
             />
             <ActivityRow
-              label="Retiring"
-              helperText="Mapped article is retiring. Plan the transition."
+              label="Retired"
+              helperText="Mapped article is retired. Plan the transition."
               cell={movement.blue}
-              href="/worklist?queue=blue"
+              href="/worklist?status=blue"
               tone="blue"
             />
           </div>
@@ -531,7 +530,7 @@ function ActivityRow({
   return (
     <Link
       href={href}
-      className="group block overflow-hidden rounded-xl border border-border/70 bg-card/40 px-5 py-4 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:bg-accent/20 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] hover:border-border"
+      className="group block overflow-hidden rounded-xl border border-border/70 bg-card/40 px-5 py-2 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all hover:bg-accent/20 hover:shadow-[0_2px_6px_rgba(0,0,0,0.06)] hover:border-border"
     >
       <div className="grid grid-cols-1 md:grid-cols-[minmax(0,1fr)_auto] gap-x-6 gap-y-3 items-start">
         {/* LEFT — badge, description, progress bar, bottom-left stats. */}
