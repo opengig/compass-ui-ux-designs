@@ -6,6 +6,7 @@ import { useReviewStore } from '../stores/useReviewStore';
 type IngredientsTableProps = {
   articleId: string;
   ingredients: Ingredient[];
+  readOnly?: boolean;
 };
 
 type IngredientDraft = {
@@ -13,20 +14,9 @@ type IngredientDraft = {
   allergenType: string;
 };
 
-const COLS = 'grid-cols-[2rem_1.7fr_1fr_4.5rem]';
+const COLS = 'grid-cols-[2rem_1fr_4.5rem]';
 
-function AllergenChip({ allergen }: { allergen: string }) {
-  if (!allergen || allergen === '-') {
-    return <span className="text-[11px] text-muted-foreground/40">—</span>;
-  }
-  return (
-    <span className="inline-flex w-fit items-center self-start px-1.5 py-0.5 rounded text-[11px] font-medium border border-rose-300 text-rose-700 bg-rose-50">
-      {allergen}
-    </span>
-  );
-}
-
-export function IngredientsTable({ articleId, ingredients }: IngredientsTableProps) {
+export function IngredientsTable({ articleId, ingredients, readOnly = false }: IngredientsTableProps) {
   const { editIngredientField, addIngredient, removeIngredient } = useReviewStore();
   const [editingRowId, setEditingRowId] = React.useState<string | null>(null);
   const [draft, setDraft] = React.useState<IngredientDraft | null>(null);
@@ -82,7 +72,6 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
         >
           <div>#</div>
           <div>Ingredient</div>
-          <div>Allergen</div>
           <div className="text-right">Actions</div>
         </div>
         <ul className="divide-y divide-border/50">
@@ -99,14 +88,17 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
                 {isEditing && draft ? (
                   <input
                     autoFocus
-                    className="rounded bg-card border border-border px-2 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
+                    className="rounded-md bg-card border border-primary/40 px-2.5 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
                     value={draft.extractedText}
                     onChange={(event) => setDraft({ ...draft, extractedText: event.target.value })}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') saveRow(row);
+                      if (event.key === 'Escape') cancelEditing();
+                    }}
                   />
                 ) : (
                   <span className="text-[13px] text-foreground leading-tight">{row.extractedText}</span>
                 )}
-                <AllergenChip allergen={row.allergenType} />
                 <div className="flex items-center justify-end gap-0.5">
                   {isEditing ? (
                     <>
@@ -125,7 +117,7 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
                         <X className="w-3 h-3" />
                       </button>
                     </>
-                  ) : (
+                  ) : !readOnly ? (
                     <>
                       <button
                         title="Edit"
@@ -142,7 +134,7 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
                         <Trash2 className="w-3 h-3" />
                       </button>
                     </>
-                  )}
+                  ) : null}
                 </div>
               </li>
             );
@@ -152,12 +144,15 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
               <span className="text-[12px] text-muted-foreground tabular-nums">{ingredients.length + 1}</span>
               <input
                 autoFocus
-                placeholder="Ingredient name"
-                className="rounded bg-card border border-border px-2 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
+                placeholder="Ingredient name…"
+                className="rounded-md bg-card border border-primary/40 px-2.5 py-1 text-[13px] outline-none focus:ring-2 focus:ring-primary/25"
                 value={draft.extractedText}
                 onChange={(event) => setDraft({ ...draft, extractedText: event.target.value })}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter') saveRow(null);
+                  if (event.key === 'Escape') cancelEditing();
+                }}
               />
-              <span className="text-[11px] text-muted-foreground italic">auto-derived</span>
               <div className="flex items-center justify-end gap-0.5">
                 <button
                   title="Add"
@@ -179,13 +174,13 @@ export function IngredientsTable({ articleId, ingredients }: IngredientsTablePro
         </ul>
       </div>
 
-      {!isAdding ? (
+      {!isAdding && !readOnly ? (
         <button
           type="button"
           onClick={startAdding}
-          className="mt-2 inline-flex items-center gap-1.5 h-7 px-2 rounded-md text-[12px] text-foreground/85 border border-border hover:border-foreground/30 transition-colors"
+          className="mt-2 inline-flex items-center gap-1 px-2.5 py-[3px] rounded-md text-[12px] font-semibold text-muted-foreground border border-dashed border-border hover:border-foreground/30 hover:text-foreground transition-colors"
         >
-          <Plus className="w-3 h-3" />
+          <Plus className="w-2.5 h-2.5" strokeWidth={2.5} />
           Add ingredient
         </button>
       ) : null}

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import React, { useState, useRef } from "react";
-import { Search, X, Filter, ArrowUpDown, Check } from "lucide-react";
+import { Search, X, Filter, ArrowDownWideNarrow, Check, ChevronDown, ChevronLeft, ChevronRight, Calendar, RefreshCcw } from "lucide-react";
 import { C } from "../data/tokens";
 import { ARTS, APPR } from "../data/mockData";
 import { PageHeader } from "../components/shared";
@@ -24,6 +24,13 @@ export function ApprovedScreen() {
   const [filterAnchor, setFilterAnchor] = useState(null)
   const [filterCats, setFilterCats] = useState([])
   const [catOpen, setCatOpen]     = useState(false)
+  // Date filters — visual only (mirrors My Tasks, which also doesn't filter rows by date).
+  const [submFrom, setSubmFrom]       = useState("")  // submitted date
+  const [submTo, setSubmTo]           = useState("")
+  const [filterDateFrom, setFilterDateFrom] = useState("")  // scanned date
+  const [filterDateTo, setFilterDateTo]     = useState("")
+  const [datePickerFor, setDatePickerFor]   = useState(null) // submStart|submEnd|scanStart|scanEnd
+  const [pickerMonth, setPickerMonth] = useState(() => { const d = new Date(); d.setDate(1); return d })
   const [listWidth, setListWidth] = useState(320)
   const [viewPanelArtId, setViewPanelArtId] = useState(null)
   const containerRef = useRef(null)
@@ -58,7 +65,7 @@ export function ApprovedScreen() {
   })
 
   const panelArt = list.find(a => a.id === viewPanelArtId) || list[0] || null
-  const activeFilters = filterCats.length
+  const activeFilters = (filterCats.length ? 1 : 0) + (submFrom ? 1 : 0) + (submTo ? 1 : 0) + (filterDateFrom ? 1 : 0) + (filterDateTo ? 1 : 0)
 
   // ── List column resize ──
   const startListDrag = (e) => {
@@ -83,7 +90,7 @@ export function ApprovedScreen() {
       <PageHeader title="Submitted Profiles" divider={false} dense/>
 
       {/* Tabs — Sent to Cookbook (green) / Rejected (red), My Tasks pill style */}
-      <div className="flex-shrink-0 flex items-center px-6 h-9 bg-card gap-2">
+      <div className="flex-shrink-0 flex items-center pl-3 pr-6 h-9 bg-card gap-2">
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {TABS.map(t => {
             const on = tab === t.key
@@ -169,36 +176,163 @@ export function ApprovedScreen() {
               </button>
               {filterOpen && filterAnchor && (
                 <>
-                  <div className="fixed inset-0 z-[60]" onClick={() => { setFilterOpen(false); setFilterAnchor(null); setCatOpen(false) }}/>
+                  <div className="fixed inset-0 z-[60]" onClick={() => { setFilterOpen(false); setFilterAnchor(null); setCatOpen(false); setDatePickerFor(null) }}/>
                   <div className="fixed z-[70]"
-                    style={{ top: filterAnchor.top, left: filterAnchor.left, width: 280,
+                    style={{ top: filterAnchor.top, left: filterAnchor.left, width: 320,
                              backgroundColor: C.card, border: `1px solid ${C.border3}`, borderRadius: 14,
                              boxShadow: "0 12px 32px rgba(26,26,26,0.14)", padding: "16px 18px 18px" }}>
-                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.mutedFg, marginBottom: 8 }}>
-                      Category
-                    </p>
-                    <div className="flex flex-wrap gap-2">
-                      {ALL_CATS.map(c => {
-                        const on = filterCats.includes(c)
+                    {/* CATEGORY — multi-select dropdown (same as My Tasks) */}
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.mutedFg, marginBottom: 8 }}>Category</p>
+                    {(() => {
+                      const label = filterCats.length === 0 ? "All categories"
+                        : filterCats.length === 1 ? filterCats[0]
+                        : `${filterCats.length} categories selected`
+                      return (
+                        <div className="relative w-full">
+                          <button type="button" onClick={() => setCatOpen(o => !o)}
+                            className="w-full inline-flex items-center justify-between transition-colors"
+                            style={{ height: 42, borderRadius: 10, border: `1px solid ${catOpen ? C.pr : C.border}`, backgroundColor: catOpen ? "#FEF9EE" : "#fff", padding: "0 12px", cursor: "pointer" }}>
+                            <span style={{ fontSize: 13, color: filterCats.length ? C.fg : C.mutedFg, fontWeight: filterCats.length ? 500 : 400, whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{label}</span>
+                            <ChevronDown size={14} style={{ color: catOpen ? C.pr : C.mutedFg, flexShrink: 0, transition: "transform 0.15s", transform: catOpen ? "rotate(180deg)" : "none" }}/>
+                          </button>
+                          {catOpen && (
+                            <>
+                              <div className="fixed inset-0 z-[72]" onClick={() => setCatOpen(false)}/>
+                              <div className="absolute z-[73] w-full mt-1.5 py-1.5" style={{ backgroundColor: C.card, border: `1px solid ${C.border3}`, borderRadius: 10, boxShadow: "0 8px 20px rgba(26,26,26,0.12)" }}>
+                                {filterCats.length > 0 && (
+                                  <button onClick={() => setFilterCats([])}
+                                    className="w-full flex items-center px-3 py-2 transition-colors"
+                                    style={{ fontSize: 12, color: C.mutedFg, fontWeight: 500, textAlign: "left", borderBottom: `1px solid ${C.border}`, cursor: "pointer", background: "transparent" }}
+                                    onMouseEnter={e => e.currentTarget.style.backgroundColor = C.muted}
+                                    onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
+                                    Clear selection
+                                  </button>
+                                )}
+                                {ALL_CATS.map(c => {
+                                  const on = filterCats.includes(c)
+                                  return (
+                                    <button key={c} onClick={() => toggleCat(c)}
+                                      className="w-full flex items-center gap-2.5 px-3 py-2 transition-colors"
+                                      style={{ cursor: "pointer", background: "transparent", textAlign: "left" }}
+                                      onMouseEnter={e => e.currentTarget.style.backgroundColor = C.muted}
+                                      onMouseLeave={e => e.currentTarget.style.backgroundColor = "transparent"}>
+                                      <span className="inline-flex items-center justify-center flex-shrink-0" style={{ width: 16, height: 16, borderRadius: 4, border: `1.5px solid ${on ? C.pr : C.border2}`, backgroundColor: on ? C.pr : "#fff" }}>
+                                        {on && <Check size={11} color="#fff" strokeWidth={3}/>}
+                                      </span>
+                                      <span style={{ fontSize: 13, color: C.fg, fontWeight: on ? 600 : 500 }}>{c}</span>
+                                    </button>
+                                  )
+                                })}
+                              </div>
+                            </>
+                          )}
+                        </div>
+                      )
+                    })()}
+
+                    {/* SUBMITTED DATE — new, sits between Category and Scanned Date */}
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.mutedFg, marginTop: 18, marginBottom: 8 }}>Submitted Date</p>
+                    <div className="flex items-center gap-2">
+                      {[{ key: "submStart", val: submFrom, ph: "Start date" }, { key: "submEnd", val: submTo, ph: "End date" }].map(d => {
+                        const on = datePickerFor === d.key
+                        const fmt = d.val ? new Date(d.val).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""
                         return (
-                          <button key={c} onClick={() => toggleCat(c)}
-                            className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold border transition-all"
-                            style={on
-                              ? { backgroundColor: "#FEF9EE", color: C.pr, borderColor: C.prBdr }
-                              : { backgroundColor: "#fff", color: C.mutedFg, borderColor: C.border }}>
-                            {on && <Check size={10} strokeWidth={3}/>}{c}
+                          <button key={d.key} type="button"
+                            onClick={() => { setDatePickerFor(prev => prev === d.key ? null : d.key); if (d.val) { const m = new Date(d.val); m.setDate(1); setPickerMonth(m) } }}
+                            className="flex-1 inline-flex items-center justify-between transition-colors"
+                            style={{ height: 42, borderRadius: 10, border: `1px solid ${on ? C.pr : C.border}`, backgroundColor: on ? "#FEF9EE" : "#fff", padding: "0 12px", cursor: "pointer" }}>
+                            <span style={{ fontSize: 13, color: fmt ? C.fg : C.mutedFg, fontWeight: fmt ? 500 : 400 }}>{fmt || d.ph}</span>
+                            <Calendar size={14} style={{ color: on ? C.pr : C.mutedFg, flexShrink: 0 }}/>
                           </button>
                         )
                       })}
                     </div>
+
+                    {/* SCANNED DATE — same as My Tasks */}
+                    <p style={{ fontSize: 10, fontWeight: 700, letterSpacing: "0.1em", textTransform: "uppercase", color: C.mutedFg, marginTop: 18, marginBottom: 8 }}>Scanned Date</p>
+                    <div className="flex items-center gap-2">
+                      {[{ key: "scanStart", val: filterDateFrom, ph: "Start date" }, { key: "scanEnd", val: filterDateTo, ph: "End date" }].map(d => {
+                        const on = datePickerFor === d.key
+                        const fmt = d.val ? new Date(d.val).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" }) : ""
+                        return (
+                          <button key={d.key} type="button"
+                            onClick={() => { setDatePickerFor(prev => prev === d.key ? null : d.key); if (d.val) { const m = new Date(d.val); m.setDate(1); setPickerMonth(m) } }}
+                            className="flex-1 inline-flex items-center justify-between transition-colors"
+                            style={{ height: 42, borderRadius: 10, border: `1px solid ${on ? C.pr : C.border}`, backgroundColor: on ? "#FEF9EE" : "#fff", padding: "0 12px", cursor: "pointer" }}>
+                            <span style={{ fontSize: 13, color: fmt ? C.fg : C.mutedFg, fontWeight: fmt ? 500 : 400 }}>{fmt || d.ph}</span>
+                            <Calendar size={14} style={{ color: on ? C.pr : C.mutedFg, flexShrink: 0 }}/>
+                          </button>
+                        )
+                      })}
+                    </div>
+
                     {activeFilters > 0 && (
-                      <button onClick={() => setFilterCats([])}
-                        className="mt-3 text-[11px] underline underline-offset-2"
-                        style={{ color: C.pr }}>
-                        Clear filter
+                      <button onClick={() => { setFilterCats([]); setSubmFrom(""); setSubmTo(""); setFilterDateFrom(""); setFilterDateTo("") }}
+                        className="mt-4 w-full inline-flex items-center justify-center gap-1.5 h-9 rounded-lg transition-colors"
+                        style={{ fontSize: 12, fontWeight: 600, color: C.pr, border: `1px solid ${C.prBdr}`, backgroundColor: "#FEF9EE" }}>
+                        <RefreshCcw size={11}/> Clear all filters
                       </button>
                     )}
                   </div>
+
+                  {/* Calendar picker — shared by both date ranges */}
+                  {datePickerFor && (() => {
+                    const curVal = datePickerFor === "submStart" ? submFrom : datePickerFor === "submEnd" ? submTo : datePickerFor === "scanStart" ? filterDateFrom : filterDateTo
+                    const applyDate = (v) => {
+                      if (datePickerFor === "submStart") setSubmFrom(v)
+                      else if (datePickerFor === "submEnd") setSubmTo(v)
+                      else if (datePickerFor === "scanStart") setFilterDateFrom(v)
+                      else setFilterDateTo(v)
+                    }
+                    const month = pickerMonth
+                    const y = month.getFullYear(); const m = month.getMonth()
+                    const firstDow = new Date(y, m, 1).getDay()
+                    const daysInMonth = new Date(y, m + 1, 0).getDate()
+                    const monthName = month.toLocaleDateString("en-IN", { month: "long", year: "numeric" })
+                    const selDate = curVal ? new Date(curVal) : null
+                    const today = new Date()
+                    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(today.getDate()).padStart(2, "0")}`
+                    const cells = []
+                    for (let i = 0; i < firstDow; i++) cells.push(null)
+                    for (let d = 1; d <= daysInMonth; d++) cells.push(d)
+                    const setDate = (d) => { const v = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`; applyDate(v); setDatePickerFor(null) }
+                    const shiftMonth = (delta) => setPickerMonth(new Date(y, m + delta, 1))
+                    return (
+                      <div style={{ position: "fixed", top: filterAnchor.top, left: filterAnchor.left + 320 + 10, width: 280, backgroundColor: C.card, border: `1px solid ${C.border3}`, borderRadius: 14, boxShadow: "0 12px 32px rgba(26,26,26,0.14)", padding: "14px 14px 16px", zIndex: 71 }}>
+                        <div className="flex items-center justify-between mb-2">
+                          <button onClick={() => shiftMonth(-1)} className="inline-flex items-center justify-center rounded-md" style={{ width: 28, height: 28, border: `1px solid ${C.border}`, backgroundColor: "#fff", color: C.mutedFg, cursor: "pointer" }}><ChevronLeft size={14}/></button>
+                          <span style={{ fontSize: 13, fontWeight: 600, color: C.fg }}>{monthName}</span>
+                          <button onClick={() => shiftMonth(1)} className="inline-flex items-center justify-center rounded-md" style={{ width: 28, height: 28, border: `1px solid ${C.border}`, backgroundColor: "#fff", color: C.mutedFg, cursor: "pointer" }}><ChevronRight size={14}/></button>
+                        </div>
+                        <div className="grid grid-cols-7 gap-0 mb-1">
+                          {["S", "M", "T", "W", "T", "F", "S"].map((d, i) => (
+                            <div key={i} style={{ textAlign: "center", fontSize: 10, fontWeight: 700, color: C.mutedFg, padding: "4px 0", textTransform: "uppercase", letterSpacing: "0.05em" }}>{d}</div>
+                          ))}
+                        </div>
+                        <div className="grid grid-cols-7 gap-0.5">
+                          {cells.map((d, i) => {
+                            if (d === null) return <div key={i}/>
+                            const dStr = `${y}-${String(m + 1).padStart(2, "0")}-${String(d).padStart(2, "0")}`
+                            const isSel = selDate && selDate.getFullYear() === y && selDate.getMonth() === m && selDate.getDate() === d
+                            const isToday = dStr === todayStr
+                            return (
+                              <button key={i} onClick={() => setDate(d)}
+                                className="inline-flex items-center justify-center transition-colors"
+                                style={{ height: 32, borderRadius: 6, fontSize: 12, fontWeight: isSel ? 700 : 500, border: "none", cursor: "pointer", color: isSel ? "#fff" : isToday ? C.pr : C.fg, backgroundColor: isSel ? C.pr : "transparent", outline: isToday && !isSel ? `1px solid ${C.prBdr}` : "none" }}
+                                onMouseEnter={e => { if (!isSel) e.currentTarget.style.backgroundColor = C.muted }}
+                                onMouseLeave={e => { if (!isSel) e.currentTarget.style.backgroundColor = "transparent" }}>
+                                {d}
+                              </button>
+                            )
+                          })}
+                        </div>
+                        <div className="flex items-center justify-between mt-3 pt-2" style={{ borderTop: `1px solid ${C.border}` }}>
+                          <button onClick={() => { applyDate(""); setDatePickerFor(null) }} style={{ fontSize: 11, color: C.mutedFg, fontWeight: 600, background: "transparent", border: "none", cursor: "pointer", padding: "4px 2px" }}>Clear</button>
+                          <button onClick={() => setDate(new Date().getDate())} style={{ fontSize: 11, color: C.pr, fontWeight: 600, background: "transparent", border: "none", cursor: "pointer", padding: "4px 2px" }}>Today</button>
+                        </div>
+                      </div>
+                    )
+                  })()}
                 </>
               )}
             </div>
@@ -226,7 +360,7 @@ export function ApprovedScreen() {
                   backgroundColor: sortBy !== "newest" ? "#FEF9EE" : C.card,
                   color: sortBy !== "newest" ? C.pr : C.mutedFg,
                 }}>
-                <ArrowUpDown size={14}/>
+                <ArrowDownWideNarrow size={14}/>
               </button>
               {sortOpen && sortAnchor && (
                 <>
@@ -270,12 +404,12 @@ export function ApprovedScreen() {
                     return (
                       <tr key={a.id}
                         className={`cursor-pointer transition-colors border-b border-border/60 ${
-                          isActive ? "bg-[#F0EDE6]" : "hover:bg-muted/40"
+                          isActive ? "bg-[#F0EDE6]" : "hover:bg-[#F5F3EE]"
                         }`}
                         onClick={() => setViewPanelArtId(a.id)}>
                         <td className="pl-3 pr-4 py-3">
                           <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                            <p className="text-[13px] font-medium text-foreground">{a.name}</p>
+                            <p className={`text-[13px] ${isActive ? "font-semibold" : "font-medium"} text-foreground`}>{a.name}</p>
                             {a.sme && (
                               <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded border flex-shrink-0 text-[9px] font-bold uppercase tracking-wide bg-primary/10 text-primary border-primary/30">
                                 SME Updated

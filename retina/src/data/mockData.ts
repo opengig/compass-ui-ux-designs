@@ -40,6 +40,7 @@ export interface ArticleData {
   aplCode: string;
   barcode: string;
   vegStatus: VegStatus;
+  category: string;
   status: ArticleStatus;
   extractedAt: string;
   confidence: number;
@@ -146,15 +147,22 @@ function statusToArt(status: ArticleStatus): ArtStatus {
   return 'amber';
 }
 
+// Category vocabulary mirrors the nutritionist filter (Staples/Dairy/Bakery/Confectionery)
+// so the Article SME category filter behaves identically.
+export const ARTICLE_CATEGORIES = ['Staples', 'Dairy', 'Bakery', 'Confectionery'] as const;
+
 export const ARTICLE_DATA: ArticleData[] = SEED_PRODUCTS.map((product, index) => ({
   id: `APL-${String(index + 100).padStart(5, '0')}`,
   name: product.name,
   aplCode: `APL-${String(index + 100).padStart(5, '0')}`,
   barcode: product.barcode,
   vegStatus: product.vegStatus,
+  category: ARTICLE_CATEGORIES[index % ARTICLE_CATEGORIES.length],
   status: STATUS_POOL[index % STATUS_POOL.length],
   extractedAt: `${13 + (index % 10)} May 2025, 0${(index % 7) + 8}:3${index % 6} PM`,
-  confidence: Math.max(72, 94 - index * 2),
+  // Cycle confidence across a pool so every queue (High ≥90 / Medium 80-89 /
+  // Low <80) always has several articles — even after some are submitted.
+  confidence: [95, 92, 91, 88, 85, 83, 78, 75, 73][index % 9],
   ingredients: baseIngredients.map((item, rowIndex) => ({
     ...item,
     id: `${index}-ing-${rowIndex + 1}`,

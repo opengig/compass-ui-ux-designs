@@ -72,17 +72,54 @@ interface ReviewStoreContextValue {
   getArticleEditLog: (articleId: string) => EditLogEntry[];
 }
 
+// A few articles start out already submitted to the nutritionist so the
+// "Submitted" page shows a populated list by default (instead of being empty).
+const SEED_SUBMISSIONS: Record<string, SubmissionRecord> = {
+  'APL-00100': {
+    comment: 'Allergen mapping verified against back label.',
+    submittedAt: '16 May 2025, 10:24 AM',
+    submittedBy: 'Priya Sharma',
+  },
+  'APL-00101': {
+    comment: 'Nutrition values rechecked — submitting for approval.',
+    submittedAt: '16 May 2025, 11:05 AM',
+    submittedBy: 'Priya Sharma',
+  },
+  'APL-00102': {
+    comment: 'Ingredient list confirmed.',
+    submittedAt: '16 May 2025, 02:18 PM',
+    submittedBy: 'Rahul Verma',
+  },
+  'APL-00103': {
+    comment: '',
+    submittedAt: '16 May 2025, 03:47 PM',
+    submittedBy: 'Priya Sharma',
+  },
+};
+
 function buildInitialState(): ReviewState {
   const articles: Record<string, ArticleData> = {};
   ARTICLE_DATA.forEach((article) => {
     articles[article.id] = article;
+  });
+  // Reflect the seeded submissions on the article records too, so reviewer /
+  // submitted-at metadata is consistent with the submission entries above.
+  Object.entries(SEED_SUBMISSIONS).forEach(([articleId, submission]) => {
+    const article = articles[articleId];
+    if (article) {
+      articles[articleId] = {
+        ...article,
+        reviewer: submission.submittedBy,
+        approvedAt: submission.submittedAt,
+      };
+    }
   });
   return {
     articles,
     editLog: [],
     undoStacks: {},
     redoStacks: {},
-    submissions: {},
+    submissions: { ...SEED_SUBMISSIONS },
   };
 }
 

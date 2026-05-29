@@ -3,7 +3,7 @@ import React, { useState, useRef } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import {
   Filter, ChevronLeft, ChevronRight, ChevronDown, Check, X, RefreshCcw, Search, ArrowDownWideNarrow, Calendar,
-  FolderInput, Hand, Grab, ArrowRightLeft, ArrowDownToLine,
+  FolderInput, ArrowRightLeft, ArrowDownToLine, Hand, Grab,
 } from "lucide-react";
 import { Input, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui";
 import { C, T } from "../data/tokens";
@@ -254,7 +254,7 @@ export function QueueScreen() {
     <div className="flex flex-col flex-1 overflow-hidden bg-background">
       <PageHeader title="My Tasks" divider={false} dense/>
       {/* Status tabs + filter — segmented pill control, matches /article-sme/review */}
-      <div className="flex-shrink-0 flex items-center px-6 h-9 bg-card gap-2">
+      <div className="flex-shrink-0 flex items-center pl-3 pr-6 h-9 bg-card gap-2">
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {STATUS_TABS.map(t => {
             const on = qf === t.key
@@ -723,7 +723,7 @@ export function QueueScreen() {
                                   "padding:8px 14px","min-width:180px","max-width:260px",
                                   "background:#fff",
                                   "border:1px solid #ECE6DA",
-                                  "border-left:3px solid #C68A1E",
+                                  `border-left:3px solid ${effectiveStatus==="green"?"#0D9488":effectiveStatus==="amber"?"#475569":effectiveStatus==="red"?"#6B7280":"#C68A1E"}`,
                                   "border-radius:10px",
                                   "box-shadow:0 16px 32px rgba(0,0,0,0.18)",
                                   "font:600 13px Inter, system-ui, sans-serif",
@@ -746,8 +746,8 @@ export function QueueScreen() {
                             className={`border-b border-border/60 ${
                               isActive
                                 ? "bg-[#F0EDE6]"
-                                : "hover:bg-muted/40"
-                            } ${bucketMode ? "cursor-grab active:cursor-grabbing" : "cursor-pointer"}`}
+                                : "hover:bg-[#F5F3EE]"
+                            } ${bucketMode ? (isDragging ? "dnd-grabbing" : "dnd-grab") : "cursor-pointer"}`}
                             style={{
                               animation: isHighlighted ? `artGlow 2s ease-in-out 0s both` : "none",
                               opacity: isDragging ? 0.35 : 1,
@@ -756,28 +756,10 @@ export function QueueScreen() {
                               willChange: bucketMode ? "transform, opacity" : "auto",
                             }}
                             onClick={()=>{ if(!bucketMode) setEditPanelArtId(a.id) }}>
-                            {bucketMode && (
-                              <td className="pl-2 pr-0 py-3" style={{width:26}}>
-                                {/* Hand (palm) when idle, fist (Grab) when this row is being dragged */}
-                                {isDragging ? (
-                                  <Grab size={15}
-                                    style={{
-                                      color: C.pr, flexShrink:0,
-                                      transition:"color 0.15s ease, transform 0.15s ease",
-                                      transform: "scale(1.15)",
-                                    }}/>
-                                ) : (
-                                  <Hand size={15}
-                                    style={{
-                                      color: C.mutedFg, flexShrink:0,
-                                      transition:"color 0.15s ease, transform 0.15s ease",
-                                    }}/>
-                                )}
-                              </td>
-                            )}
+                            {/* No leading hand icon — in bucket mode the cursor itself turns to grab/grabbing. */}
                             <td className="pl-3 pr-4 py-3">
                               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                                <p className={`${editPanelArtId ? "text-[12px]" : "text-[13px]"} font-medium ${isActive ? "text-foreground" : "text-foreground"}`}>{a.name}</p>
+                                <p className={`${editPanelArtId ? "text-[12px]" : "text-[13px]"} ${isActive ? "font-semibold" : "font-medium"} text-foreground`}>{a.name}</p>
                                 {bucketMode && (() => {
                                   const cfg = effectiveStatus==="green" ? {l:"Ready To Cookbook", c:"bg-teal-50 text-teal-700 border-teal-200"}
                                             : effectiveStatus==="amber" ? {l:"To Review",         c:"bg-slate-100 text-slate-700 border-slate-200"}
@@ -803,27 +785,29 @@ export function QueueScreen() {
                               <p className={`text-[11.5px] ${isActive ? "text-muted-foreground" : "text-muted-foreground"}`}>{a.apl}</p>
                             </td>
                             {!editPanelArtId && <td className="px-4 py-3"><IssueChips art={a}/></td>}
-                            {!bucketMode && (
-                              <td className="pr-2 py-3 text-right align-middle" style={{width:34}}>
-                                {!a.retired && (
-                                  <button
-                                    onClick={(e)=>{
-                                      e.stopPropagation()
-                                      const r = e.currentTarget.getBoundingClientRect()
-                                      setRowMenu(rm => rm?.id===a.id ? null : { id:a.id, top:r.bottom+4, right: window.innerWidth - r.right })
-                                    }}
-                                    aria-label="Move article"
-                                    title="Move article"
-                                    className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                                    <ArrowRightLeft size={14}/>
-                                  </button>
-                                )}
-                              </td>
-                            )}
+                            <td className="pr-3 py-3 text-right align-middle" style={{width:36}}>
+                              {bucketMode ? (
+                                isDragging
+                                  ? <Grab size={15} className="dnd-hand" style={{color:C.pr, display:"inline-block", marginRight:2}}/>
+                                  : <Hand size={15} className="dnd-hand" style={{color:C.mutedFg, display:"inline-block", marginRight:2}}/>
+                              ) : !a.retired ? (
+                                <button
+                                  onClick={(e)=>{
+                                    e.stopPropagation()
+                                    const r = e.currentTarget.getBoundingClientRect()
+                                    setRowMenu(rm => rm?.id===a.id ? null : { id:a.id, top:r.bottom+4, right: window.innerWidth - r.right })
+                                  }}
+                                  aria-label="Move article"
+                                  title="Move article"
+                                  className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
+                                  <ArrowRightLeft size={14}/>
+                                </button>
+                              ) : null}
+                            </td>
                           </tr>
                         )
                       }) : (
-                        <tr><td colSpan={(bucketMode ? 1 : 0) + (editPanelArtId ? 1 : 2)} className="text-center py-16">
+                        <tr><td colSpan={editPanelArtId ? 2 : 3} className="text-center py-16">
                           <div className="flex flex-col items-center gap-2">
                             {selectedSites.length === 0 ? (
                               <>

@@ -7,10 +7,10 @@ import {
   Check,
   Copy,
   CheckCheck,
-  Undo2,
-  Redo2,
-  ArrowRightLeft,
+  ChevronsDownUp,
+  ChevronsUpDown,
   Camera,
+  X,
 } from 'lucide-react';
 import { useReviewStore } from '../stores/useReviewStore';
 import { useExpandSections } from '../stores/ExpandSections';
@@ -229,7 +229,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
     redo,
     getCanUndo,
     getCanRedo,
-    moveToBucket,
     getArticleEditLog,
   } = reviewStore;
   const article = getArticleById(selectedArticleId) ?? articles[0] ?? null;
@@ -237,8 +236,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   const submitRef = React.useRef<HTMLDivElement | null>(null);
   const [showSubmit, setShowSubmit] = React.useState(false);
   const [comment, setComment] = React.useState('');
-  const [moveOpen, setMoveOpen] = React.useState(false);
-  const moveRef = React.useRef<HTMLDivElement | null>(null);
   const [activeImg, setActiveImg] = React.useState(0);
   const [imgErr, setImgErr] = React.useState(false);
   const [photoCollapsed, setPhotoCollapsed] = React.useState(false);
@@ -252,23 +249,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
     () => (article ? getProductImages(article.barcode, { count: 4 }) : []),
     [article?.barcode],
   );
-
-  // Close the Move-to picker on outside click / Esc.
-  React.useEffect(() => {
-    if (!moveOpen) return;
-    const onDoc = (e: MouseEvent) => {
-      if (moveRef.current && !moveRef.current.contains(e.target as Node)) setMoveOpen(false);
-    };
-    const onEsc = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') setMoveOpen(false);
-    };
-    document.addEventListener('mousedown', onDoc);
-    document.addEventListener('keydown', onEsc);
-    return () => {
-      document.removeEventListener('mousedown', onDoc);
-      document.removeEventListener('keydown', onEsc);
-    };
-  }, [moveOpen]);
 
   // Reset state when switching articles
   React.useEffect(() => {
@@ -322,6 +302,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   const unsavedEdits = getUnsavedEditCount(article.id);
   const canUndo = getCanUndo(article.id);
   const canRedo = getCanRedo(article.id);
+  const { isExpanded: allExpanded, toggle: toggleAllSections } = useExpandSections();
   const conf = confidenceTone(article.confidence);
   const editLog = getArticleEditLog(article.id);
   const pendingLog = editLog.filter((entry) => entry.status === 'pending');
@@ -368,9 +349,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
       saveChanges(article.id);
     }
     setShowSubmit(true);
-    setTimeout(() => {
-      submitRef.current?.scrollIntoView({ behavior: 'smooth', block: 'end' });
-    }, 50);
   };
 
   const onSubmit = () => {
@@ -379,7 +357,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   };
 
   return (
-    <div className="flex-1 flex flex-col min-w-0 h-full bg-card border-l border-border">
+    <div className="flex-1 flex flex-col min-w-0 h-full bg-card">
       {/* Top meta bar — name, confidence, barcode, scanned / updated, undo/redo */}
       <div
         className="flex items-center gap-2.5 px-5 py-2.5 flex-shrink-0 min-h-12 bg-card flex-wrap"
@@ -410,21 +388,21 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
         <div className="ml-auto flex items-center gap-0.5 shrink-0">
           <button
             type="button"
-            onClick={() => undo(article.id)}
-            disabled={!canUndo}
-            title="Undo (⌘Z)"
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
+            onClick={toggleAllSections}
+            title={allExpanded ? 'Collapse all' : 'Expand all'}
+            className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-card border border-border text-foreground hover:bg-muted hover:border-foreground/20 transition-colors text-[12.5px] font-medium"
           >
-            <Undo2 className="w-3.5 h-3.5" />
-          </button>
-          <button
-            type="button"
-            onClick={() => redo(article.id)}
-            disabled={!canRedo}
-            title="Redo (⌘⇧Z)"
-            className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/40 disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
-          >
-            <Redo2 className="w-3.5 h-3.5" />
+            {allExpanded ? (
+              <>
+                <ChevronsDownUp className="w-3.5 h-3.5" />
+                Collapse All
+              </>
+            ) : (
+              <>
+                <ChevronsUpDown className="w-3.5 h-3.5" />
+                Expand All
+              </>
+            )}
           </button>
         </div>
       </div>
@@ -576,7 +554,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                     flexShrink: 0,
                     borderRadius: 8,
                     overflow: 'hidden',
-                    border: isActive ? `2.5px solid ${C.fg}` : `1.5px solid ${C.border}`,
+                    border: isActive ? `2.5px solid ${C.pr}` : `1.5px solid ${C.border}`,
                     backgroundColor: C.muted,
                     cursor: 'pointer',
                     padding: 0,
@@ -609,15 +587,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                 </button>
               );
             })}
-            <a
-              href={offLink}
-              target="_blank"
-              rel="noopener noreferrer"
-              style={{ marginLeft: 'auto', fontSize: 9, color: C.mutedFg, textDecoration: 'none', whiteSpace: 'nowrap', flexShrink: 0 }}
-              title="View on Open Food Facts"
-            >
-              📷 OFF
-            </a>
           </div>
         </div>
 
@@ -627,7 +596,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
           className="flex-1 overflow-y-auto retina-thin-scroll min-w-0"
           style={{ backgroundColor: C.page }}
         >
-          <div className="px-6 py-6 max-w-3xl mx-auto flex flex-col gap-4">
+          <div className={`px-6 py-6 flex flex-col gap-4 ${photoCollapsed ? 'w-full' : 'max-w-3xl mx-auto'}`}>
             {/* Read-only banner */}
             {isReadOnly ? (
               <div
@@ -640,13 +609,9 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
               </div>
             ) : null}
 
-            <h1 style={{ fontSize: 22, fontWeight: 700, color: C.fg, letterSpacing: '-0.02em' }}>
-              {article.name}
-            </h1>
-
             {/* INGREDIENTS — unchanged SME section */}
             <CollapsibleSection title="Ingredients" defaultOpen count={article.ingredients.length}>
-              <IngredientsTable articleId={article.id} ingredients={article.ingredients} />
+              <IngredientsTable articleId={article.id} ingredients={article.ingredients} readOnly={isReadOnly} />
             </CollapsibleSection>
 
             {/* ALLERGENS (Contains) */}
@@ -709,7 +674,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                   </div>
                   <div
                     className="px-3 py-2.5"
-                    style={{ width: 150, flexShrink: 0, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.mutedFg, borderLeft: `1px solid ${C.border}`, textAlign: 'center' }}
+                    style={{ width: 150, flexShrink: 0, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.mutedFg, borderLeft: `1px solid ${C.border}`, textAlign: 'left' }}
                   >
                     Per 100g / 100ml
                   </div>
@@ -732,7 +697,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                         <span style={{ fontSize: 13, fontWeight: 500, color: C.fg, lineHeight: 1.3 }}>{row.nutrient}</span>
                       </div>
                       <div
-                        className="px-3 py-2.5 flex items-center justify-center"
+                        className="px-3 py-2.5 flex items-center"
                         style={{ width: 150, flexShrink: 0, borderLeft: `1px solid ${C.border}` }}
                       >
                         <span style={{ fontSize: 13, fontWeight: 500, color: C.fg, fontFeatureSettings: '"tnum"' }}>
@@ -777,50 +742,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
               )}
             </AccordionCard>
 
-            {/* Submit panel — appears after Save */}
-            {showSubmit ? (
-              <section
-                ref={submitRef}
-                className="rounded-lg p-4"
-                style={{ border: `1px solid ${C.prBdr}`, backgroundColor: C.card }}
-                aria-live="polite"
-              >
-                <h2 className="text-[13px] font-semibold text-foreground">Submit for review</h2>
-                {pendingLog.length > 0 ? (
-                  <p className="text-[11.5px] text-muted-foreground mt-0.5">
-                    {pendingLog.length} edit{pendingLog.length === 1 ? '' : 's'} will be sent.
-                  </p>
-                ) : null}
-                <label className="block mt-3 text-[11px] uppercase tracking-wide text-muted-foreground">
-                  Comment <span className="text-muted-foreground/70 normal-case">(optional)</span>
-                </label>
-                <textarea
-                  value={comment}
-                  onChange={(event) => setComment(event.target.value)}
-                  placeholder="Briefly explain your decisions (what you changed, what you verified, anything reviewers should know)…"
-                  rows={3}
-                  autoFocus
-                  className="mt-1 w-full rounded-md border border-border bg-transparent px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70"
-                />
-                <div className="mt-3 flex items-center justify-end gap-2">
-                  <button
-                    type="button"
-                    onClick={() => setShowSubmit(false)}
-                    className="px-3 h-8 rounded-md text-[12px] text-muted-foreground hover:text-foreground hover:bg-muted/40"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="button"
-                    onClick={onSubmit}
-                    className="inline-flex items-center gap-1.5 px-3 h-8 rounded-md bg-primary text-primary-foreground text-[12.5px] font-semibold hover:bg-primary-hover"
-                  >
-                    <Check className="w-3.5 h-3.5" />
-                    Submit
-                  </button>
-                </div>
-              </section>
-            ) : null}
+            {/* Submit handled via the confirmation modal (rendered below). */}
           </div>
         </div>
       </div>
@@ -859,21 +781,12 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
       ) : null}
 
       {/* Bottom action footer — helper text left, actions right */}
-      {!showSubmit ? (
+      {true ? (
         <div className="flex-shrink-0 border-t border-border bg-card px-5 py-3 flex items-center gap-3">
           {isReadOnly ? (
             <>
               <span className="text-[11.5px]" style={{ color: C.mutedFg }}>
                 This article is locked.
-              </span>
-              <span className="ml-auto text-[12px] text-muted-foreground inline-flex items-center gap-1.5">
-                <span
-                  className={`w-1.5 h-1.5 rounded-full ${article.status === 'approved' ? 'bg-sky-500' : 'bg-stone-400'}`}
-                />
-                {article.status === 'approved'
-                  ? `Approved · ${article.approvedAt ?? ''}`
-                  : `Submitted · ${submission?.submittedAt ?? ''}`}
-                <span className="text-muted-foreground/70 ml-1">read only</span>
               </span>
             </>
           ) : (
@@ -884,65 +797,6 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                   : 'Submitting will send this article for review.'}
               </span>
               <div className="ml-auto flex items-center gap-2 shrink-0">
-                {unsavedEdits === 0
-                  ? (() => {
-                      const currentBucket: 'high' | 'amber' | 'low' =
-                        article.confidence >= 90 ? 'high' : article.confidence >= 80 ? 'amber' : 'low';
-                      const BUCKETS: { key: 'high' | 'amber' | 'low'; label: string; dot: string; sub: string }[] = [
-                        { key: 'high', label: 'Match', dot: 'bg-emerald-500', sub: 'High confidence (95%)' },
-                        { key: 'amber', label: 'Review', dot: 'bg-amber-500', sub: 'Needs a second look (85%)' },
-                        { key: 'low', label: 'Fix', dot: 'bg-rose-500', sub: 'Low confidence — rework (50%)' },
-                      ];
-                      const targets = BUCKETS.filter((b) => b.key !== currentBucket);
-                      return (
-                        <div className="relative" ref={moveRef}>
-                          <button
-                            type="button"
-                            onClick={() => setMoveOpen((o) => !o)}
-                            className={`inline-flex items-center gap-1.5 h-9 px-3 rounded-md border text-[12.5px] font-medium transition-colors ${
-                              moveOpen
-                                ? 'border-primary/40 bg-primary/10 text-foreground'
-                                : 'border-border bg-card text-foreground hover:bg-muted hover:border-foreground/20'
-                            }`}
-                          >
-                            <ArrowRightLeft className="w-3.5 h-3.5" />
-                            Move to…
-                          </button>
-                          {moveOpen ? (
-                            <div className="absolute right-0 bottom-[calc(100%+6px)] w-64 rounded-lg border border-border bg-card shadow-soft z-50 overflow-hidden">
-                              <div className="px-3 py-2 border-b border-border/70">
-                                <p className="text-[11px] font-semibold tracking-[0.06em] uppercase text-muted-foreground">
-                                  Move to bucket
-                                </p>
-                                <p className="text-[11.5px] text-muted-foreground/80 mt-0.5">
-                                  Currently in {BUCKETS.find((b) => b.key === currentBucket)?.label}
-                                </p>
-                              </div>
-                              <div className="p-1">
-                                {targets.map((t) => (
-                                  <button
-                                    key={t.key}
-                                    type="button"
-                                    onClick={() => {
-                                      moveToBucket(article.id, t.key);
-                                      setMoveOpen(false);
-                                    }}
-                                    className="w-full flex items-center gap-2.5 px-2 py-1.5 rounded-md text-left hover:bg-muted/40 transition-colors"
-                                  >
-                                    <span className={`w-1.5 h-1.5 rounded-full ${t.dot} shrink-0`} />
-                                    <span className="flex-1 min-w-0">
-                                      <span className="block text-[13px] font-medium text-foreground">{t.label}</span>
-                                      <span className="block text-[11.5px] text-muted-foreground truncate">{t.sub}</span>
-                                    </span>
-                                  </button>
-                                ))}
-                              </div>
-                            </div>
-                          ) : null}
-                        </div>
-                      );
-                    })()
-                  : null}
                 <button
                   className="h-9 px-4 rounded-md bg-primary text-primary-foreground text-[13px] font-medium hover:bg-primary-hover transition-colors disabled:opacity-50"
                   onClick={openSubmit}
@@ -952,6 +806,78 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
               </div>
             </>
           )}
+        </div>
+      ) : null}
+
+      {/* Submit for review — confirmation modal (matches the nutritionist modals) */}
+      {showSubmit ? (
+        <div
+          className="fixed inset-0 z-[200] flex items-center justify-center"
+          style={{ backgroundColor: 'rgba(15,23,42,0.5)', backdropFilter: 'blur(2px)' }}
+          onClick={() => setShowSubmit(false)}
+        >
+          <div
+            onClick={(e) => e.stopPropagation()}
+            style={{ width: 440, maxWidth: '92vw', backgroundColor: '#fff', borderRadius: 14, border: `1px solid ${C.border}`, boxShadow: '0 24px 64px rgba(0,0,0,0.25)', overflow: 'hidden' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-3.5" style={{ borderBottom: `1px solid ${C.border}` }}>
+              <span style={{ fontSize: 14, fontWeight: 700, color: C.fg }}>Submit for review</span>
+              <button
+                onClick={() => setShowSubmit(false)}
+                aria-label="Close"
+                className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-muted/50"
+              >
+                <X className="w-[15px] h-[15px]" />
+              </button>
+            </div>
+            {/* Body */}
+            <div className="px-5 py-4 space-y-3">
+              <div className="flex items-center gap-3">
+                <div style={{ width: 56, height: 56, flexShrink: 0, borderRadius: 8, overflow: 'hidden', backgroundColor: C.muted, border: `1px solid ${C.border}` }}>
+                  <Thumb url={images[0]?.url} label="Front" />
+                </div>
+                <div className="min-w-0">
+                  <p style={{ fontSize: 14, fontWeight: 700, color: C.fg, lineHeight: 1.3 }}>{article.name}</p>
+                  <p style={{ fontSize: 12, color: C.mutedFg, marginTop: 2 }}>APL: {article.aplCode}</p>
+                </div>
+              </div>
+              {pendingLog.length > 0 ? (
+                <p style={{ fontSize: 12, color: C.mutedFg }}>
+                  {pendingLog.length} edit{pendingLog.length === 1 ? '' : 's'} will be sent.
+                </p>
+              ) : null}
+              <div>
+                <label className="block text-[11px] uppercase tracking-wide text-muted-foreground mb-1.5">
+                  Remark <span className="text-muted-foreground/70 normal-case">(optional)</span>
+                </label>
+                <textarea
+                  value={comment}
+                  onChange={(e) => setComment(e.target.value)}
+                  placeholder="Briefly explain your decisions (what you changed, what you verified)…"
+                  rows={4}
+                  autoFocus
+                  className="w-full rounded-md border border-border bg-transparent px-3 py-2 text-[13px] outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 placeholder:text-muted-foreground/70"
+                />
+              </div>
+            </div>
+            {/* Footer */}
+            <div className="flex items-center justify-end gap-2 px-5 py-3.5" style={{ borderTop: `1px solid ${C.border}` }}>
+              <button
+                onClick={() => setShowSubmit(false)}
+                style={{ padding: '8px 14px', borderRadius: 8, fontSize: 13, fontWeight: 600, backgroundColor: '#fff', color: C.mutedFg, border: `1px solid ${C.border2}`, cursor: 'pointer' }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={onSubmit}
+                className="inline-flex items-center gap-1.5"
+                style={{ padding: '8px 16px', borderRadius: 8, fontSize: 13, fontWeight: 700, backgroundColor: C.pr, color: '#fff', border: `1px solid ${C.pr}`, cursor: 'pointer' }}
+              >
+                <Check className="w-3.5 h-3.5" /> Confirm
+              </button>
+            </div>
+          </div>
         </div>
       ) : null}
     </div>

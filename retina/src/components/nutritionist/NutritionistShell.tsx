@@ -31,7 +31,7 @@ function ShellChrome() {
       </div>
       {t && (
         <div
-          className="fixed bottom-5 right-5 z-[300] flex items-center gap-3 rounded-lg pl-4 pr-2.5 py-2.5 text-[13px] font-semibold shadow-lg"
+          className="fixed top-5 right-5 z-[300] flex items-center gap-3 rounded-lg pl-4 pr-2.5 py-2.5 text-[13px] font-semibold shadow-lg"
           style={{
             animation:"toastIn 0.18s cubic-bezier(0.34,1.56,0.64,1)",
             backgroundColor: t.kind === "warn" ? "#7A5310" : "#1F1611",

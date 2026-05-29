@@ -1,7 +1,6 @@
-import { ChevronsDownUp, ChevronsUpDown } from 'lucide-react';
+import { Clock } from 'lucide-react';
 import { useReviewStore } from '../stores/useReviewStore';
 import { useQueueFilter, type QueueTab } from '../hooks/useQueueFilter';
-import { useExpandSections } from '../stores/ExpandSections';
 
 type PillSpec = {
   tab: QueueTab;
@@ -21,7 +20,6 @@ export function QueueHeader({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
     articles,
     variant === 'submitted' ? 'submitted' : undefined,
   );
-  const { isExpanded, toggle } = useExpandSections();
 
   const counts = (() => {
     const submitted = articles.filter((article) => isSubmitted(article.id));
@@ -41,31 +39,21 @@ export function QueueHeader({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
 
   const title = variant === 'submitted' ? 'Submitted' : 'My Tasks';
 
-  const expandButton = (
-    <button
-      onClick={toggle}
-      className="inline-flex items-center gap-1.5 h-8 px-3 rounded-md bg-card border border-border text-foreground hover:bg-muted hover:border-foreground/20 transition-colors text-[12.5px] font-medium"
-    >
-      {isExpanded ? (
-        <>
-          <ChevronsDownUp className="w-3.5 h-3.5" />
-          Collapse All
-        </>
-      ) : (
-        <>
-          <ChevronsUpDown className="w-3.5 h-3.5" />
-          Expand All
-        </>
-      )}
-    </button>
-  );
+  const now = new Date();
+  const stamp =
+    now.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', hour12: false }) +
+    ' IST · ' +
+    now.toLocaleDateString('en-IN', { day: '2-digit', month: '2-digit', year: 'numeric' });
 
   return (
     <div className="flex-shrink-0 border-b border-border bg-card">
       {/* Page title */}
       <div className="flex items-center gap-2 px-4 pt-3 pb-2">
         <h1 className="text-[18px] font-bold text-foreground tracking-tight">{title}</h1>
-        {variant === 'submitted' ? <div className="ml-auto shrink-0">{expandButton}</div> : null}
+        <div className="ml-auto flex items-center gap-2 shrink-0">
+          <Clock className="w-3 h-3 text-muted-foreground" />
+          <span className="font-mono text-[11.5px] text-muted-foreground">{stamp}</span>
+        </div>
       </div>
 
       {/* Tabs row — inbox only */}
@@ -96,7 +84,6 @@ export function QueueHeader({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
               );
             })}
           </nav>
-          <div className="ml-auto flex items-center gap-1.5 shrink-0">{expandButton}</div>
         </div>
       ) : null}
     </div>

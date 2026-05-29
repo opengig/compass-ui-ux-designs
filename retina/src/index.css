@@ -95,6 +95,35 @@
   }
 }
 
+/* ── Buttons: consistent hover + pressed feedback across all flows ──
+   Subtle, color-agnostic (filter/transform) so it stacks on top of each
+   button's own styling. Opt out with `data-flat` (e.g. large card-buttons
+   that intentionally have no hover). */
+@layer base {
+  button:not(:disabled) { cursor: pointer; }
+  button:not([data-flat]):not(:disabled) {
+    transition: transform 0.08s ease, filter 0.12s ease, background-color 0.12s ease, border-color 0.12s ease;
+  }
+  button:not([data-flat]):not(:disabled):hover { filter: brightness(0.96); }
+  button:not([data-flat]):not(:disabled):active { transform: translateY(0.5px) scale(0.97); filter: brightness(0.92); }
+}
+
+/* CTA chips that aren't <button> elements (e.g. the dashboard "View tasks"
+   chip lives inside a flat card-button) still need hover/press feedback. */
+.dash-cta { transition: filter 0.12s ease, transform 0.08s ease; }
+.dash-cta:hover { filter: brightness(0.92); }
+.dash-cta:active { transform: scale(0.97); }
+
+/* Drag-and-drop mode: force the grab / grabbing hand cursor across the whole
+   row AND its children (the !important overrides inner buttons' pointer cursor)
+   so the hand is clearly visible the moment drag mode is on. */
+.dnd-grab, .dnd-grab * { cursor: grab !important; }
+.dnd-grabbing, .dnd-grabbing * { cursor: grabbing !important; }
+
+/* Drag-mode hand icon: subtle grow on hover. */
+.dnd-hand { transition: transform 0.12s ease; }
+.dnd-hand:hover { transform: scale(1.25); }
+
 /* Thin custom scrollbar — kicks in on `.retina-thin-scroll` */
 .retina-thin-scroll {
   scrollbar-width: thin;

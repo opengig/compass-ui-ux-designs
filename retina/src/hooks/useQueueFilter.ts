@@ -5,6 +5,10 @@ import { useReviewStore } from '../stores/useReviewStore';
 
 export type QueueTab = 'all' | 'high' | 'amber' | 'low' | 'submitted' | 'approved';
 
+export type QueueSort = 'newest' | 'oldest' | 'name' | 'confLow' | 'confHigh';
+
+const VALID_SORTS: QueueSort[] = ['newest', 'oldest', 'name', 'confLow', 'confHigh'];
+
 export type QueueFilterTab = {
   label: string;
   count: number;
@@ -26,6 +30,31 @@ export function useQueueFilter(articles: ArticleData[], forcedTab?: QueueTab) {
   const [searchParams, setSearchParams] = useSearchParams();
   const queueTab = forcedTab ?? parseTab(searchParams.get('tab'));
   const searchQuery = searchParams.get('q') ?? '';
+  const categories = (searchParams.get('cat') ?? '').split(',').filter(Boolean);
+  const sortBy: QueueSort = (() => {
+    const v = searchParams.get('sort');
+    return v && (VALID_SORTS as string[]).includes(v) ? (v as QueueSort) : 'newest';
+  })();
+
+  const setCategories = (next: string[]) => {
+    const params = new URLSearchParams(searchParams);
+    if (next.length === 0) {
+      params.delete('cat');
+    } else {
+      params.set('cat', next.join(','));
+    }
+    setSearchParams(params, { replace: true });
+  };
+
+  const setSortBy = (sort: QueueSort) => {
+    const params = new URLSearchParams(searchParams);
+    if (sort === 'newest') {
+      params.delete('sort');
+    } else {
+      params.set('sort', sort);
+    }
+    setSearchParams(params, { replace: true });
+  };
 
   const setQueueTab = (tab: QueueTab) => {
     const next = new URLSearchParams(searchParams);
@@ -70,7 +99,7 @@ export function useQueueFilter(articles: ArticleData[], forcedTab?: QueueTab) {
           ? approvedArticles
           : pendingArticles;
 
-    return pool.filter((article) => {
+    const matched = pool.filter((article) => {
       const tabMatch =
         queueTab === 'all' ||
         queueTab === 'submitted' ||
@@ -83,9 +112,28 @@ export function useQueueFilter(articles: ArticleData[], forcedTab?: QueueTab) {
         searchQuery.length === 0 ||
         [article.name, article.aplCode].join(' ').toLowerCase().includes(searchQuery.toLowerCase());
 
-      return tabMatch && searchMatch;
+      const categoryMatch = categories.length === 0 || categories.includes(article.category);
+
+      return tabMatch && searchMatch && categoryMatch;
     });
-  }, [pendingArticles, submittedArticles, approvedArticles, queueTab, searchQuery]);
+
+    const order = matched.map((article, index) => ({ article, index }));
+    order.sort((a, b) => {
+      switch (sortBy) {
+        case 'oldest':
+          return b.index - a.index;
+        case 'name':
+          return a.article.name.localeCompare(b.article.name);
+        case 'confLow':
+          return a.article.confidence - b.article.confidence;
+        case 'confHigh':
+          return b.article.confidence - a.article.confidence;
+        default:
+          return a.index - b.index; // newest first = insertion order
+      }
+    });
+    return order.map((entry) => entry.article);
+  }, [pendingArticles, submittedArticles, approvedArticles, queueTab, searchQuery, categories.join(','), sortBy]);
 
   const filterTabs = useMemo<QueueFilterTab[]>(
     () => [
@@ -104,6 +152,10 @@ export function useQueueFilter(articles: ArticleData[], forcedTab?: QueueTab) {
     setQueueTab,
     searchQuery,
     setSearchQuery,
+    categories,
+    setCategories,
+    sortBy,
+    setSortBy,
     filteredArticles,
     filterTabs,
   };

@@ -1,172 +1,226 @@
 // @ts-nocheck
 import { useNavigate } from "react-router-dom";
-import { ChevronRight, AlertTriangle, Sparkles, ClipboardCheck } from "lucide-react";
-import { C, T } from "../data/tokens";
-import { ARTS } from "../data/mockData";
+import { ArrowRight } from "lucide-react";
+import { C } from "../data/tokens";
+import { ARTS, APPR } from "../data/mockData";
 import { useNutritionist } from "../NutritionistContext";
 
 /**
- * Dashboard screen — simplified per 26 May review.
+ * Dashboard screen — CMP Autobot-style work view (29 May review).
  *
- * Why: nutritionist persona is not a chart consumer. She wants to know
- * "what needs my attention today?" — so the dashboard is reduced to a few
- * actionable counts and a prominent jump-into-queue panel. No graphs.
+ * ROW 1  Work Progress (all-time gauge) + 4 metric cards
+ *        (Pending / Approved / Reviewed / Retired APL).
+ * ROW 2  Per-queue progress rows — brand-coloured only.
+ *
+ * Full-bleed width (no max-width gutter). Per-queue daily flow numbers are
+ * demo data (the mock ARTS feed has no per-day movement); the metric cards
+ * stay tied to live ARTS counts.
  */
 
-export function DashboardScreen() {
-  const navigate = useNavigate();
-  const { selectedSites, setQueueTab, setHighlightArtIds } = useNutritionist();
-  const goApp = (s) => navigate(`/nutritionist/${s}`);
-  const siteArts = ARTS.filter(a => selectedSites.includes(a.site))
+const BRAND = { accent: C.pr, text: C.am, soft: "#FEF3E0", border: C.amBdr };
 
-  const amberCount = siteArts.filter(a=>a.status==="amber").length
-  const redCount   = siteArts.filter(a=>a.status==="red").length
-  const greenCount = siteArts.filter(a=>a.status==="green").length
-  const smeCount   = siteArts.filter(a=>a.sme===true).length
-  const pendingTotal = amberCount + redCount
-
+/* Semi-circle gauge — brand fill. */
+function SemiCircleGauge({ pct, size = 120, stroke = 12 }) {
+  const radius = (size - stroke) / 2;
+  const cx = size / 2;
+  const cy = radius + stroke / 2;
+  const arcPath = `M ${cx - radius} ${cy} A ${radius} ${radius} 0 0 1 ${cx + radius} ${cy}`;
+  const arcLength = Math.PI * radius;
+  const dash = (Math.max(0, Math.min(100, pct)) / 100) * arcLength;
+  const svgHeight = radius + stroke;
   return (
-    <div className="flex-1 flex flex-col overflow-hidden" style={{backgroundColor:C.page}}>
-      {/* Header */}
-      <div className="flex-shrink-0 px-6 flex items-center justify-between" style={{height:72, backgroundColor:C.page, borderBottom:`1px solid ${C.border}`}}>
-        <div>
-          <h1 style={{fontSize:16, fontWeight:600, color:C.ink2, letterSpacing:"-0.01em", lineHeight:1.2}}>
-            Welcome back, Priya
-          </h1>
-          <p style={{fontSize:11, fontWeight:400, color:C.mutedFg, marginTop:2}}>
-            {new Date().toLocaleDateString("en-IN", {weekday:"long", day:"numeric", month:"long"})}
-          </p>
+    <svg width={size} height={svgHeight} viewBox={`0 0 ${size} ${svgHeight}`} role="img" aria-label={`Work progress: ${Math.round(pct)} percent`}>
+      <path d={arcPath} fill="none" stroke={C.border} strokeWidth={stroke} strokeLinecap="round" />
+      <path d={arcPath} fill="none" stroke={C.gr} strokeWidth={stroke} strokeLinecap="round"
+        strokeDasharray={`${dash} ${arcLength}`} style={{ transition: "stroke-dasharray 500ms ease" }} />
+    </svg>
+  );
+}
+
+/* Metric card — previous style: uppercase label, big number, sub-line, accent edge. */
+function MetricCard({ label, val, sub, accent }) {
+  return (
+    <div style={{
+      backgroundColor: C.card, borderRadius: 8, padding: "16px 14px",
+      border: `1px solid ${C.border}`, borderLeft: `3px solid ${accent}`,
+      boxShadow: "0 1px 2px rgba(26,26,26,0.04)",
+    }}>
+      <p style={{ fontSize: 10, fontWeight: 600, color: C.mutedFg, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{label}</p>
+      <p style={{ fontSize: 24, fontWeight: 700, color: C.fg, lineHeight: 1.1, letterSpacing: "-0.02em", fontFeatureSettings: '"tnum"', marginBottom: 4 }}>{val}</p>
+      <p style={{ fontSize: 11, color: C.mutedFg }}>{sub}</p>
+    </div>
+  );
+}
+
+/* ActivityRow — one queue. Brand-coloured throughout. */
+function ActivityRow({ label, helper, cell, onClick }) {
+  const { completedToday, remainingOld, newToday } = cell;
+  const total = completedToday + remainingOld + newToday;
+  const progressPct = total > 0 ? Math.max(0, Math.min(100, Math.round((completedToday / total) * 100))) : 0;
+  const open = remainingOld + newToday;
+  return (
+    <button
+      onClick={onClick}
+      data-flat
+      className="text-left"
+      style={{
+        backgroundColor: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
+        padding: "14px 20px", cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+        display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", columnGap: 24, alignItems: "stretch",
+      }}
+    >
+      {/* LEFT */}
+      <div className="min-w-0 flex flex-col" style={{ gap: 9 }}>
+        <div className="flex flex-col" style={{ gap: 4 }}>
+          <span style={{
+            alignSelf: "flex-start", fontSize: 10, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.08em",
+            color: BRAND.text, backgroundColor: BRAND.soft, border: `1px solid ${BRAND.border}`,
+            borderRadius: 6, padding: "3px 8px",
+          }}>
+            {label}
+          </span>
+          <p style={{ fontSize: 12, color: C.mutedFg, lineHeight: 1.4 }}>{helper}</p>
+        </div>
+        <div className="flex flex-wrap items-center" style={{ gap: 16, fontSize: 11.5, fontFeatureSettings: '"tnum"' }}>
+          <span style={{ color: C.ink2, fontWeight: 500 }}>Remaining: <span style={{ color: C.fg }}>{remainingOld}</span></span>
+          <span style={{ color: C.ink2, fontWeight: 500 }}>New today: <span style={{ color: C.fg }}>+{newToday}</span></span>
         </div>
       </div>
 
-      {/* Body */}
+      {/* RIGHT */}
+      <div className="flex flex-col items-end justify-between" style={{ gap: 8, minWidth: 120 }}>
+        <div style={{ textAlign: "right" }}>
+          <p style={{ fontSize: 15, fontWeight: 700, color: C.fg, lineHeight: 1, fontFeatureSettings: '"tnum"' }}>Open: {open}</p>
+        </div>
+        <span className="dash-cta" style={{
+          display: "inline-flex", alignItems: "center", gap: 5,
+          fontSize: 11.5, fontWeight: 700, color: "#fff", backgroundColor: C.pr, border: `1px solid ${C.pr}`,
+          borderRadius: 7, padding: "6px 12px", whiteSpace: "nowrap",
+          boxShadow: "0 1px 2px rgba(198,138,30,0.25)",
+        }}>
+          View tasks <ArrowRight size={12} color="#fff" />
+        </span>
+      </div>
+    </button>
+  );
+}
+
+export function DashboardScreen() {
+  const navigate = useNavigate();
+  const { selectedSites, setQueueTab } = useNutritionist();
+  const goApp = (s) => navigate(`/nutritionist/${s}`);
+  const goQueue = (tab) => { setQueueTab(tab); goApp("queue"); };
+
+  // ── Live counts for the metric cards ──
+  const siteArts = ARTS.filter((a) => selectedSites.includes(a.site));
+  const pendingReview = siteArts.filter((a) => a.status === "amber" || a.status === "red").length;
+  const approvedArticles = [...new Set(APPR.map((a) => a.artId))]
+    .map((id) => ARTS.find((a) => a.id === id))
+    .filter((a) => a && selectedSites.includes(a.site)).length;
+  const reviewedArticles = siteArts.length;
+  const retiredApl = siteArts.filter((a) => a.retired).length;
+
+  // ── Per-queue flow (demo) ──
+  const movement = {
+    green: { completedToday: 6, newToday: 3, remainingOld: 5 },
+    amber: { completedToday: 5, newToday: 8, remainingOld: 17 },
+    red:   { completedToday: 2, newToday: 4, remainingOld: 10 },
+    sme:   { completedToday: 0, newToday: 1, remainingOld: 2 },
+  };
+
+  // ── All-time work progress (overall, not "today") ──
+  const completedAll = Object.values(movement).reduce((s, m) => s + m.completedToday, 0);
+  const totalAll = Object.values(movement).reduce((s, m) => s + m.completedToday + m.newToday + m.remainingOld, 0);
+  const progressPct = totalAll > 0 ? Math.round((completedAll / totalAll) * 100) : 0;
+
+  return (
+    <div className="flex-1 flex flex-col overflow-hidden" style={{ backgroundColor: C.page }}>
+      {/* Header */}
+      <div className="flex-shrink-0 px-6 flex items-center justify-between" style={{ height: 56, borderBottom: `1px solid ${C.border}` }}>
+        <div className="flex items-baseline" style={{ gap: 10 }}>
+          <h1 style={{ fontSize: 15, fontWeight: 600, color: C.ink2, letterSpacing: "-0.01em" }}>Welcome back, Priya</h1>
+          <span style={{ fontSize: 11, color: C.mutedFg }}>
+            {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
+          </span>
+        </div>
+      </div>
+
+      {/* Body — full width */}
       <div className="flex-1 overflow-y-auto px-6 py-5">
-        <div className="max-w-4xl mx-auto flex flex-col gap-4">
+        <div className="flex flex-col" style={{ gap: 18 }}>
 
-          {/* PRIMARY action card — Needs Attention (largest, top) */}
-          <button
-            onClick={()=>{ setQueueTab("amber"); goApp("queue") }}
-            className="text-left"
-            style={{
-              backgroundColor:"#FEF3E0",
-              border:`1px solid #E8C97A`,
-              borderLeft:`6px solid ${C.pr}`,
-              borderRadius:10,
-              padding:"22px 24px",
-              display:"flex", alignItems:"center", gap:18,
-              cursor:"pointer", transition:"background-color 0.15s",
-            }}
-            onMouseEnter={e=>e.currentTarget.style.backgroundColor="#FDE8C0"}
-            onMouseLeave={e=>e.currentTarget.style.backgroundColor="#FEF3E0"}>
-            <div style={{
-              width:56, height:56, borderRadius:"50%",
-              backgroundColor:"#fff", border:`1.5px solid ${C.amBdr}`,
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-            }}>
-              <AlertTriangle size={26} color={C.pr} strokeWidth={2}/>
-            </div>
-            <div className="flex-1">
-              <p style={{fontSize:10,fontWeight:700,color:C.am,textTransform:"uppercase",letterSpacing:"0.09em",marginBottom:4}}>Needs your attention</p>
-              <p style={{fontSize:22,fontWeight:700,color:C.ink2,lineHeight:1.2,marginBottom:4}}>
-                {pendingTotal} {pendingTotal === 1 ? "article" : "articles"} pending review
-              </p>
-              <p style={{fontSize:13,color:C.mutedFg,lineHeight:1.5}}>
-                {amberCount} need review · {redCount} need fix
-              </p>
-            </div>
-            <ChevronRight size={20} style={{color:C.am,flexShrink:0}}/>
-          </button>
-
-          {/* SME updates */}
-          {smeCount > 0 && (
-            <button
-              onClick={()=>{ setQueueTab("sme"); goApp("queue") }}
-              className="text-left"
-              style={{
-                backgroundColor:"#EEF2FF",
-                border:`1px solid #C7D2FE`,
-                borderLeft:`6px solid #4F46E5`,
-                borderRadius:10,
-                padding:"18px 22px",
-                display:"flex", alignItems:"center", gap:16,
-                cursor:"pointer", transition:"background-color 0.15s",
-              }}
-              onMouseEnter={e=>e.currentTarget.style.backgroundColor="#E0E7FF"}
-              onMouseLeave={e=>e.currentTarget.style.backgroundColor="#EEF2FF"}>
-              <div style={{
-                width:44, height:44, borderRadius:"50%",
-                backgroundColor:"#fff", border:`1.5px solid #C7D2FE`,
-                display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-              }}>
-                <Sparkles size={20} color="#4F46E5" strokeWidth={2}/>
-              </div>
-              <div className="flex-1">
-                <p style={{fontSize:10,fontWeight:700,color:"#3730A3",textTransform:"uppercase",letterSpacing:"0.09em",marginBottom:3}}>From SME</p>
-                <p style={{fontSize:15,fontWeight:600,color:C.ink2,lineHeight:1.4}}>
-                  {smeCount} {smeCount === 1 ? "article was" : "articles were"} updated by Article SME
-                </p>
-              </div>
-              <ChevronRight size={18} style={{color:"#4F46E5",flexShrink:0}}/>
-            </button>
-          )}
-
-          {/* Summary snapshot — simple counts, no charts */}
-          <div>
-            <p style={{...T.label, color:C.mutedFg, fontSize:10, marginBottom:8}}>Summary</p>
-            <div className="grid grid-cols-3 gap-3">
-              {[
-                {label:"Pending Reviews", val:String(amberCount + redCount), sub:"Awaiting your review",  color:C.fg, accent:C.pr},
-                {label:"Approved Items",  val:String(greenCount),            sub:"Ready to Cookbook",     color:C.fg, accent:C.gr},
-                {label:"Reviewed Items",  val:String(siteArts.length),       sub:"Total profiles reviewed", color:C.fg, accent:C.info},
-              ].map(m => (
-                <div key={m.label}
-                  style={{
-                    backgroundColor:C.card, borderRadius:8, padding:"16px 14px",
-                    border:`1px solid ${C.border}`, borderLeft:`3px solid ${m.accent}`,
-                    boxShadow:"0 1px 2px rgba(26,26,26,0.04)",
-                  }}>
-                  <p style={{...T.kpiLabel, fontSize:10, marginBottom:6}}>{m.label}</p>
-                  <p style={{fontSize:24,fontWeight:700,color:m.color,lineHeight:1.1,letterSpacing:"-0.02em",fontFeatureSettings:'"tnum"',marginBottom:4}}>{m.val}</p>
-                  <p style={{fontSize:11, color:C.mutedFg}}>{m.sub}</p>
+          {/* ── ROW 1 — Work Progress gauge + 4 metric cards ── */}
+          <div className="grid" style={{ gridTemplateColumns: "1.8fr 1fr 1fr 1fr 1fr", gap: 12, alignItems: "stretch" }}>
+            {/* Work Progress (all-time) */}
+            <div style={{ backgroundColor: C.card, border: `1px solid ${C.border}`, borderRadius: 10, padding: "14px 16px" }}>
+              <p style={{ fontSize: 10.5, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.16em", color: C.mutedFg }}>Work Progress</p>
+              <div className="flex items-center" style={{ gap: 16, marginTop: 8 }}>
+                <div style={{ position: "relative", width: 120, flexShrink: 0 }}>
+                  <SemiCircleGauge pct={progressPct} size={120} stroke={12} />
+                  <div style={{ position: "absolute", left: 0, right: 0, bottom: 2, textAlign: "center" }}>
+                    <span style={{ fontSize: 20, fontWeight: 700, color: C.fg, fontFeatureSettings: '"tnum"' }}>{progressPct}%</span>
+                  </div>
                 </div>
-              ))}
+                <div className="flex-1 min-w-0 flex flex-col" style={{ gap: 4 }}>
+                  <div style={{ fontSize: 24, fontWeight: 700, color: C.fg, lineHeight: 1.05, letterSpacing: "-0.02em", fontFeatureSettings: '"tnum"' }}>
+                    {completedAll}
+                    <span style={{ color: C.ink4, margin: "0 4px" }}>/</span>
+                    {totalAll}
+                    <span style={{ fontSize: 12.5, fontWeight: 400, color: C.mutedFg, marginLeft: 8 }}>reviewed</span>
+                  </div>
+                  <button
+                    onClick={() => goQueue("all")}
+                    style={{
+                      marginTop: 6, alignSelf: "flex-start",
+                      display: "inline-flex", alignItems: "center", gap: 6,
+                      fontSize: 12, fontWeight: 700, color: "#fff", backgroundColor: C.pr, border: `1px solid ${C.pr}`,
+                      borderRadius: 7, padding: "6px 12px", cursor: "pointer",
+                      boxShadow: "0 1px 2px rgba(198,138,30,0.25)",
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.backgroundColor = C.prHov; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.backgroundColor = C.pr; }}>
+                    Continue review <ArrowRight size={12} color="#fff" />
+                  </button>
+                </div>
+              </div>
             </div>
+
+            <MetricCard label="Pending Reviews" val={pendingReview}    sub="Awaiting your review"     accent={C.pr} />
+            <MetricCard label="Approved Items"  val={approvedArticles} sub="Ready to Cookbook"        accent={C.gr} />
+            <MetricCard label="Reviewed Items"  val={reviewedArticles} sub="Total profiles reviewed"  accent={C.info} />
+            <MetricCard label="Retired APL"     val={retiredApl}       sub="Mapped article retired"   accent={C.mutedFg} />
           </div>
 
-          {/* Quick jump — Approved */}
-          <button
-            onClick={()=>goApp("approved")}
-            className="text-left"
-            style={{
-              backgroundColor:C.card,
-              border:`1px solid ${C.border}`,
-              borderRadius:10,
-              padding:"14px 18px",
-              display:"flex", alignItems:"center", gap:14,
-              cursor:"pointer", transition:"background-color 0.15s",
-            }}
-            onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.muted}
-            onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.card}>
-            <div style={{
-              width:36, height:36, borderRadius:8,
-              backgroundColor:C.grBg, border:`1px solid ${C.grBdr}`,
-              display:"flex", alignItems:"center", justifyContent:"center", flexShrink:0,
-            }}>
-              <ClipboardCheck size={16} color={C.gr} strokeWidth={2}/>
-            </div>
-            <div className="flex-1">
-              <p style={{fontSize:13,fontWeight:600,color:C.fg,lineHeight:1.3}}>
-                Recently submitted
-              </p>
-              <p style={{fontSize:11,color:C.mutedFg,marginTop:2}}>
-                View articles pushed to Cookbook
-              </p>
-            </div>
-            <ChevronRight size={16} style={{color:C.mutedFg,flexShrink:0}}/>
-          </button>
+          {/* ── ROW 2 — Per-queue progress (no section title) ── */}
+          <div className="flex flex-col" style={{ gap: 12 }}>
+            <ActivityRow
+              label="Ready to Cookbook Articles"
+              helper="High-confidence items, you can map quickly."
+              cell={movement.green}
+              onClick={() => goQueue("green")}
+            />
+            <ActivityRow
+              label="Need To Review Articles"
+              helper="Low-confidence articles that need quick review."
+              cell={movement.amber}
+              onClick={() => goQueue("amber")}
+            />
+            <ActivityRow
+              label="Need To Fix Articles"
+              helper="Low-confidence articles that need to be fixed."
+              cell={movement.red}
+              onClick={() => goQueue("red")}
+            />
+            <ActivityRow
+              label="Article SME Updated Articles"
+              helper="Updated by the Article SME."
+              cell={movement.sme}
+              onClick={() => goQueue("sme")}
+            />
+          </div>
 
         </div>
       </div>
     </div>
-  )
+  );
 }

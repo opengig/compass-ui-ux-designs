@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import {
-  LayoutDashboard, ClipboardList, Send,
+  LayoutDashboard, Inbox, Send,
   Building, Check,
 } from "lucide-react";
 import { ALL_SITES } from "../data/sites";
@@ -25,7 +25,7 @@ export function SideNav() {
 
   const NAV = [
     { key: "dashboard", label: "Dashboard", Icon: LayoutDashboard, path: NUTRITIONIST_ROUTES.dashboard },
-    { key: "queue",     label: "Tasks",     Icon: ClipboardList,   path: NUTRITIONIST_ROUTES.queue, badge: pendingCount > 0 ? pendingCount : null },
+    { key: "queue",     label: "Tasks",     Icon: Inbox,           path: NUTRITIONIST_ROUTES.queue, badge: pendingCount > 0 ? pendingCount : null },
     { key: "approved",  label: "Submitted", Icon: Send,            path: NUTRITIONIST_ROUTES.approved },
   ];
 

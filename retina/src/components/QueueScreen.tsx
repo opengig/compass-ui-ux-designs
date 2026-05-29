@@ -49,6 +49,7 @@ export function QueueScreen({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
           onSelectProduct={onSelectProduct}
           visibleArticleIds={filteredArticles.map((item) => item.id)}
           width={listWidth}
+          readOnly={variant === 'submitted'}
         />
         <Resizer
           onResize={onListResize}

@@ -1,6 +1,6 @@
 // @ts-nocheck
 import { useState, useRef, useEffect } from "react";
-import { Lock, Check, X, ChevronUp, ChevronDown, Plus, Copy, Trash2, RefreshCw } from "lucide-react";
+import { Lock, Check, X, ChevronUp, ChevronDown, Plus, Copy, Trash2, RefreshCw, ChevronsDownUp, ChevronsUpDown } from "lucide-react";
 import { C } from "../data/tokens";
 import { NNAMES, computeDisplayNuts } from "../data/nutrients";
 import { useOFFImages } from "../hooks/useOFFImages";
@@ -35,7 +35,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
   const [gtinCopied, setGtinCopied] = useState(false)
   const gtin = `8901${art.apl.replace("APL-","").padStart(9,"0")}`
   // Section order: Allergens → May Contain → Nutrients → Ingredients (Ingredients last; FYI only)
-  const [sec, setSec]             = useState({allergens:true, mayContain:true, nutrients:false, reasons:false, ingredients:false})
+  const [sec, setSec]             = useState({allergens:true, mayContain:true, nutrients:true, reasons:true, ingredients:true})
   const allExpanded = sec.allergens && sec.mayContain && sec.nutrients && sec.reasons && sec.ingredients
   const toggleAllSections = () => {
     const next = !allExpanded
@@ -53,6 +53,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
   const [rescanOpen, setRescanOpen]   = useState(false)
   const [rescanRemark, setRescanRemark] = useState("")
   const [approveOpen, setApproveOpen] = useState(false)
+  const [removeOpen, setRemoveOpen]   = useState(false)
   const [topToast, setTopToast]       = useState(null) // message string | null
   const showTopToast = (msg) => { setTopToast(msg); setTimeout(()=>setTopToast(null), 3500) }
   const imgContainerRef           = useRef(null)
@@ -228,6 +229,19 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
             </div>
 
           </div>
+          {/* Collapse all / expand all — same control as the Article SME detail */}
+          <button
+            type="button"
+            onClick={toggleAllSections}
+            title={allExpanded ? "Collapse all" : "Expand all"}
+            className="flex-shrink-0 inline-flex items-center gap-1.5"
+            style={{ height:32, padding:"0 12px", borderRadius:8, fontSize:12.5, fontWeight:500,
+                     backgroundColor:C.card, color:C.fg, border:`1px solid ${C.border}`, cursor:"pointer" }}
+            onMouseEnter={e=>{ e.currentTarget.style.backgroundColor=C.muted }}
+            onMouseLeave={e=>{ e.currentTarget.style.backgroundColor=C.card }}>
+            {allExpanded ? <ChevronsDownUp size={14}/> : <ChevronsUpDown size={14}/>}
+            {allExpanded ? "Collapse All" : "Expand All"}
+          </button>
         </div>
 
         {/* ── Body: LEFT details form + RIGHT photo column ── */}
@@ -334,7 +348,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                         style={{
                           width:52, height:52, flexShrink:0,
                           borderRadius:8, overflow:"hidden",
-                          border: i===activeImg ? `2.5px solid ${C.fg}` : `1.5px solid ${C.border}`,
+                          border: i===activeImg ? `2.5px solid ${C.pr}` : `1.5px solid ${C.border}`,
                           backgroundColor: C.muted,
                           cursor:"pointer", padding:0,
                           transition:"border-color 0.12s, box-shadow 0.12s",
@@ -355,13 +369,6 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                       </button>
                       )
                     })}
-                    {offLink && (
-                      <a href={offLink} target="_blank" rel="noopener noreferrer"
-                        style={{marginLeft:"auto",fontSize:9,color:C.mutedFg,textDecoration:"none",whiteSpace:"nowrap",flexShrink:0}}
-                        title="View on Open Food Facts">
-                        📷 OFF
-                      </a>
-                    )}
                   </div>
                 </div>{/* end RIGHT PHOTO PANEL */}
 
@@ -691,30 +698,33 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
 
             {/* ══════ REASONS — last section; plain sentences, no color ══════ */}
             <div style={{border:`1px solid ${C.border}`, borderRadius:14, boxShadow:"0 2px 8px rgba(0,0,0,0.06)", backgroundColor:"#fff", overflow:"hidden", margin:"0 18px 16px"}}>
-              <SectionHdr k="reasons" label="Reasons"/>
+              <SectionHdr k="reasons" label="Activity"/>
               {sec.reasons && (
                 <div className="px-5 py-4" style={{backgroundColor:"#fff"}}>
                   {(() => {
+                    // Activity timeline — same shape as the Article SME log, but
+                    // without an action-taker name (only the action + timestamp).
                     const isGreen = art.status === "green"
                     const isRed   = art.status === "red"
                     const bucket  = isGreen ? "Ready To Cookbook" : isRed ? "To Fix" : "To Review"
-                    const reasons = art.reasons.length > 0
-                      ? art.reasons
-                      : isGreen
-                        ? ["All values scanned and verified","No allergen discrepancies detected","Nutritional data complete"]
-                        : isRed
-                          ? ["Critical data missing or unverifiable"]
-                          : ["Requires manual verification"]
-                    const sentences = reasons.map(r => /[.!?]$/.test(r.trim()) ? r.trim() : r.trim() + ".")
+                    const activities = []
+                    if (art.rescanRequested)       activities.push({ text: "Re-scan requested", time: art.updatedAt || art.at })
+                    if (art.sme)                   activities.push({ text: "Updated by Article SME", time: art.updatedAt || art.at })
+                    if (art.updatedAt && !art.sme) activities.push({ text: "Nutrition details updated", time: art.updatedAt })
+                    activities.push({ text: `Auto-classified as ${bucket}`, time: art.at })
+                    activities.push({ text: `Scanned via ${art.scanned}`, time: art.at })
                     return (
-                      <>
-                        <p style={{fontSize:12, color:C.mutedFg, marginBottom:8, lineHeight:1.5}}>
-                          Why this article is in the <span style={{fontWeight:700, color:C.fg}}>{bucket}</span> list:
-                        </p>
-                        <p style={{fontSize:13, color:C.fg, lineHeight:1.75}}>
-                          {sentences.join(" ")}
-                        </p>
-                      </>
+                      <ol style={{ listStyle: "none", margin: 0, padding: 0 }}>
+                        {activities.map((act, i) => (
+                          <li key={i} className="flex items-start gap-2" style={{ marginBottom: i === activities.length - 1 ? 0 : 10 }}>
+                            <span style={{ marginTop: 6, width: 7, height: 7, borderRadius: "50%", backgroundColor: C.pr, flexShrink: 0 }}/>
+                            <div style={{ minWidth: 0 }}>
+                              <p style={{ fontSize: 12.5, color: C.fg, lineHeight: 1.4 }}>{act.text}</p>
+                              {act.time && <p style={{ fontSize: 10.5, color: C.mutedFg, marginTop: 2 }}>{act.time}</p>}
+                            </div>
+                          </li>
+                        ))}
+                      </ol>
                     )
                   })()}
                 </div>
@@ -774,7 +784,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
               This APL is retired — it can no longer be edited or approved.
             </span>
             <button
-              onClick={()=>{ removeArticle(art.id); showToast("APL retired article was removed"); onClose?.() }}
+              onClick={()=>setRemoveOpen(true)}
               style={{
                 display:"inline-flex", alignItems:"center", gap:6,
                 padding:"8px 16px", borderRadius:8,
@@ -837,7 +847,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                   Cancel
                 </button>
                 <button
-                  onClick={()=>{ setRescanOpen(false); showTopToast("Re-scan request sent") }}
+                  onClick={()=>{ setRescanOpen(false); showToast("Re-scan request sent") }}
                   style={{padding:"8px 16px",borderRadius:8,fontSize:13,fontWeight:700,backgroundColor:C.pr,color:"#fff",border:`1px solid ${C.pr}`,cursor:"pointer"}}
                   onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.prHov}
                   onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.pr}>
@@ -888,11 +898,62 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                   Cancel
                 </button>
                 <button
-                  onClick={()=>{ setApproveOpen(false); showTopToast("Approved & pushed to Cookbook") }}
+                  onClick={()=>{ setApproveOpen(false); showToast("Approved & pushed to Cookbook") }}
                   style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,fontSize:13,fontWeight:700,backgroundColor:C.pr,color:"#fff",border:`1px solid ${C.pr}`,cursor:"pointer"}}
                   onMouseEnter={e=>e.currentTarget.style.backgroundColor=C.prHov}
                   onMouseLeave={e=>e.currentTarget.style.backgroundColor=C.pr}>
                   <Check size={13} strokeWidth={3}/> Confirm
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ── Remove Entirely confirmation modal ── */}
+        {removeOpen && (
+          <div className="fixed inset-0 z-[200] flex items-center justify-center"
+            style={{backgroundColor:"rgba(15,23,42,0.5)", backdropFilter:"blur(2px)"}}
+            onClick={()=>setRemoveOpen(false)}>
+            <div onClick={e=>e.stopPropagation()}
+              style={{width:440, maxWidth:"92vw", backgroundColor:"#fff", borderRadius:14,
+                      border:`1px solid ${C.border}`, boxShadow:"0 24px 64px rgba(0,0,0,0.25)", overflow:"hidden"}}>
+              {/* Header */}
+              <div className="flex items-center justify-between px-5 py-3.5" style={{borderBottom:`1px solid ${C.border}`}}>
+                <span style={{fontSize:14,fontWeight:700,color:C.fg}}>Remove Retired APL</span>
+                <button onClick={()=>setRemoveOpen(false)} aria-label="Close"
+                  className="inline-flex items-center justify-center w-7 h-7 rounded-md text-muted-foreground hover:bg-muted/50">
+                  <X size={15}/>
+                </button>
+              </div>
+              {/* Body */}
+              <div className="px-5 py-4 space-y-3">
+                <div className="flex items-center gap-3">
+                  <div style={{width:56,height:56,flexShrink:0,borderRadius:8,overflow:"hidden",backgroundColor:C.muted,border:`1px solid ${C.border}`}}>
+                    {resolvedImgs(0)
+                      ? <img src={resolvedImgs(0)} alt={art.name} style={{width:"100%",height:"100%",objectFit:"cover",display:"block"}}/>
+                      : <div style={{width:"100%",height:"100%",display:"flex",alignItems:"center",justifyContent:"center",fontSize:9,color:C.mutedFg}}>No image</div>}
+                  </div>
+                  <div className="min-w-0">
+                    <p style={{fontSize:14,fontWeight:700,color:C.fg,lineHeight:1.3}}>{art.name}</p>
+                    <p style={{fontSize:12,color:C.mutedFg,fontFeatureSettings:'"tnum"',marginTop:2}}>APL: {art.apl}</p>
+                  </div>
+                </div>
+                <p style={{fontSize:12.5,color:C.mutedFg,lineHeight:1.5}}>
+                  This will permanently remove this retired APL article from the list. This cannot be undone.
+                </p>
+              </div>
+              {/* Footer */}
+              <div className="flex items-center justify-end gap-2 px-5 py-3.5" style={{borderTop:`1px solid ${C.border}`}}>
+                <button onClick={()=>setRemoveOpen(false)}
+                  style={{padding:"8px 14px",borderRadius:8,fontSize:13,fontWeight:600,backgroundColor:"#fff",color:C.mutedFg,border:`1px solid ${C.border2}`,cursor:"pointer"}}>
+                  Cancel
+                </button>
+                <button
+                  onClick={()=>{ setRemoveOpen(false); removeArticle(art.id); showToast("APL retired article was removed"); onClose?.() }}
+                  style={{display:"inline-flex",alignItems:"center",gap:6,padding:"8px 16px",borderRadius:8,fontSize:13,fontWeight:700,backgroundColor:"#B42318",color:"#fff",border:"1px solid #B42318",cursor:"pointer"}}
+                  onMouseEnter={e=>e.currentTarget.style.backgroundColor="#9A1C13"}
+                  onMouseLeave={e=>e.currentTarget.style.backgroundColor="#B42318"}>
+                  <Trash2 size={13}/> Remove Entirely
                 </button>
               </div>
             </div>
