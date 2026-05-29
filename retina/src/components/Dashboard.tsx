@@ -11,45 +11,9 @@ import {
   Tooltip as RTooltip,
 } from 'recharts';
 import { ARTS, SITES } from '../data/mockData';
-
-// ─── Colour tokens ────────────────────────────────────────────────────────────
-const C = {
-  page:    '#FBF9F5',
-  card:    '#FFFFFF',
-  border:  '#E4DDCE',
-  fg:      '#1A1A1A',
-  ink2:    '#4A463E',
-  mutedFg: '#8A8275',
-  surfHov: '#F5F3EE',
-  pr:      '#C68A1E',   // primary amber
-  prBdr:   '#E8C97A',   // primary border (lighter amber)
-  gr:      '#16A34A',   // green
-  am:      '#B45309',   // amber-dark (attention)
-  info:    '#3B82F6',   // blue
-};
-
-// ─── Typography tokens ────────────────────────────────────────────────────────
-const T = {
-  kpiLabel: {
-    fontSize: 10,
-    fontWeight: 600,
-    color: C.mutedFg,
-    textTransform: 'uppercase' as const,
-    letterSpacing: '0.07em',
-  },
-  display: {
-    fontWeight: 700,
-    letterSpacing: '-0.02em',
-    lineHeight: 1,
-  },
-  h2: {
-    fontWeight: 600,
-  },
-  small: {
-    fontSize: 11,
-    color: C.mutedFg,
-  },
-};
+// Shared Design System tokens — one source of truth for colour + type across
+// the Nutritionist, Article SME, and Store Manager prototypes.
+import { C, T } from './nutritionist/data/tokens';
 
 // ─── Week history data ────────────────────────────────────────────────────────
 const WEEK_HISTORY: Record<string, { day: string; count: number }[]> = {
@@ -343,14 +307,14 @@ export function Dashboard({
               className="flex-shrink-0 flex items-center justify-between px-4 py-4 cursor-pointer"
               onClick={() => { setQueueTab('amber'); goApp('queue'); }}
               style={{
-                backgroundColor: '#FEF3E0',
-                border: `1px solid #E8C97A`,
+                backgroundColor: C.amBg,
+                border: `1px solid ${C.amBdr}`,
                 borderLeft: `4px solid ${C.pr}`,
                 borderRadius: 8,
                 transition: 'background-color 0.15s',
               }}
               onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#FDE8C0')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#FEF3E0')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = C.amBg)}
             >
               <div>
                 <p style={{ fontSize: 10, fontWeight: 700, color: C.am, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>
@@ -374,24 +338,24 @@ export function Dashboard({
                 setTimeout(() => setHighlightArtIds([]), 3000);
               }}
               style={{
-                backgroundColor: '#E8EEF8',
-                border: `1px solid #B8C9E8`,
-                borderLeft: '4px solid #3B5FA0',
+                backgroundColor: C.infoBg,
+                border: `1px solid ${C.infoBdr}`,
+                borderLeft: `4px solid ${C.info}`,
                 borderRadius: 8,
                 transition: 'background-color 0.15s',
               }}
-              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#D4E0F0')}
-              onMouseLeave={e => (e.currentTarget.style.backgroundColor = '#E8EEF8')}
+              onMouseEnter={e => (e.currentTarget.style.backgroundColor = '#DCE7EF')}
+              onMouseLeave={e => (e.currentTarget.style.backgroundColor = C.infoBg)}
             >
               <div>
-                <p style={{ fontSize: 10, fontWeight: 700, color: '#2A4480', textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>
+                <p style={{ fontSize: 10, fontWeight: 700, color: C.info, textTransform: 'uppercase', letterSpacing: '0.09em', marginBottom: 6 }}>
                   Incremental Article
                 </p>
-                <p style={{ fontSize: 13, fontWeight: 400, color: '#3B5FA0', lineHeight: 1.6 }}>
+                <p style={{ fontSize: 13, fontWeight: 400, color: C.info, lineHeight: 1.6 }}>
                   3 new articles added from store manager on 16 May.
                 </p>
               </div>
-              <ChevronRight size={14} style={{ color: '#3B5FA0', flexShrink: 0, marginLeft: 12 }} />
+              <ChevronRight size={14} style={{ color: C.info, flexShrink: 0, marginLeft: 12 }} />
             </div>
 
           </div>

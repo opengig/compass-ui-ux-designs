@@ -43,7 +43,7 @@ function MetricCard({ label, val, sub, accent }) {
     <div style={{
       backgroundColor: C.card, borderRadius: 8, padding: "16px 14px",
       border: `1px solid ${C.border}`, borderLeft: `3px solid ${accent}`,
-      boxShadow: "0 1px 2px rgba(26,26,26,0.04)",
+      boxShadow: "0 1px 2px rgba(26,26,26,0.05)",
     }}>
       <p style={{ fontSize: 10, fontWeight: 600, color: C.mutedFg, textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: 6 }}>{label}</p>
       <p style={{ fontSize: 24, fontWeight: 700, color: C.fg, lineHeight: 1.1, letterSpacing: "-0.02em", fontFeatureSettings: '"tnum"', marginBottom: 4 }}>{val}</p>
@@ -65,7 +65,7 @@ function ActivityRow({ label, helper, cell, onClick }) {
       className="text-left"
       style={{
         backgroundColor: C.card, border: `1px solid ${C.border}`, borderRadius: 12,
-        padding: "14px 20px", cursor: "pointer", boxShadow: "0 1px 2px rgba(0,0,0,0.04)",
+        padding: "14px 20px", cursor: "pointer", boxShadow: "0 1px 2px rgba(26,26,26,0.05)",
         display: "grid", gridTemplateColumns: "minmax(0,1fr) auto", columnGap: 24, alignItems: "stretch",
       }}
     >

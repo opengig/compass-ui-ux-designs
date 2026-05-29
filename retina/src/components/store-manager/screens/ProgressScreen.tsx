@@ -13,12 +13,12 @@ const RetinaLogo = ({ size = 20 }: { size?: number }) => (
   >
     <path
       d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z"
-      fill="#44403C"
+      fill="#4A463E"
       opacity=".55"
     />
-    <ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#44403C" />
-    <path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#44403C" />
-    <path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#44403C" />
+    <ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#4A463E" />
+    <path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#4A463E" />
+    <path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#4A463E" />
   </svg>
 );
 
@@ -39,7 +39,7 @@ export function ProgressScreen() {
       >
         <div
           className="font-semibold flex items-center gap-[7px]"
-          style={{ fontSize: '17px', color: '#2B2A26' }}
+          style={{ fontSize: '17px', color: '#1A1A1A' }}
         >
           <RetinaLogo />
           Progress
@@ -48,12 +48,12 @@ export function ProgressScreen() {
 
       <div
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
-        style={{ padding: '10px 14px 12px', background: '#FBF8F0' }}
+        style={{ padding: '10px 14px 12px', background: '#FBF9F5' }}
       >
         {/* Gamification banner */}
         <div
           style={{
-            background: 'linear-gradient(135deg,#C68A1E,#44403C)',
+            background: 'linear-gradient(135deg,#C68A1E,#4A463E)',
             borderRadius: '12px',
             padding: '13px 15px',
             position: 'relative',
@@ -72,7 +72,7 @@ export function ProgressScreen() {
           <div className="flex items-center gap-2.5">
             <div
               className="font-bold"
-              style={{ fontSize: '28px', color: '#F1ECDD', lineHeight: 1 }}
+              style={{ fontSize: '28px', color: '#ECE6DA', lineHeight: 1 }}
             >
               7
             </div>
@@ -99,7 +99,7 @@ export function ProgressScreen() {
                   flex: 1,
                   height: '4px',
                   borderRadius: '2px',
-                  background: i < 7 ? '#F1ECDD' : 'rgba(255,255,255,0.15)',
+                  background: i < 7 ? '#ECE6DA' : 'rgba(255,255,255,0.15)',
                 }}
               />
             ))}
@@ -117,21 +117,21 @@ export function ProgressScreen() {
           <div
             className="text-center"
             style={{
-              background: '#EAF3DE',
+              background: '#E6F2EA',
               borderRadius: '10px',
               padding: '9px 8px',
-              border: '1px solid #97C459',
+              border: '1px solid #A8D9BC',
             }}
           >
             <div
               className="text-[10px] font-semibold uppercase mb-[2px]"
-              style={{ color: '#3B6D11', letterSpacing: '0.04em' }}
+              style={{ color: '#1B8754', letterSpacing: '0.04em' }}
             >
               Done
             </div>
             <div
               className="font-bold"
-              style={{ fontSize: '20px', color: '#3B6D11', lineHeight: 1 }}
+              style={{ fontSize: '20px', color: '#1B8754', lineHeight: 1 }}
             >
               6
             </div>
@@ -139,21 +139,21 @@ export function ProgressScreen() {
           <div
             className="text-center"
             style={{
-              background: '#FCEBEB',
+              background: '#FCEAEA',
               borderRadius: '10px',
               padding: '9px 8px',
-              border: '1px solid #F09595',
+              border: '1px solid #EFA0A0',
             }}
           >
             <div
               className="text-[10px] font-semibold uppercase mb-[2px]"
-              style={{ color: '#A32D2D', letterSpacing: '0.04em' }}
+              style={{ color: '#C53030', letterSpacing: '0.04em' }}
             >
               Failed
             </div>
             <div
               className="font-bold"
-              style={{ fontSize: '20px', color: '#A32D2D', lineHeight: 1 }}
+              style={{ fontSize: '20px', color: '#C53030', lineHeight: 1 }}
             >
               1
             </div>
@@ -164,7 +164,7 @@ export function ProgressScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #F1ECDD',
+            border: '1px solid #ECE6DA',
             borderRadius: '10px',
             padding: '10px 12px',
           }}
@@ -172,7 +172,7 @@ export function ProgressScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#9C9B94',
+              color: '#8A8275',
               letterSpacing: '0.05em',
               marginBottom: '6px',
             }}
@@ -192,7 +192,7 @@ export function ProgressScreen() {
                       height: '30px',
                       borderRadius: '50%',
                       background: '#C68A1E',
-                      border: '2px solid #F1ECDD',
+                      border: '2px solid #ECE6DA',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
@@ -200,7 +200,7 @@ export function ProgressScreen() {
                   >
                     <span
                       className="font-bold"
-                      style={{ fontSize: '10px', color: '#F1ECDD' }}
+                      style={{ fontSize: '10px', color: '#ECE6DA' }}
                     >
                       7
                     </span>
@@ -211,14 +211,14 @@ export function ProgressScreen() {
                       width: '30px',
                       height: '30px',
                       borderRadius: '50%',
-                      background: '#ECECEB',
-                      border: '1.5px dashed #C5C4BC',
+                      background: '#ECE6DA',
+                      border: '1.5px dashed #B8B0A1',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Lock className="w-[12px] h-[12px]" style={{ color: '#C5C4BC' }} />
+                    <Lock className="w-[12px] h-[12px]" style={{ color: '#B8B0A1' }} />
                   </div>
                 ) : (
                   <div
@@ -226,13 +226,13 @@ export function ProgressScreen() {
                       width: '30px',
                       height: '30px',
                       borderRadius: '50%',
-                      background: '#EAF3DE',
+                      background: '#E6F2EA',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
                     }}
                   >
-                    <Check className="w-[15px] h-[15px]" style={{ color: '#3B6D11' }} />
+                    <Check className="w-[15px] h-[15px]" style={{ color: '#1B8754' }} />
                   </div>
                 )}
                 <span
@@ -240,10 +240,10 @@ export function ProgressScreen() {
                   style={{
                     color:
                       d === 'Thu'
-                        ? '#F1ECDD'
+                        ? '#ECE6DA'
                         : d === 'Fri'
-                          ? '#C5C4BC'
-                          : '#9C9B94',
+                          ? '#B8B0A1'
+                          : '#8A8275',
                     fontWeight: d === 'Thu' ? 500 : 400,
                   }}
                 >
@@ -258,7 +258,7 @@ export function ProgressScreen() {
         <div
           style={{
             background: '#fff',
-            border: '1px solid #F1ECDD',
+            border: '1px solid #ECE6DA',
             borderRadius: '10px',
             padding: '10px 12px',
           }}
@@ -266,7 +266,7 @@ export function ProgressScreen() {
           <div
             className="text-[10px] font-semibold uppercase"
             style={{
-              color: '#9C9B94',
+              color: '#8A8275',
               letterSpacing: '0.05em',
               marginBottom: '6px',
             }}
@@ -281,30 +281,30 @@ export function ProgressScreen() {
                     width: '6px',
                     height: '6px',
                     borderRadius: '50%',
-                    background: r.status === 'done' ? '#5A8C1A' : '#E24B4A',
+                    background: r.status === 'done' ? '#1B8754' : '#C53030',
                     flexShrink: 0,
                   }}
                 />
                 <span
                   className="flex-1 text-[12.5px] truncate"
-                  style={{ color: '#2B2A26' }}
+                  style={{ color: '#1A1A1A' }}
                 >
                   {r.name}
                 </span>
-                <span className="text-[11px]" style={{ color: '#9C9B94' }}>
+                <span className="text-[11px]" style={{ color: '#8A8275' }}>
                   {r.time}
                 </span>
                 {r.status === 'done' ? (
                   <span
                     className="text-[11.5px] font-medium"
-                    style={{ color: '#5A8C1A' }}
+                    style={{ color: '#1B8754' }}
                   >
                     Done
                   </span>
                 ) : (
                   <span
                     className="text-[11.5px] font-medium cursor-pointer active:opacity-70"
-                    style={{ color: '#A32D2D', padding: '4px 6px', margin: '-4px -6px' }}
+                    style={{ color: '#C53030', padding: '4px 6px', margin: '-4px -6px' }}
                     onClick={onRetryFailed}
                   >
                     Retry
@@ -338,24 +338,24 @@ export function ProgressScreen() {
         className="flex flex-shrink-0"
         style={{
           background: '#fff',
-          borderTop: '1px solid #F1ECDD',
+          borderTop: '1px solid #ECE6DA',
           padding: '6px 0 0',
           paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
         }}
       >
         <div
-          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]"
+          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F3EE]"
           onClick={onOpenArticles}
         >
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <List className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
-          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
+          <List className="w-[22px] h-[22px]" style={{ color: '#8A8275' }} />
+          <span className="text-[10px]" style={{ color: '#8A8275' }}>
             Articles
           </span>
         </div>
-        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]">
+        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F3EE]">
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }}
           />
@@ -368,14 +368,14 @@ export function ProgressScreen() {
           </span>
         </div>
         <div
-          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]"
+          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F3EE]"
           onClick={onOpenAccount}
         >
           <div
             style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
           />
-          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
-          <span className="text-[10px]" style={{ color: '#9C9B94' }}>
+          <UserCircle className="w-[22px] h-[22px]" style={{ color: '#8A8275' }} />
+          <span className="text-[10px]" style={{ color: '#8A8275' }}>
             Account
           </span>
         </div>
