@@ -94,11 +94,10 @@ function ActivityRow({ label, helper, cell, onClick }) {
         </div>
         <span className="dash-cta" style={{
           display: "inline-flex", alignItems: "center", gap: 5,
-          fontSize: 11.5, fontWeight: 700, color: "#fff", backgroundColor: C.pr, border: `1px solid ${C.pr}`,
+          fontSize: 11.5, fontWeight: 600, color: C.fg, backgroundColor: C.card, border: `1px solid ${C.border2}`,
           borderRadius: 7, padding: "6px 12px", whiteSpace: "nowrap",
-          boxShadow: "0 1px 2px rgba(198,138,30,0.25)",
         }}>
-          View tasks <ArrowRight size={12} color="#fff" />
+          View tasks <ArrowRight size={12} />
         </span>
       </div>
     </button>
