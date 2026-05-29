@@ -67,9 +67,9 @@ export function PageHeader({ title, subtitle, divider=true, dense=false }) {
   const stamp = now.toLocaleTimeString("en-IN",{hour:"2-digit",minute:"2-digit",hour12:false})
     + " IST · " + now.toLocaleDateString("en-IN",{day:"2-digit",month:"2-digit",year:"numeric"})
   return (
-    <div className={`flex-shrink-0 flex items-center justify-between ${dense ? "h-9" : "h-12"} pl-3 pr-6 bg-card z-[100] ${divider ? "border-b border-border" : ""}`}>
+    <div className={`flex-shrink-0 flex items-center justify-between bg-card z-[100] ${dense ? "px-3 pt-3 pb-2" : "h-12 pl-3 pr-6"} ${divider ? "border-b border-border" : ""}`}>
       <div className="flex items-center gap-3">
-        <h1 className="m-0 text-[15px] font-semibold text-foreground">{title}</h1>
+        <h1 className="m-0 text-[18px] font-bold text-foreground tracking-tight">{title}</h1>
         {subtitle && <span className="text-[12px] text-muted-foreground">{subtitle}</span>}
       </div>
       <div className="flex items-center gap-2">

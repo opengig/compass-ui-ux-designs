@@ -137,7 +137,7 @@ export function DashboardScreen() {
       {/* Header */}
       <div className="flex-shrink-0 px-6 flex items-center justify-between" style={{ height: 56, borderBottom: `1px solid ${C.border}` }}>
         <div className="flex items-baseline" style={{ gap: 10 }}>
-          <h1 style={{ fontSize: 15, fontWeight: 600, color: C.ink2, letterSpacing: "-0.01em" }}>Welcome back, Priya</h1>
+          <h1 style={{ fontSize: 16, fontWeight: 600, color: C.ink2, letterSpacing: "-0.01em" }}>Welcome back, Priya</h1>
           <span style={{ fontSize: 11, color: C.mutedFg }}>
             {new Date().toLocaleDateString("en-IN", { weekday: "long", day: "numeric", month: "long" })}
           </span>

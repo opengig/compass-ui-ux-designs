@@ -90,7 +90,7 @@ export function ApprovedScreen() {
       <PageHeader title="Submitted Profiles" divider={false} dense/>
 
       {/* Tabs — Sent to Cookbook (green) / Rejected (red), My Tasks pill style */}
-      <div className="flex-shrink-0 flex items-center pl-3 pr-6 h-9 bg-card gap-2">
+      <div className="flex-shrink-0 flex items-center px-3 pb-2 bg-card gap-2 border-b border-border">
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {TABS.map(t => {
             const on = tab === t.key
@@ -114,8 +114,6 @@ export function ApprovedScreen() {
         </nav>
       </div>
 
-      {/* White gap + divider touching the content */}
-      <div className="flex-shrink-0 h-2 bg-card border-b border-border"/>
 
       {/* ── Main body: list + read-only detail panel ── */}
       <div ref={containerRef} className="flex flex-1 overflow-hidden">

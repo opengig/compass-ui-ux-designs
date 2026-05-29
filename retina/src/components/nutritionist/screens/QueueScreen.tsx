@@ -254,7 +254,7 @@ export function QueueScreen() {
     <div className="flex flex-col flex-1 overflow-hidden bg-background">
       <PageHeader title="My Tasks" divider={false} dense/>
       {/* Status tabs + filter — segmented pill control, matches /article-sme/review */}
-      <div className="flex-shrink-0 flex items-center pl-3 pr-6 h-9 bg-card gap-2">
+      <div className="flex-shrink-0 flex items-center px-3 pb-2 bg-card gap-2 border-b border-border">
         <nav className="inline-flex items-center bg-stone-200/70 rounded-lg p-1 gap-0.5 shrink min-w-0 overflow-x-auto">
           {STATUS_TABS.map(t => {
             const on = qf === t.key
@@ -284,8 +284,6 @@ export function QueueScreen() {
         </nav>
       </div>
 
-      {/* White gap (no gray) + divider that touches the content below */}
-      <div className="flex-shrink-0 h-2 bg-card border-b border-border"/>
       {/* ── Main body: table + optional inline edit panel ── */}
       <div ref={containerRef} className="flex flex-1 overflow-hidden">
 

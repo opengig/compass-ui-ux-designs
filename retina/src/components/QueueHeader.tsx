@@ -48,7 +48,7 @@ export function QueueHeader({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
   return (
     <div className="flex-shrink-0 border-b border-border bg-card">
       {/* Page title */}
-      <div className="flex items-center gap-2 px-4 pt-3 pb-2">
+      <div className="flex items-center gap-2 px-3 pt-3 pb-2">
         <h1 className="text-[18px] font-bold text-foreground tracking-tight">{title}</h1>
         <div className="ml-auto flex items-center gap-2 shrink-0">
           <Clock className="w-3 h-3 text-muted-foreground" />
