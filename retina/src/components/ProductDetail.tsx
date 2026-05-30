@@ -1,5 +1,4 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
 import {
   ChevronDown,
   ChevronUp,
@@ -15,7 +14,6 @@ import {
 import { useReviewStore } from '../stores/useReviewStore';
 import { useExpandSections } from '../stores/ExpandSections';
 import { IngredientsTable } from './IngredientsTable';
-import { ROUTES } from '../router/routes';
 import { getProductImages } from '../data/offImages';
 import { C } from './nutritionist/data/tokens';
 import type { QueueTab } from '../hooks/useQueueFilter';
@@ -23,6 +21,10 @@ import type { QueueTab } from '../hooks/useQueueFilter';
 type ProductDetailProps = {
   selectedArticleId: string | null;
   queueTab: QueueTab;
+  // Ordered ids currently visible in the queue list, used to advance to the
+  // next article after a submit (without leaving the My Tasks page).
+  visibleArticleIds?: string[];
+  onSelectArticle?: (articleId: string) => void;
 };
 
 const THUMB_LABELS = ['Front', 'Back', 'Side', 'Barcode'] as const;
@@ -215,9 +217,8 @@ function CollapsibleSection({
   );
 }
 
-export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProps) {
+export function ProductDetail({ selectedArticleId, queueTab, visibleArticleIds, onSelectArticle }: ProductDetailProps) {
   void queueTab;
-  const navigate = useNavigate();
   const reviewStore = useReviewStore();
   const {
     articles,
@@ -230,6 +231,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
     getCanUndo,
     getCanRedo,
     getArticleEditLog,
+    showToast,
   } = reviewStore;
   const article = getArticleById(selectedArticleId) ?? articles[0] ?? null;
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
@@ -352,8 +354,21 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
   };
 
   const onSubmit = () => {
+    // Figure out the next article to land on BEFORE submitting — once submitted,
+    // this article drops out of the My Tasks list.
+    const ids = visibleArticleIds ?? [];
+    const idx = ids.indexOf(article.id);
+    const nextId = idx >= 0 ? (ids[idx + 1] ?? ids[idx - 1] ?? null) : null;
+
     submitArticle(article.id, comment.trim());
-    navigate(ROUTES.submitted);
+    setShowSubmit(false);
+    showToast(`${article.name} submitted for review`);
+
+    // Stay on My Tasks: the submitted article is removed from this list and now
+    // shows up under Submitted. Just advance the selection to the next article.
+    if (nextId && onSelectArticle) {
+      onSelectArticle(nextId);
+    }
   };
 
   return (
@@ -674,7 +689,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                   </div>
                   <div
                     className="px-3 py-2.5"
-                    style={{ width: 150, flexShrink: 0, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.mutedFg, borderLeft: `1px solid ${C.border}`, textAlign: 'left' }}
+                    style={{ flex: 1, fontSize: 10, fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', color: C.mutedFg, borderLeft: `1px solid ${C.border}`, textAlign: 'left' }}
                   >
                     Per 100g / 100ml
                   </div>
@@ -698,7 +713,7 @@ export function ProductDetail({ selectedArticleId, queueTab }: ProductDetailProp
                       </div>
                       <div
                         className="px-3 py-2.5 flex items-center"
-                        style={{ width: 150, flexShrink: 0, borderLeft: `1px solid ${C.border}` }}
+                        style={{ flex: 1, borderLeft: `1px solid ${C.border}` }}
                       >
                         <span style={{ fontSize: 13, fontWeight: 500, color: C.fg, fontFeatureSettings: '"tnum"' }}>
                           {row.extractedValue}

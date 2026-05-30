@@ -70,6 +70,13 @@ interface ReviewStoreContextValue {
   getSubmission: (articleId: string) => SubmissionRecord | null;
   isSubmitted: (articleId: string) => boolean;
   getArticleEditLog: (articleId: string) => EditLogEntry[];
+  toast: ToastMessage | null;
+  showToast: (message: string | ToastMessage) => void;
+}
+
+interface ToastMessage {
+  msg: string;
+  kind?: 'success' | 'warn';
 }
 
 // A few articles start out already submitted to the nutritionist so the
@@ -393,6 +400,17 @@ const ReviewStoreContext = createContext<ReviewStoreContextValue | null>(null);
 
 export function ReviewStoreProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(reviewStoreReducer, initialState);
+  const [toast, setToast] = React.useState<ToastMessage | null>(null);
+  const toastTimer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const showToast = React.useCallback((message: string | ToastMessage) => {
+    const next = typeof message === 'string' ? { msg: message } : message;
+    setToast(next);
+    if (toastTimer.current) {
+      clearTimeout(toastTimer.current);
+    }
+    toastTimer.current = setTimeout(() => setToast(null), 3500);
+  }, []);
 
   const value: ReviewStoreContextValue = useMemo(() => {
     const articles = Object.values(state.articles);
@@ -544,8 +562,10 @@ export function ReviewStoreProvider({ children }: { children: React.ReactNode })
       getSubmission: (articleId) => state.submissions[articleId] ?? null,
       isSubmitted: (articleId) => Boolean(state.submissions[articleId]),
       getArticleEditLog: (articleId) => state.editLog.filter((entry) => entry.articleId === articleId),
+      toast,
+      showToast,
     };
-  }, [state]);
+  }, [state, toast, showToast]);
 
   return <ReviewStoreContext.Provider value={value}>{children}</ReviewStoreContext.Provider>;
 }

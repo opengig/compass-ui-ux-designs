@@ -5,23 +5,65 @@
  * Tailwind handles the rest.
  * ============================================================ */
 
-/* Full-screen wrapper — no phone bezel, content fills the viewport.
-   Use browser devtools to simulate mobile widths if needed. */
-.sm-outer {
-  background: #FBF8F0;
+/* ------------------------------------------------------------------ */
+/* Phone-mockup chrome — step pills, bezel, status bar, footer.        */
+/* Mirrors the source HTML prototype's presentation.                   */
+/* ------------------------------------------------------------------ */
+.sm-frame-outer {
+  background: #E8E7E1;
+  min-height: 100vh;
   display: flex;
   flex-direction: column;
-  flex: 1;
-  min-height: 0;
+  align-items: center;
+  gap: 14px;
+  padding: 20px 14px 28px;
 }
+.sm-step-row {
+  display: flex;
+  gap: 5px;
+  flex-wrap: wrap;
+  justify-content: center;
+  max-width: 760px;
+}
+.sm-phone-wrap {
+  background: #111;
+  border-radius: 48px;
+  padding: 10px;
+  width: 360px;
+  max-width: 100%;
+  box-shadow: 0 0 0 1px #333;
+  flex-shrink: 0;
+}
+/* The screen surface inside the bezel. Positioned + clipped so the
+   absolutely-positioned overlays / sheets / toast clip to the phone. */
 .sm-phone {
   background: #FBF8F0;
-  flex: 1;
+  border-radius: 38px;
+  overflow: hidden;
   width: 100%;
+  height: 700px;
   display: flex;
   flex-direction: column;
   position: relative;
-  overflow: hidden;
+}
+.sm-sbar {
+  background: #fff;
+  padding: 10px 20px 4px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-shrink: 0;
+}
+.sm-stime {
+  font-size: 12px;
+  font-weight: 700;
+  color: #2B2A26;
+}
+.sm-foot {
+  font-size: 11px;
+  color: #9C9B94;
+  text-align: center;
+  max-width: 360px;
 }
 
 /* Camera dark backdrop with vignette */
@@ -53,10 +95,10 @@
   left: 6px;
   right: 6px;
   height: 1.5px;
-  background: linear-gradient(90deg, transparent, #97C459 50%, transparent);
+  background: linear-gradient(90deg, transparent, #3FA56E 50%, transparent);
   box-shadow:
-    0 0 6px rgba(151, 196, 89, 0.7),
-    0 0 12px rgba(151, 196, 89, 0.35);
+    0 0 6px rgba(63, 165, 110, 0.7),
+    0 0 12px rgba(63, 165, 110, 0.35);
   animation: sm-scanmove 2.2s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   border-radius: 1px;
 }
@@ -122,7 +164,7 @@
   left: 50%;
   bottom: 84px;
   transform: translateX(-50%) translateY(8px);
-  background: #C68A1E;
+  background: #2B2A26;
   color: #fff;
   font-size: 12px;
   padding: 9px 14px;
@@ -166,8 +208,8 @@
   font-size: 11px;
   color: #C68A1E;
   background: #FBF3E0;
-  border: 1px solid #F4E4BC;
-  padding: 3px 10px;
+  border: none;
+  padding: 4px 10px;
   border-radius: 99px;
   white-space: nowrap;
   font-weight: 500;
@@ -176,11 +218,15 @@
   transition: background 0.15s;
   flex-shrink: 0;
 }
+.sm-fchip.off {
+  background: #F9F4EA;
+  color: #6B6A64;
+  font-weight: 400;
+}
 .sm-fchip-more {
   background: #C68A1E !important;
   color: #fff !important;
-  border-color: #C68A1E !important;
-  font-weight: 600;
+  font-weight: 500;
   padding: 4px 9px;
   display: inline-flex;
   align-items: center;
@@ -190,7 +236,10 @@
   background: #A8741A !important;
 }
 .sm-filter-strip:hover .sm-fchip:not(.sm-fchip-more) {
-  background: #F6E8C7;
+  background: #F6E5BF;
+}
+.sm-filter-strip:hover .sm-fchip.off {
+  background: #F4EFE5;
 }
 .sm-filter-strip:active {
   opacity: 0.85;

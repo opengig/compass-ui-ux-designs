@@ -104,14 +104,14 @@ export function IngredientsTable({ articleId, ingredients, readOnly = false }: I
                     <>
                       <button
                         title="Save"
-                        className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary text-primary-foreground hover:bg-primary-hover"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded bg-primary text-primary-foreground transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/50 focus-visible:ring-offset-1"
                         onClick={() => saveRow(row)}
                       >
                         <Check className="w-3 h-3" />
                       </button>
                       <button
                         title="Cancel"
-                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/40"
                         onClick={cancelEditing}
                       >
                         <X className="w-3 h-3" />
@@ -121,14 +121,14 @@ export function IngredientsTable({ articleId, ingredients, readOnly = false }: I
                     <>
                       <button
                         title="Edit"
-                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground transition-colors hover:bg-primary/10 hover:text-primary focus-visible:outline-none focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/40"
                         onClick={() => startEditing(row)}
                       >
                         <Pencil className="w-3 h-3" />
                       </button>
                       <button
                         title="Remove"
-                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:bg-rose-50 hover:text-rose-600"
+                        className="inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground transition-colors hover:bg-rose-50 hover:text-rose-600 focus-visible:outline-none focus-visible:text-rose-600 focus-visible:ring-2 focus-visible:ring-rose-400/40"
                         onClick={() => removeIngredient(articleId, row.id)}
                       >
                         <Trash2 className="w-3 h-3" />
@@ -178,7 +178,7 @@ export function IngredientsTable({ articleId, ingredients, readOnly = false }: I
         <button
           type="button"
           onClick={startAdding}
-          className="mt-2 inline-flex items-center gap-1 px-2.5 py-[3px] rounded-md text-[12px] font-semibold text-muted-foreground border border-dashed border-border hover:border-foreground/30 hover:text-foreground transition-colors"
+          className="mt-2 inline-flex items-center gap-1 px-2.5 py-[3px] rounded-md text-[12px] font-semibold text-muted-foreground border border-dashed border-border transition-colors hover:border-primary hover:text-primary focus-visible:outline-none focus-visible:border-primary focus-visible:text-primary focus-visible:ring-2 focus-visible:ring-primary/30"
         >
           <Plus className="w-2.5 h-2.5" strokeWidth={2.5} />
           Add ingredient

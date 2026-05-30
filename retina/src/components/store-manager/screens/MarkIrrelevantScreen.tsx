@@ -57,16 +57,16 @@ export function MarkIrrelevantScreen() {
           aria-label="back"
           className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#6B6A64' }} />
         </button>
         <div className="flex-1 min-w-0">
           <div
             className="font-semibold"
-            style={{ fontSize: '17px', color: '#2B2A26' }}
+            style={{ fontSize: '16px', color: '#2B2A26' }}
           >
             {title}
           </div>
-          <div className="text-[11.5px] mt-[1px] truncate" style={{ color: '#9C9B94' }}>
+          <div className="text-[11px] mt-[1px] truncate" style={{ color: '#9C9B94' }}>
             Amul Paneer 1kg · ART-10234
           </div>
         </div>
@@ -79,17 +79,17 @@ export function MarkIrrelevantScreen() {
         <div
           className="flex gap-[9px]"
           style={{
-            background: '#FBF3E0',
+            background: '#FEF6E8',
             borderRadius: '10px',
             padding: '13px 14px',
-            border: '1px solid #F4E4BC',
+            border: '1px solid #F5C842',
           }}
         >
           <Info
             className="w-4 h-4 flex-shrink-0 mt-[1px]"
-            style={{ color: '#C68A1E' }}
+            style={{ color: '#BA7517' }}
           />
-          <div className="text-[12.5px] leading-[1.6]" style={{ color: '#7A5310' }}>
+          <div className="text-[12px] leading-[1.6]" style={{ color: '#854F0B' }}>
             {info}
           </div>
         </div>
@@ -154,8 +154,8 @@ export function MarkIrrelevantScreen() {
               borderRadius: '7px',
               padding: '10px 12px',
               fontFamily: 'inherit',
-              background: '#F5F5F4',
-              height: '72px',
+              background: '#F9F8F4',
+              height: '56px',
             }}
           />
         </div>
@@ -175,7 +175,7 @@ export function MarkIrrelevantScreen() {
           onClick={onCancel}
           className="flex items-center justify-center text-[13px] font-medium active:opacity-80"
           style={{
-            flex: 0.6,
+            flex: 0.55,
             padding: '14px 16px',
             borderRadius: '8px',
             background: '#fff',
@@ -194,9 +194,9 @@ export function MarkIrrelevantScreen() {
             flex: 1,
             padding: '14px 16px',
             borderRadius: '8px',
-            background: '#C68A1E',
+            background: '#BA7517',
             color: '#fff',
-            border: '1px solid #C68A1E',
+            border: '1px solid #BA7517',
             minHeight: '48px',
           }}
         >

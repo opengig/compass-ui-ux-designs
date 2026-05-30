@@ -583,7 +583,7 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                       </div>
                       <div className="px-3 py-2.5 flex-1"
                         style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",
-                                color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"center"}}>
+                                color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"left"}}>
                         Per 100g / Per 100ml
                       </div>
                       <div className="px-3 py-2.5"
@@ -606,8 +606,8 @@ export function EditIngredientsPanel({ art, onClose, viewOnly: viewOnlyProp=fals
                               {NNAMES[k]}
                             </span>
                           </div>
-                          {/* Col 2 — Per 100g/100ml input (centered) */}
-                          <div className="px-3 py-1.5 flex-1 flex items-center justify-center"
+                          {/* Col 2 — Per 100g/100ml input (left-aligned) */}
+                          <div className="px-3 py-1.5 flex-1 flex items-center justify-start"
                             style={{borderLeft:`1px solid ${C.border}`}}>
                             <input
                               value={isNA ? "N/A" : (nutVals[k] || "")}

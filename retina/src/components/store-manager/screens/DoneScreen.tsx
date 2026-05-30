@@ -41,26 +41,26 @@ export function DoneScreen() {
     >
       <div
         style={{
-          width: '64px',
-          height: '64px',
+          width: '60px',
+          height: '60px',
           borderRadius: '50%',
-          background: '#EAF3DE',
+          background: '#E0F0E7',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
         }}
       >
-        <Check className="w-[28px] h-[28px]" style={{ color: '#3B6D11' }} />
+        <Check className="w-[26px] h-[26px]" style={{ color: '#0F6B3D' }} />
       </div>
       <div
         className="font-semibold text-center"
-        style={{ fontSize: '22px', color: '#2B2A26' }}
+        style={{ fontSize: '19px', color: '#2B2A26' }}
       >
         Submitted!
       </div>
       <div
-        className="text-[14px] text-center leading-[1.6]"
-        style={{ color: '#9C9B94' }}
+        className="text-[13px] text-center leading-[1.6]"
+        style={{ color: '#6B6A64' }}
       >
         Submitted — keep scanning your next article.
       </div>
@@ -100,7 +100,7 @@ export function DoneScreen() {
             </span>
             <span
               className="text-[11.5px] font-medium flex items-center gap-1"
-              style={{ color: '#3B6D11' }}
+              style={{ color: '#0F6B3D' }}
             >
               <Check className="w-[11px] h-[11px]" />
               Submitted
@@ -112,27 +112,21 @@ export function DoneScreen() {
       <div
         className="w-full max-w-md flex items-center gap-2.5"
         style={{
-          background: '#C68A1E',
+          background: '#F6EBD5',
           borderRadius: '10px',
           padding: '12px 14px',
         }}
       >
         <div className="flex-1">
           <div
-            className="text-[11.5px]"
-            style={{ color: 'rgba(255,255,255,0.6)', marginBottom: '2px' }}
+            className="text-[11px] font-semibold uppercase"
+            style={{ color: '#B9831F', marginBottom: '2px', letterSpacing: '0.06em' }}
           >
             Today&apos;s progress
           </div>
-          <div
-            className="font-bold"
-            style={{ fontSize: '17px', color: '#F1ECDD' }}
-          >
+          <div className="font-bold" style={{ fontSize: '16px', color: '#B9831F' }}>
             8{' '}
-            <span
-              className="font-normal text-[11.5px]"
-              style={{ color: 'rgba(255,255,255,0.5)' }}
-            >
+            <span className="font-normal text-[11px]" style={{ color: '#7A6F58' }}>
               of 20 done
             </span>
           </div>
@@ -142,13 +136,13 @@ export function DoneScreen() {
             height: '36px',
             width: '36px',
             borderRadius: '50%',
-            background: 'rgba(255,255,255,0.08)',
+            background: '#EFE0BF',
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'center',
           }}
         >
-          <Flame className="w-[18px] h-[18px]" style={{ color: '#F1ECDD' }} />
+          <Flame className="w-[18px] h-[18px]" style={{ color: '#B9831F' }} />
         </div>
       </div>
 

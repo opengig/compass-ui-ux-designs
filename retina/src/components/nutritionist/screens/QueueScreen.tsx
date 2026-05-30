@@ -296,7 +296,7 @@ export function QueueScreen() {
             style={{borderBottom:`1px solid ${C.border}`, backgroundColor:C.card}}>
             {/* Search box */}
             <div className="relative flex-1 min-w-0">
-              <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
+              <Search size={14} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none"/>
               <input
                 value={searchQ}
                 onChange={e=>{ setSearchQ(e.target.value); setVisibleCount(10) }}
@@ -308,7 +308,7 @@ export function QueueScreen() {
                 <button onClick={()=>{ setSearchQ(""); setVisibleCount(10) }}
                   aria-label="Clear search"
                   className="absolute right-1 top-1/2 -translate-y-1/2 inline-flex items-center justify-center w-6 h-6 rounded text-muted-foreground hover:text-foreground hover:bg-muted/40">
-                  <X size={11}/>
+                  <X size={12}/>
                 </button>
               )}
             </div>
@@ -755,9 +755,9 @@ export function QueueScreen() {
                             }}
                             onClick={()=>{ if(!bucketMode) setEditPanelArtId(a.id) }}>
                             {/* No leading hand icon — in bucket mode the cursor itself turns to grab/grabbing. */}
-                            <td className="pl-3 pr-4 py-3">
+                            <td className="pl-4 pr-4 py-3">
                               <div className="flex items-center gap-2 flex-wrap mb-0.5">
-                                <p className={`${editPanelArtId ? "text-[12px]" : "text-[13px]"} ${isActive ? "font-semibold" : "font-medium"} text-foreground`}>{a.name}</p>
+                                <p className={`text-[13px] ${isActive ? "font-semibold" : "font-medium"} text-foreground`}>{a.name}</p>
                                 {bucketMode && (() => {
                                   const cfg = effectiveStatus==="green" ? {l:"Ready To Cookbook", c:"bg-teal-50 text-teal-700 border-teal-200"}
                                             : effectiveStatus==="amber" ? {l:"To Review",         c:"bg-slate-100 text-slate-700 border-slate-200"}
@@ -786,8 +786,8 @@ export function QueueScreen() {
                             <td className="pr-3 py-3 text-right align-middle" style={{width:36}}>
                               {bucketMode ? (
                                 isDragging
-                                  ? <Grab size={15} className="dnd-hand" style={{color:C.pr, display:"inline-block", marginRight:2}}/>
-                                  : <Hand size={15} className="dnd-hand" style={{color:C.mutedFg, display:"inline-block", marginRight:2}}/>
+                                  ? <Grab size={16} className="dnd-hand" style={{color:C.pr, display:"inline-block", marginRight:4}}/>
+                                  : <Hand size={16} className="dnd-hand" style={{color:C.mutedFg, display:"inline-block", marginRight:4}}/>
                               ) : !a.retired ? (
                                 <button
                                   onClick={(e)=>{

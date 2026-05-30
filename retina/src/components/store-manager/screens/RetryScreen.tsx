@@ -22,11 +22,11 @@ export function RetryScreen() {
           aria-label="back"
           className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#6B6A64' }} />
         </button>
         <div
           className="font-semibold flex-1"
-          style={{ fontSize: '17px', color: '#2B2A26' }}
+          style={{ fontSize: '16px', color: '#2B2A26' }}
         >
           Upload failed
         </div>
@@ -130,11 +130,11 @@ export function RetryScreen() {
                   width: '56px',
                   height: '56px',
                   borderRadius: '8px',
-                  border: '1px solid #7DBD3B',
-                  background: '#EAF3DE',
+                  border: '1px solid #C5DCCD',
+                  background: '#E0F0E7',
                 }}
               >
-                <Check className="w-[18px] h-[18px]" style={{ color: '#3B6D11' }} />
+                <Check className="w-[18px] h-[18px]" style={{ color: '#0F6B3D' }} />
               </div>
             ))}
           </div>

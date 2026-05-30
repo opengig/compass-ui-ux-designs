@@ -16,7 +16,7 @@ export function BarcodeScreen() {
   const onDetected = () => {
     setCapture((prev: CaptureContext) => {
       const next: CaptureContext = { ...prev, barcode: true };
-      const reqs: CaptureStep[] = prev.mode === 'loose' ? ['front'] : ['barcode', 'front', 'back'];
+      const reqs: CaptureStep[] = prev.mode === 'loose' ? ['front'] : ['front', 'back', 'barcode'];
       const pending = reqs.find((s) => !next[s]);
       next.active = pending ?? 'more';
       return next;
@@ -39,16 +39,16 @@ export function BarcodeScreen() {
           aria-label="back"
           className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#6B6A64' }} />
         </button>
         <div className="flex-1 min-w-0">
           <div
             className="font-semibold"
-            style={{ fontSize: '17px', color: '#2B2A26' }}
+            style={{ fontSize: '16px', color: '#2B2A26' }}
           >
             Scan Article
           </div>
-          <div className="text-[11.5px] mt-[1px] truncate" style={{ color: '#9C9B94' }}>
+          <div className="text-[11px] mt-[1px] truncate" style={{ color: '#9C9B94' }}>
             {capture.title.split(',').slice(0, 2).join(',').trim() || 'Article'} · {capture.code}
           </div>
         </div>
@@ -64,8 +64,8 @@ export function BarcodeScreen() {
             style={{
               top: 0,
               left: 0,
-              borderTop: '2.5px solid #97C459',
-              borderLeft: '2.5px solid #97C459',
+              borderTop: '2.5px solid #3FA56E',
+              borderLeft: '2.5px solid #3FA56E',
               borderRadius: '3px 0 0 0',
             }}
           />
@@ -74,8 +74,8 @@ export function BarcodeScreen() {
             style={{
               top: 0,
               right: 0,
-              borderTop: '2.5px solid #97C459',
-              borderRight: '2.5px solid #97C459',
+              borderTop: '2.5px solid #3FA56E',
+              borderRight: '2.5px solid #3FA56E',
               borderRadius: '0 3px 0 0',
             }}
           />
@@ -84,8 +84,8 @@ export function BarcodeScreen() {
             style={{
               bottom: 0,
               left: 0,
-              borderBottom: '2.5px solid #97C459',
-              borderLeft: '2.5px solid #97C459',
+              borderBottom: '2.5px solid #3FA56E',
+              borderLeft: '2.5px solid #3FA56E',
               borderRadius: '0 0 0 3px',
             }}
           />
@@ -94,8 +94,8 @@ export function BarcodeScreen() {
             style={{
               bottom: 0,
               right: 0,
-              borderBottom: '2.5px solid #97C459',
-              borderRight: '2.5px solid #97C459',
+              borderBottom: '2.5px solid #3FA56E',
+              borderRight: '2.5px solid #3FA56E',
               borderRadius: '0 0 3px 0',
             }}
           />
@@ -124,21 +124,21 @@ export function BarcodeScreen() {
       >
         <div className="min-w-0">
           <div
-            className="text-[12.5px] font-medium"
-            style={{ color: '#9C9B94' }}
+            className="text-[12px] font-medium"
+            style={{ color: '#6B6A64' }}
           >
             Barcode not detected?
           </div>
-          <div className="text-[11px] mt-[1px]" style={{ color: '#C5C4BC' }}>
+          <div className="text-[10px] mt-[1px]" style={{ color: '#B0AFA8' }}>
             Take a photo instead
           </div>
         </div>
         <button
           type="button"
-          className="text-[12.5px] font-medium flex items-center gap-1 cursor-pointer flex-shrink-0 active:opacity-80"
+          className="text-[12px] font-medium flex items-center gap-1 cursor-pointer flex-shrink-0 active:opacity-80"
           style={{
             color: '#2B2A26',
-            background: '#ECECEB',
+            background: '#F9F4EA',
             padding: '10px 14px',
             borderRadius: '8px',
             minHeight: '40px',

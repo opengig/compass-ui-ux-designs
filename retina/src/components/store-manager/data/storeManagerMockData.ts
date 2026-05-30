@@ -335,6 +335,15 @@ export const SCANNED_TODAY_INLINE: TodayScanRow[] = [
   { name: 'MDH Chana Masala', time: '9:41 AM', status: 'failed' },
 ];
 
+// Sites the manager can switch between (matches the source prototype).
+export type Site = { id: string; name: string; meta: string };
+export const SITES: Site[] = [
+  { id: 'BCK-001', name: 'Bengaluru Central Kitchen', meta: 'BCK-001 · Primary' },
+  { id: 'WFH-014', name: 'Whitefield Hub', meta: 'WFH-014 · Secondary' },
+  { id: 'ELC-022', name: 'Electronic City Site', meta: 'ELC-022 · Secondary' },
+  { id: 'HSR-031', name: 'HSR Layout Kitchen', meta: 'HSR-031 · Secondary' },
+];
+
 // "Scanned today" rows for the standalone Progress screen (slightly different)
 export const SCANNED_TODAY_PROGRESS: TodayScanRow[] = [
   { name: 'Amul Paneer 1kg', time: '9:12 AM', status: 'done' },

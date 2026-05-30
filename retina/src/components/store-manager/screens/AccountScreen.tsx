@@ -1,37 +1,14 @@
 import { useState } from 'react';
-import { MapPin, ChevronDown, LogOut, List, BarChart3, UserCircle, Check } from 'lucide-react';
+import { MapPin, ChevronRight, LogOut, List, BarChart3, UserCircle, Check, X } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { STORE_MANAGER_ROUTES } from '../../../router/routes';
-
-const SITES = [
-  { id: 'bck-001', name: 'Bengaluru Central Kitchen', code: 'BCK-001 · Primary' },
-  { id: 'bck-002', name: 'Whitefield Kitchen',         code: 'BCK-002' },
-  { id: 'bck-003', name: 'Electronic City Kitchen',    code: 'BCK-003' },
-];
-
-const RetinaLogo = ({ size = 20 }: { size?: number }) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 40 40"
-    aria-hidden="true"
-    style={{ flexShrink: 0 }}
-  >
-    <path
-      d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z"
-      fill="#44403C"
-      opacity=".55"
-    />
-    <ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#44403C" />
-    <path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#44403C" />
-    <path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#44403C" />
-  </svg>
-);
+import { useStoreManager } from '../StoreManagerContext';
+import { SITES } from '../data/storeManagerMockData';
 
 export function AccountScreen() {
   const navigate = useNavigate();
+  const { showToast, siteId, setSiteId } = useStoreManager();
   const [siteOpen, setSiteOpen] = useState(false);
-  const [siteId, setSiteId] = useState(SITES[0].id);
   const [signOutOpen, setSignOutOpen] = useState(false);
 
   const onSignOut = () => navigate(STORE_MANAGER_ROUTES.login);
@@ -39,21 +16,25 @@ export function AccountScreen() {
   const onOpenProgress = () => navigate(STORE_MANAGER_ROUTES.progress);
   const currentSite = SITES.find((s) => s.id === siteId) ?? SITES[0];
 
+  const selectSite = (id: string) => {
+    const s = SITES.find((x) => x.id === id);
+    setSiteId(id);
+    setSiteOpen(false);
+    if (s) showToast(`Site switched to ${s.name}`);
+  };
+
   return (
     <>
+      {/* Topbar */}
       <div
-        className="flex items-center gap-2 flex-shrink-0"
+        className="flex items-center flex-shrink-0"
         style={{
           padding: '10px 16px 8px',
           paddingTop: 'max(10px, env(safe-area-inset-top))',
           background: '#fff',
         }}
       >
-        <div
-          className="font-semibold flex items-center gap-[7px]"
-          style={{ fontSize: '17px', color: '#2B2A26' }}
-        >
-          <RetinaLogo />
+        <div className="font-semibold" style={{ fontSize: '16px', color: '#2B2A26' }}>
           Account
         </div>
       </div>
@@ -62,14 +43,10 @@ export function AccountScreen() {
         className="flex-1 overflow-y-auto flex flex-col gap-2.5"
         style={{ background: '#FBF8F0', padding: '12px 16px' }}
       >
+        {/* Profile card */}
         <div
           className="flex items-center gap-3"
-          style={{
-            background: '#fff',
-            border: '1px solid #F1ECDD',
-            borderRadius: '12px',
-            padding: '16px',
-          }}
+          style={{ background: '#fff', border: '1px solid #F1ECDD', borderRadius: '12px', padding: '16px' }}
         >
           <div
             className="flex items-center justify-center font-semibold flex-shrink-0"
@@ -77,44 +54,31 @@ export function AccountScreen() {
               width: '48px',
               height: '48px',
               borderRadius: '50%',
-              background: '#ECECEB',
+              background: '#E6F1FB',
               fontSize: '16px',
-              color: '#44403C',
+              color: '#185FA5',
             }}
           >
             RK
           </div>
           <div className="min-w-0">
-            <div
-              className="text-[15px] font-medium"
-              style={{ color: '#2B2A26' }}
-            >
+            <div className="text-[14px] font-medium" style={{ color: '#2B2A26' }}>
               Ravi Kumar
             </div>
-            <div className="text-[12px] mt-[2px] truncate" style={{ color: '#9C9B94' }}>
+            <div className="text-[11px] mt-[2px] truncate" style={{ color: '#9C9B94' }}>
               ravi.kumar@compass-group.com
             </div>
-            <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
+            <div className="text-[11px] mt-[1px]" style={{ color: '#9C9B94' }}>
               Store Manager · Bengaluru
             </div>
           </div>
         </div>
 
-        <div
-          style={{
-            background: '#fff',
-            border: '1px solid #F1ECDD',
-            borderRadius: '12px',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Site */}
+        <div style={{ background: '#fff', border: '1px solid #F1ECDD', borderRadius: '12px', overflow: 'hidden' }}>
           <div
             className="text-[10px] font-semibold uppercase"
-            style={{
-              color: '#9C9B94',
-              letterSpacing: '0.06em',
-              padding: '10px 14px 6px',
-            }}
+            style={{ color: '#9C9B94', letterSpacing: '0.06em', padding: '10px 14px 6px' }}
           >
             Site
           </div>
@@ -123,61 +87,36 @@ export function AccountScreen() {
             onClick={() => setSiteOpen(true)}
             className="w-full flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
             style={{
-              padding: '12px 14px',
-              minHeight: '48px',
-              borderTop: '1px solid #F1ECDD',
+              padding: '10px 14px',
+              borderTop: '1px solid #F9F4EA',
               background: 'transparent',
               border: 'none',
               textAlign: 'left',
             }}
           >
-            <MapPin
-              className="w-4 h-4 flex-shrink-0"
-              style={{ color: '#C68A1E' }}
-            />
+            <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: '#6B6A64' }} />
             <div className="flex-1 min-w-0">
-              <div className="text-[14px]" style={{ color: '#2B2A26' }}>
+              <div className="text-[13px]" style={{ color: '#2B2A26' }}>
                 {currentSite.name}
               </div>
-              <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
-                {currentSite.code}
+              <div className="text-[11px] mt-[1px]" style={{ color: '#9C9B94' }}>
+                {currentSite.meta}
               </div>
             </div>
-            <ChevronDown
-              className="w-[16px] h-[16px]"
-              style={{ color: '#C68A1E' }}
-            />
+            <ChevronRight className="w-[15px] h-[15px]" style={{ color: '#C5C4BC' }} />
           </button>
         </div>
 
-        <div
-          style={{
-            background: '#fff',
-            border: '1px solid #F1ECDD',
-            borderRadius: '12px',
-            overflow: 'hidden',
-          }}
-        >
+        {/* Sign out */}
+        <div style={{ background: '#fff', border: '1px solid #F1ECDD', borderRadius: '12px', overflow: 'hidden' }}>
           <button
             type="button"
             className="w-full flex items-center gap-2.5 cursor-pointer active:bg-[#F5F5F4]"
-            style={{
-              padding: '14px 14px',
-              minHeight: '48px',
-              background: 'transparent',
-              border: 'none',
-              textAlign: 'left',
-            }}
+            style={{ padding: '12px 14px', background: 'transparent', border: 'none', textAlign: 'left' }}
             onClick={() => setSignOutOpen(true)}
           >
-            <LogOut
-              className="w-4 h-4 flex-shrink-0"
-              style={{ color: '#A32D2D' }}
-            />
-            <div
-              className="flex-1 text-[14px] font-medium"
-              style={{ color: '#A32D2D' }}
-            >
+            <LogOut className="w-4 h-4 flex-shrink-0" style={{ color: '#A32D2D' }} />
+            <div className="flex-1 text-[13px] font-medium" style={{ color: '#A32D2D' }}>
               Sign out
             </div>
           </button>
@@ -191,86 +130,74 @@ export function AccountScreen() {
           background: '#fff',
           borderTop: '1px solid #F1ECDD',
           padding: '6px 0 0',
-          paddingBottom: 'max(0.5rem, env(safe-area-inset-bottom))',
+          paddingBottom: 'max(0.875rem, env(safe-area-inset-bottom))',
         }}
       >
-        <div
-          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]"
-          onClick={onOpenArticles}
-        >
-          <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
-          />
+        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-1 active:bg-[#F5F5F4]" onClick={onOpenArticles}>
+          <div style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }} />
           <List className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
           <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Articles
           </span>
         </div>
-        <div
-          className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]"
-          onClick={onOpenProgress}
-        >
-          <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }}
-          />
+        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-1 active:bg-[#F5F5F4]" onClick={onOpenProgress}>
+          <div style={{ width: '32px', height: '3px', borderRadius: '2px', background: 'transparent', marginBottom: '1px' }} />
           <BarChart3 className="w-[22px] h-[22px]" style={{ color: '#9C9B94' }} />
           <span className="text-[10px]" style={{ color: '#9C9B94' }}>
             Progress
           </span>
         </div>
-        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-2 active:bg-[#F5F5F4]">
-          <div
-            style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }}
-          />
+        <div className="flex-1 flex flex-col items-center gap-[2px] cursor-pointer py-1 active:bg-[#F5F5F4]">
+          <div style={{ width: '32px', height: '3px', borderRadius: '2px', background: '#C68A1E', marginBottom: '1px' }} />
           <UserCircle className="w-[22px] h-[22px]" style={{ color: '#C68A1E' }} />
-          <span
-            className="text-[10px] font-medium"
-            style={{ color: '#C68A1E' }}
-          >
+          <span className="text-[10px] font-medium" style={{ color: '#C68A1E' }}>
             Account
           </span>
         </div>
       </div>
 
-      {/* Site picker action sheet */}
+      {/* Switch-site bottom sheet */}
       {siteOpen && (
         <>
           <div className="sm-overlay" onClick={() => setSiteOpen(false)} />
           <div className="sm-sheet" style={{ maxHeight: '70%' }}>
             <div className="sm-handle" />
-            <div className="flex items-center gap-3" style={{ padding: '12px 16px 8px' }}>
-              <span
-                className="flex-1 font-semibold"
-                style={{ fontSize: '16px', color: '#2B2A26' }}
-              >
-                Select site
+            <div className="flex items-center justify-between" style={{ padding: '12px 18px 4px' }}>
+              <span className="font-semibold" style={{ fontSize: '15px', color: '#2B2A26' }}>
+                Switch site
               </span>
+              <button
+                type="button"
+                onClick={() => setSiteOpen(false)}
+                aria-label="Close"
+                className="w-8 h-8 flex items-center justify-center -mr-2 active:bg-[#F9F4EA] rounded-full"
+              >
+                <X className="w-[18px] h-[18px]" style={{ color: '#6B6A64' }} />
+              </button>
             </div>
-            <div className="overflow-y-auto" style={{ paddingBottom: '8px' }}>
+            <div className="overflow-y-auto" style={{ padding: '8px 14px 18px' }}>
               {SITES.map((s) => {
                 const on = s.id === siteId;
                 return (
                   <div
                     key={s.id}
-                    onClick={() => {
-                      setSiteId(s.id);
-                      setSiteOpen(false);
-                    }}
-                    className="flex items-center gap-[10px] cursor-pointer active:bg-[#F5F5F4]"
+                    onClick={() => selectSite(s.id)}
+                    className="flex items-center gap-[10px] cursor-pointer active:opacity-90"
                     style={{
-                      padding: '12px 16px',
-                      minHeight: '48px',
-                      borderBottom: '1px solid #F1ECDD',
-                      background: on ? '#FBF3E0' : 'transparent',
+                      padding: '12px 14px',
+                      border: `1px solid ${on ? '#C68A1E' : '#F1ECDD'}`,
+                      borderRadius: '10px',
+                      marginBottom: '6px',
+                      background: on ? '#FBF6EC' : '#fff',
                     }}
                   >
-                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: on ? '#C68A1E' : '#9C9B94' }} />
+                    <MapPin className="w-4 h-4 flex-shrink-0" style={{ color: on ? '#C68A1E' : '#6B6A64' }} />
                     <div className="flex-1 min-w-0">
-                      <div className="text-[14px]" style={{ color: '#2B2A26', fontWeight: on ? 600 : 400 }}>
+                      <div className="text-[13px]" style={{ color: '#2B2A26', fontWeight: on ? 600 : 500 }}>
                         {s.name}
                       </div>
-                      <div className="text-[12px] mt-[1px]" style={{ color: '#9C9B94' }}>
-                        {s.code}
+                      <div className="text-[11px] mt-[1px]" style={{ color: '#9C9B94' }}>
+                        {s.meta}
                       </div>
                     </div>
                     {on && <Check className="w-[16px] h-[16px]" style={{ color: '#C68A1E' }} />}
@@ -282,32 +209,51 @@ export function AccountScreen() {
         </>
       )}
 
-      {/* Sign-out confirmation */}
+      {/* Sign-out confirmation modal (centered) */}
       {signOutOpen && (
         <>
-          <div className="sm-overlay" onClick={() => setSignOutOpen(false)} />
-          <div className="sm-sheet" style={{ paddingBottom: 'max(20px, calc(env(safe-area-inset-bottom) + 8px))' }}>
-            <div className="sm-handle" />
-            <div style={{ padding: '16px 20px 4px' }}>
-              <div className="text-[16px] font-semibold" style={{ color: '#2B2A26' }}>
+          <div className="sm-overlay" style={{ zIndex: 11 }} onClick={() => setSignOutOpen(false)} />
+          <div
+            style={{
+              position: 'absolute',
+              left: '50%',
+              top: '50%',
+              transform: 'translate(-50%,-50%)',
+              background: '#fff',
+              borderRadius: '14px',
+              width: '78%',
+              maxWidth: '300px',
+              padding: '18px 18px 14px',
+              zIndex: 12,
+              boxShadow: '0 8px 24px rgba(0,0,0,0.15)',
+            }}
+          >
+            <div className="flex items-center gap-2.5" style={{ marginBottom: '8px' }}>
+              <div
+                className="flex items-center justify-center flex-shrink-0"
+                style={{ width: '32px', height: '32px', borderRadius: '50%', background: '#FAF1EE' }}
+              >
+                <LogOut className="w-4 h-4" style={{ color: '#B94A48' }} />
+              </div>
+              <div className="text-[14px] font-semibold" style={{ color: '#2B2A26' }}>
                 Sign out?
               </div>
-              <div className="text-[13px] mt-[4px]" style={{ color: '#9C9B94' }}>
-                You'll need to sign back in to continue scanning.
-              </div>
             </div>
-            <div className="flex gap-2" style={{ padding: '14px 20px 8px' }}>
+            <div className="text-[12px]" style={{ color: '#6B6A64', lineHeight: 1.5, marginBottom: '14px' }}>
+              You&apos;ll need to sign in again to continue scanning.
+            </div>
+            <div className="flex gap-2">
               <button
                 type="button"
                 onClick={() => setSignOutOpen(false)}
-                className="flex-1 flex items-center justify-center text-[14px] font-medium active:opacity-80"
+                className="flex-1 flex items-center justify-center text-[12px] font-medium active:opacity-80"
                 style={{
-                  padding: '12px 16px',
-                  borderRadius: '8px',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
                   background: '#fff',
-                  border: '1px solid #F1ECDD',
+                  border: '1px solid #C5C4BC',
                   color: '#2B2A26',
-                  minHeight: '48px',
+                  minHeight: '44px',
                 }}
               >
                 Cancel
@@ -315,17 +261,16 @@ export function AccountScreen() {
               <button
                 type="button"
                 onClick={onSignOut}
-                className="flex-1 flex items-center justify-center gap-1.5 text-[14px] font-medium active:opacity-90"
+                className="flex-1 flex items-center justify-center text-[12px] font-medium active:opacity-90"
                 style={{
-                  padding: '12px 16px',
-                  borderRadius: '8px',
-                  background: '#A32D2D',
+                  padding: '10px 14px',
+                  borderRadius: '10px',
+                  background: '#B94A48',
                   color: '#fff',
-                  border: '1px solid #A32D2D',
-                  minHeight: '48px',
+                  border: '1px solid #B94A48',
+                  minHeight: '44px',
                 }}
               >
-                <LogOut className="w-[15px] h-[15px]" />
                 Sign out
               </button>
             </div>

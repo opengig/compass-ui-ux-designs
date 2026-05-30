@@ -376,7 +376,7 @@ export function DetailScreen() {
                               </div>
                               <div className="px-3 py-2.5 flex-1"
                                 style={{fontSize:10,fontWeight:700,textTransform:"uppercase",letterSpacing:"0.08em",
-                                        color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"center"}}>
+                                        color:C.mutedFg,borderLeft:`1px solid ${C.border}`,textAlign:"left"}}>
                                 Per 100g / Per 100ml
                               </div>
                               <div className="px-3 py-2.5"

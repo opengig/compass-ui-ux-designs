@@ -1,4 +1,5 @@
-import { ArrowLeft, Barcode, Camera, Plus, Check, ScanLine } from 'lucide-react';
+import { type CSSProperties } from 'react';
+import { ArrowLeft, Barcode, Camera, Plus, Check, ScanLine, Info } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { STORE_MANAGER_ROUTES } from '../../../router/routes';
 import { useStoreManager, type CaptureContext, type CaptureStep } from '../StoreManagerContext';
@@ -11,7 +12,7 @@ const labels: Record<CaptureStep, string> = {
 };
 
 function captureReqs(mode: CaptureContext['mode']): CaptureStep[] {
-  return mode === 'loose' ? ['front'] : ['barcode', 'front', 'back'];
+  return mode === 'loose' ? ['front'] : ['front', 'back', 'barcode'];
 }
 
 export function CaptureScreen() {
@@ -43,11 +44,27 @@ export function CaptureScreen() {
     onUpdate(next);
   };
 
-  // Sub-bar caption + button label depends on active step / completion state
-  let captionText = capture.active ? labels[capture.active] : 'Tap a step to capture';
-  let hintText = capture.active
+  const captionText = capture.active ? labels[capture.active] : 'Tap a step to capture';
+  const hintText = capture.active
     ? `Point at ${labels[capture.active].toLowerCase()}`
     : 'Tap a step below to start';
+
+  // Capture button label mirrors the source: front/back collapse to "Capture".
+  const captureLabel =
+    capture.active === 'more'
+      ? 'Capture More'
+      : capture.active === 'barcode'
+        ? 'Capture Barcode'
+        : 'Capture';
+
+  const cornerStyle = (pos: 'tl' | 'tr' | 'bl' | 'br') => {
+    const c = '#3FA56E';
+    const base: CSSProperties = { position: 'absolute' };
+    if (pos === 'tl') return { ...base, top: 0, left: 0, borderTop: `2.5px solid ${c}`, borderLeft: `2.5px solid ${c}`, borderRadius: '3px 0 0 0' };
+    if (pos === 'tr') return { ...base, top: 0, right: 0, borderTop: `2.5px solid ${c}`, borderRight: `2.5px solid ${c}`, borderRadius: '0 3px 0 0' };
+    if (pos === 'bl') return { ...base, bottom: 0, left: 0, borderBottom: `2.5px solid ${c}`, borderLeft: `2.5px solid ${c}`, borderRadius: '0 0 0 3px' };
+    return { ...base, bottom: 0, right: 0, borderBottom: `2.5px solid ${c}`, borderRight: `2.5px solid ${c}`, borderRadius: '0 0 3px 0' };
+  };
 
   return (
     <>
@@ -65,27 +82,19 @@ export function CaptureScreen() {
           aria-label="back"
           className="w-9 h-9 flex items-center justify-center -ml-2 active:bg-[#F9F4EA] rounded-full"
         >
-          <ArrowLeft className="w-5 h-5" style={{ color: '#9C9B94' }} />
+          <ArrowLeft className="w-5 h-5" style={{ color: '#6B6A64' }} />
         </button>
         <div className="flex-1 min-w-0">
-          <div
-            className="font-semibold truncate"
-            style={{ fontSize: '16px', color: '#2B2A26' }}
-          >
+          <div className="font-semibold truncate" style={{ fontSize: '16px', color: '#2B2A26' }}>
             {capture.title}
           </div>
-          <div className="text-[11.5px] mt-[1px]" style={{ color: '#9C9B94' }}>
+          <div className="text-[11px] mt-[1px]" style={{ color: '#9C9B94' }}>
             {captionText}
           </div>
         </div>
         <span
-          className="text-[11px] flex-shrink-0"
-          style={{
-            color: '#9C9B94',
-            background: '#ECECEB',
-            padding: '4px 9px',
-            borderRadius: '5px',
-          }}
+          className="text-[10px] flex-shrink-0"
+          style={{ color: '#9C9B94', background: '#F9F4EA', padding: '3px 8px', borderRadius: '5px' }}
         >
           {done}/{reqs.length}
         </span>
@@ -93,111 +102,53 @@ export function CaptureScreen() {
 
       <div className="sm-cam-dark">
         {capture.active === 'barcode' ? (
-          <div
-            className="sm-cam-frame"
-            style={{ width: '230px', height: '118px' }}
-          >
-            <div
-              className="sm-corner"
-              style={{
-                top: 0,
-                left: 0,
-                borderTop: '2.5px solid #97C459',
-                borderLeft: '2.5px solid #97C459',
-                borderRadius: '3px 0 0 0',
-              }}
-            />
-            <div
-              className="sm-corner"
-              style={{
-                top: 0,
-                right: 0,
-                borderTop: '2.5px solid #97C459',
-                borderRight: '2.5px solid #97C459',
-                borderRadius: '0 3px 0 0',
-              }}
-            />
-            <div
-              className="sm-corner"
-              style={{
-                bottom: 0,
-                left: 0,
-                borderBottom: '2.5px solid #97C459',
-                borderLeft: '2.5px solid #97C459',
-                borderRadius: '0 0 0 3px',
-              }}
-            />
-            <div
-              className="sm-corner"
-              style={{
-                bottom: 0,
-                right: 0,
-                borderBottom: '2.5px solid #97C459',
-                borderRight: '2.5px solid #97C459',
-                borderRadius: '0 0 3px 0',
-              }}
-            />
+          <div className="sm-cam-frame" style={{ width: '230px', height: '118px' }}>
+            <div className="sm-corner" style={cornerStyle('tl')} />
+            <div className="sm-corner" style={cornerStyle('tr')} />
+            <div className="sm-corner" style={cornerStyle('bl')} />
+            <div className="sm-corner" style={cornerStyle('br')} />
             <div className="sm-scanline" />
           </div>
         ) : (
           <div
             className="sm-cam-frame flex items-center justify-center"
-            style={{
-              width: '180px',
-              height: '220px',
-              border: '2px dashed rgba(255,255,255,0.35)',
-              borderRadius: '12px',
-            }}
+            style={{ width: '180px', height: '220px', border: '2px dashed rgba(255,255,255,0.35)', borderRadius: '12px' }}
           >
-            <div
-              className="text-[11px] text-center"
-              style={{ color: 'rgba(255,255,255,0.45)', padding: '0 16px' }}
-            >
+            <div className="text-[11px] text-center" style={{ color: 'rgba(255,255,255,0.45)', padding: '0 16px' }}>
               {hintText}
             </div>
           </div>
         )}
       </div>
 
-      {/* Quality bar */}
+      {/* Instruction strip */}
       <div
-        style={{ background: '#fff', padding: '8px 16px 6px', flexShrink: 0 }}
+        className="flex items-center gap-2 flex-shrink-0"
+        style={{
+          margin: '10px 14px 6px',
+          padding: '9px 12px',
+          background: '#F6F1E6',
+          border: '1px solid #EFE6CF',
+          borderRadius: '8px',
+          fontSize: '11px',
+          lineHeight: 1.45,
+          color: '#8A8275',
+        }}
       >
-        <div
-          className="flex justify-between text-[11.5px]"
-          style={{ color: '#9C9B94', marginBottom: '3px' }}
-        >
-          <span>Quality</span>
-          <span style={{ color: '#5A8C1A', fontWeight: 500 }}>Good</span>
-        </div>
-        <div
-          style={{
-            height: '4px',
-            background: '#F1ECDD',
-            borderRadius: '2px',
-          }}
-        >
-          <div
-            style={{
-              height: '4px',
-              borderRadius: '2px',
-              width: '78%',
-              background: '#5A8C1A',
-            }}
-          />
-        </div>
+        <Info className="w-[13px] h-[13px] flex-shrink-0" style={{ color: '#B9831F' }} />
+        <span>
+          {loose
+            ? 'Capture the item, then add more angles if needed'
+            : 'Capture Front → Back → Barcode, then add more if needed'}
+        </span>
       </div>
 
       {/* Thumb row */}
       <div
         className="flex gap-1.5 flex-shrink-0"
-        style={{
-          padding: '8px 14px',
-          background: '#fff',
-          borderTop: '1px solid #F1ECDD',
-        }}
+        style={{ padding: '6px 14px', background: '#fff' }}
       >
-        {(['barcode', 'front', 'back'] as const).map((k) => {
+        {(['front', 'back', 'barcode'] as const).map((k) => {
           if (loose && (k === 'barcode' || k === 'back')) return null;
           const isDone = capture[k];
           const isActive = capture.active === k && !isDone;
@@ -207,29 +158,28 @@ export function CaptureScreen() {
               onClick={() => selectStep(k)}
               className="flex flex-col items-center justify-center gap-[2px] cursor-pointer flex-shrink-0"
               style={{
-                width: '52px',
-                height: '52px',
-                borderRadius: '8px',
+                width: '46px',
+                height: '46px',
+                borderRadius: '9px',
                 border: isActive
-                  ? '2px solid #C68A1E'
+                  ? '1px solid #C68A1E'
                   : isDone
-                    ? '1px solid #7DBD3B'
-                    : '1px solid #F1ECDD',
-                background: isDone ? '#EAF3DE' : '#F5F5F4',
-                fontSize: '9px',
-                color: isDone ? '#3B6D11' : '#9C9B94',
+                    ? '1px solid #C5DCCD'
+                    : '1px solid #E8D8B5',
+                background: isActive ? '#F5E8C7' : isDone ? '#E0F0E7' : '#F9F4EA',
+                fontSize: '8px',
+                fontWeight: isDone || isActive ? 600 : 500,
+                color: isActive ? '#C68A1E' : isDone ? '#0F6B3D' : '#B9831F',
               }}
             >
               {isDone ? (
-                <Check className="w-[15px] h-[15px]" style={{ color: '#3B6D11' }} />
+                <Check className="w-[13px] h-[13px]" style={{ color: '#0F6B3D' }} />
               ) : k === 'barcode' ? (
-                <Barcode className="w-[15px] h-[15px]" />
+                <Barcode className="w-[13px] h-[13px]" />
               ) : (
-                <Camera className="w-[15px] h-[15px]" />
+                <Camera className="w-[13px] h-[13px]" />
               )}
-              <span>
-                {k === 'barcode' ? 'Barcode' : k === 'front' ? 'Front' : 'Back'}
-              </span>
+              <span>{k === 'barcode' ? 'Barcode' : k === 'front' ? 'Front' : 'Back'}</span>
             </div>
           );
         })}
@@ -237,16 +187,14 @@ export function CaptureScreen() {
           onClick={() => selectStep('more')}
           className="flex flex-col items-center justify-center gap-[2px] cursor-pointer flex-shrink-0 relative"
           style={{
-            width: '52px',
-            height: '52px',
-            borderRadius: '8px',
-            border:
-              capture.active === 'more'
-                ? '2px solid #C68A1E'
-                : '1px dashed #F1ECDD',
-            background: '#F5F5F4',
-            fontSize: '9px',
-            color: '#9C9B94',
+            width: '46px',
+            height: '46px',
+            borderRadius: '9px',
+            border: capture.active === 'more' ? '1px solid #C68A1E' : '1px dashed #E8D8B5',
+            background: capture.active === 'more' ? '#F5E8C7' : '#F9F4EA',
+            fontSize: '8px',
+            fontWeight: 500,
+            color: capture.active === 'more' ? '#C68A1E' : '#B9831F',
           }}
         >
           <Plus className="w-3 h-3" style={{ color: '#C5C4BC' }} />
@@ -275,7 +223,7 @@ export function CaptureScreen() {
       <div
         className="flex gap-2 flex-shrink-0"
         style={{
-          padding: '10px 16px',
+          padding: '8px 14px',
           paddingBottom: 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.5rem))',
           background: '#fff',
           borderTop: '1px solid #F1ECDD',
@@ -284,15 +232,15 @@ export function CaptureScreen() {
         <button
           type="button"
           onClick={onCancel}
-          className="flex items-center justify-center text-[13px] font-medium active:opacity-80"
+          className="flex items-center justify-center text-[12px] font-medium active:opacity-80"
           style={{
             flex: 0.55,
-            padding: '14px 16px',
+            padding: '12px 14px',
             borderRadius: '8px',
             background: '#fff',
             border: '1px solid #C5C4BC',
             color: '#2B2A26',
-            minHeight: '48px',
+            minHeight: '44px',
           }}
         >
           Cancel
@@ -301,16 +249,16 @@ export function CaptureScreen() {
           type="button"
           disabled={!capture.active}
           onClick={isComplete ? onReview : doCapture}
-          className="flex-1 flex items-center justify-center gap-1.5 text-[14px] font-medium active:opacity-90"
+          className="flex-1 flex items-center justify-center gap-1.5 text-[12.5px] font-medium active:opacity-90"
           style={{
-            padding: '14px 16px',
+            padding: '12px 14px',
             borderRadius: '8px',
             background: '#C68A1E',
             color: '#fff',
             border: '1px solid #C68A1E',
             opacity: capture.active ? 1 : 0.55,
             pointerEvents: capture.active ? 'auto' : 'none',
-            minHeight: '48px',
+            minHeight: '44px',
           }}
         >
           {isComplete ? (
@@ -321,22 +269,12 @@ export function CaptureScreen() {
           ) : capture.active === 'barcode' ? (
             <>
               <ScanLine className="w-[15px] h-[15px]" />
-              Capture {labels[capture.active]}
-            </>
-          ) : capture.active === 'more' ? (
-            <>
-              <Camera className="w-[15px] h-[15px]" />
-              Capture More
-            </>
-          ) : capture.active ? (
-            <>
-              <Camera className="w-[15px] h-[15px]" />
-              Capture {labels[capture.active]}
+              {captureLabel}
             </>
           ) : (
             <>
               <Camera className="w-[15px] h-[15px]" />
-              Capture
+              {captureLabel}
             </>
           )}
         </button>

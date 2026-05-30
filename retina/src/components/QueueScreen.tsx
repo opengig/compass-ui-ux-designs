@@ -61,6 +61,8 @@ export function QueueScreen({ variant = 'inbox' }: { variant?: 'inbox' | 'submit
             key={`detail-${activeArticle.id}`}
             selectedArticleId={selectedVisibleArticleId}
             queueTab={queueTab}
+            visibleArticleIds={filteredArticles.map((item) => item.id)}
+            onSelectArticle={onSelectProduct}
           />
         ) : (
           <div className="flex-1 flex items-center justify-center text-sm text-muted-foreground">

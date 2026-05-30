@@ -56,6 +56,8 @@ export type StoreManagerContextValue = {
   showToast: (msg: string) => void;
   excludeLoose: boolean;
   setExcludeLoose: (v: boolean) => void;
+  siteId: string;
+  setSiteId: (id: string) => void;
 };
 
 const StoreManagerCtx = createContext<StoreManagerContextValue | null>(null);
@@ -65,6 +67,7 @@ export function StoreManagerProvider({ children }: { children: ReactNode }) {
   const [paneerScanned, setPaneerScanned] = useState(false);
   const [paneerExcluded, setPaneerExcluded] = useState(false);
   const [excludeLoose, setExcludeLoose] = useState(false);
+  const [siteId, setSiteId] = useState('BCK-001');
 
   // Toast — auto-clears after ~1800ms to preserve existing behavior.
   const [toast, setToast] = useState<string | null>(null);
@@ -103,8 +106,10 @@ export function StoreManagerProvider({ children }: { children: ReactNode }) {
       showToast,
       excludeLoose,
       setExcludeLoose,
+      siteId,
+      setSiteId,
     }),
-    [capture, setCapture, paneerScanned, paneerExcluded, toast, showToast, excludeLoose],
+    [capture, setCapture, paneerScanned, paneerExcluded, toast, showToast, excludeLoose, siteId],
   );
 
   return <StoreManagerCtx.Provider value={value}>{children}</StoreManagerCtx.Provider>;
