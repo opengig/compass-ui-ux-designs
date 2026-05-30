@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom';
 import { STORE_MANAGER_ROUTES } from '../../../router/routes';
+import { COMPASS_LOGO } from '../../nutritionist/data/images';
 
 /**
  * S0 — Login splash. Microsoft-branded SSO entry point, mirroring the source
@@ -20,22 +21,6 @@ function MicrosoftMark({ size = 16 }: { size?: number }) {
   );
 }
 
-/** Retina leaf logo mark. */
-function RetinaMark({ size = 86 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 40 40" aria-hidden="true">
-      <path
-        d="M7 22 C 5 13, 16 8, 26 9 C 33 9.5, 36 13, 34 17 C 32 21, 26 20, 22 18 C 14 14, 10 16, 8 21 C 7 23, 6 24, 7 22 Z"
-        fill="#2B2A26"
-        opacity=".5"
-      />
-      <ellipse cx="21" cy="9" rx="2" ry="2.6" fill="#2B2A26" />
-      <path d="M19 14 C 17 17, 20 23, 24 21 C 27 19.5, 25 14, 21 14 Z" fill="#2B2A26" />
-      <path d="M22 23 L 24.5 33 L 21 34.5 L 20 25 Z" fill="#2B2A26" />
-    </svg>
-  );
-}
-
 export function LoginScreen() {
   const navigate = useNavigate();
   const onSignIn = () => navigate(STORE_MANAGER_ROUTES.sso);
@@ -51,7 +36,11 @@ export function LoginScreen() {
     >
       {/* Logo / brand block */}
       <div className="flex flex-col items-center" style={{ gap: '14px' }}>
-        <RetinaMark size={86} />
+        <img
+          src={COMPASS_LOGO}
+          alt="Compass Group"
+          style={{ width: 86, height: 86, objectFit: 'contain' }}
+        />
         <div className="text-center">
           <div
             className="text-[22px] font-bold"
